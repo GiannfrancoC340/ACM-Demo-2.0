@@ -1,12 +1,11 @@
-# React + Vite
+# Airplane Communications Mapping Demo 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This demo project was created by Giannfranco Crovetto.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Our group project - Airplane Communications Mapping - is a system that captures, organizes, and analyzes real-time air traffic control (ATC) communications using software-defined radios (SDRs). It pairs live audio with real-time aircraft tracking and transcribes the conversations using speech-to-text tools. The system also uses stress detection algorithms to flag when a pilot may be under emotional strain. This information is presented through a web-based dashboard designed for aviation analysts, students, and enthusiasts to review live and past flight communications more easily and effectively. 
 
-## Expanding the ESLint configuration
+In this specific demo, I will be showcasing a standard demo run. When the user first loads into the app, the user will see the home screen, that has 2 links to signup for an account or login to an existing account. The user authentication is handled by Supabase, it only records the user accounts as there is no data being pulled from the database yet at least. Then once the user is logged in, there will be an interactive map to see. The map is set to view over the Boca Raton airport by default as there is a red marker over it. The user is able to zoom out, zoom in, and move around the map. The user can click on the red marker and see the incoming flights. The user can see more flights if they wish by clicking the button below it, and the user can click on each individual flight to see specific flight information for that corresponding flight. In that page, it has specific flight information regarding that flight, like flight number, destination, arrival time, departure time etc. 
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Time Spent
