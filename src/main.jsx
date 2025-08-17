@@ -3,8 +3,13 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import { BrowserRouter } from 'react-router-dom'
 import 'leaflet/dist/leaflet.css'
+import './App.css'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// Create the root before rendering
+const root = ReactDOM.createRoot(document.getElementById('root'))
+
+// Render the app with BrowserRouter
+root.render(
   <React.StrictMode>
     <BrowserRouter>
       <App />
