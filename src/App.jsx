@@ -57,7 +57,6 @@ function App() {
           }
         />
         {/* New route for flight information */}
-        <Route path="/flights/:flightId" element={<FlightInfo />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       
