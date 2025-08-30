@@ -539,18 +539,11 @@ export default function MapView() {
                 <ul className="flights-list">
                   {(showAllFlights ? bocaRatonAirport.flights : initialFlightsToShow).map((flight) => (
                     <li key={flight.id}>
-                      <button 
+                      <div 
                         className={`flight-link ${hoveredFlight === flight.id ? 'hover' : ''}`}
                         onClick={() => handleFlightClick(flight.id)}
                         onMouseEnter={() => setHoveredFlight(flight.id)}
                         onMouseLeave={() => setHoveredFlight(null)}
-                        style={{ 
-                          background: 'none', 
-                          border: 'none', 
-                          padding: 0, 
-                          width: '100%',
-                          textAlign: 'left'
-                        }}
                       >
                         <div className="flight-item">
                           <span className="flight-icon">✈️</span>
@@ -561,7 +554,7 @@ export default function MapView() {
                             </span>
                           </div>
                         </div>
-                      </button>
+                      </div>
                     </li>
                   ))}
                 </ul>
