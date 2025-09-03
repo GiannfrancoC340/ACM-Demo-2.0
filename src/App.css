@@ -92,15 +92,19 @@
   margin-top: 20px;
   text-align: center;
   font-size: 0.9rem;
+  color: #667;
 }
 
 .auth-footer a {
   color: #4285f4;
   text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 .auth-footer a:hover {
   text-decoration: underline;
+  color: #2a65d6;
 }
 
 .header {
