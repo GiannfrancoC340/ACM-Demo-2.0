@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useNavigate } from 'react-router-dom'
+import './Auth.css'
 
 export default function Signup() {
   const [email, setEmail] = useState('')
@@ -52,6 +53,7 @@ export default function Signup() {
   }
 
   return (
+    <div className="auth-page">
     <div className="auth-container">
       <h2>Sign Up</h2>
       
@@ -98,6 +100,7 @@ export default function Signup() {
       <div className="auth-footer">
         Already have an account? <a href="/login">Log In</a>
       </div>
+    </div>
     </div>
   )
 }
