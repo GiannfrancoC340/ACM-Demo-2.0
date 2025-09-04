@@ -30,6 +30,7 @@ body, html, #root {
   font-size: 1.5rem;
   font-weight: bold;
   color: #4285f4;
+  margin-bottom: 15px;
 }
 
 nav {
@@ -73,4 +74,55 @@ nav a:hover {
   height: 100vh;
   width: 100%;
   z-index: 1;
+}
+
+.home-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 100vh;
+  /* background: linear-gradient(135deg, #f0f4ff, #dfe9f3); */
+  text-align: center;
+}
+
+.tagline {
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.home-links {
+  display: flex;
+  gap: 20px;
+}
+
+.home-links a {
+  display: inline-block;
+  margin: 0 15px;
+  padding: 20px 30px;
+  border-radius: 12px;
+  background: white;
+  color: #4285f4;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+.home-links a:hover {
+  background: #f0f4ff;
+  border-color: #4285f4;
+}
+
+.home-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f0f4ff, #dfe9f3);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
