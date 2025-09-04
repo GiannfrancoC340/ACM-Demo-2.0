@@ -30,12 +30,14 @@ function RouteInfo() {
 
 function Home() {
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>ACM Home</h1>
-      <p>Welcome to the Airplane Communications Mapping application!</p>
-      <div style={{ marginTop: '20px' }}>
-        <a href="/login" style={{ marginRight: '10px' }}>Login</a>
-        <a href="/signup" style={{ marginRight: '10px' }}>Signup</a>
+    <div className="home-page">
+      <div className="home-container">
+        <h1>ACM Home</h1>
+        <p className="tagline">Welcome to ACM. Please log in or sign up to continue.</p>
+        <div className="home-links">
+          <a href="/login">Login</a>
+          <a href="/signup">Sign Up</a>
+        </div>
       </div>
     </div>
   );
