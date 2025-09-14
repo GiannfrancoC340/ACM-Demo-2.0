@@ -1,10 +1,11 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import { useEffect, useState, useRef } from 'react'
-import { supabase } from '../supabaseClient'
 import L from 'leaflet'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import './MapView.css'
+import { collection, getDocs, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebaseConfig'
 
 // Fix for the default icon
 let DefaultIcon = L.icon({
@@ -477,14 +478,14 @@ export default function MapView() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data, error } = await supabase.from('locations').select('*')
-        if (error) {
-          console.error("Error fetching locations:", error)
-          setError(`Error: ${error.message}`)
-        } else {
-          console.log("Fetched locations:", data)
-          setLocations(data || [])
-        }
+        const locationsRef = collection(db, 'locations')
+        const snapshot = await getDocs(locationsRef)
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        console.log("Fetched locations:", data)
+        setLocations(data || [])
       } catch (err) {
         console.error("Exception:", err)
         setError(`Exception: ${err.message}`)
@@ -493,6 +494,25 @@ export default function MapView() {
       }
     }
     fetchData()
+  }, [])
+
+  // Add this useEffect for real-time aircraft positions
+  useEffect(() => {
+    const aircraftRef = collection(db, 'aircraft_positions')
+    
+    const unsubscribe = onSnapshot(aircraftRef, (snapshot) => {
+      const aircraftData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      
+      // Update your aircraft positions on the map
+      setAircraftPositions(aircraftData)
+    }, (error) => {
+      console.error("Error listening to aircraft positions:", error)
+    })
+
+    return () => unsubscribe()
   }, [])
 
   const handlePopupClose = () => {
