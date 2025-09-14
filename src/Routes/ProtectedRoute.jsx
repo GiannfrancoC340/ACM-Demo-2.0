@@ -1,20 +1,23 @@
 // src/routes/ProtectedRoute.js
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { supabase } from '../supabaseClient'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../firebaseConfig'
 
 export default function ProtectedRoute({ children }) {
-  const [session, setSession] = useState(null)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
       setLoading(false)
     })
+
+    return () => unsubscribe()
   }, [])
 
   if (loading) return <p>Loading...</p>
 
-  return session ? children : <Navigate to="/login" />
+  return user ? children : <Navigate to="/login" />
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { supabase } from '../supabaseClient'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../firebaseConfig'
 import { useNavigate, Link } from 'react-router-dom'
 import './Auth.css'
 
@@ -16,21 +17,12 @@ export default function Login() {
     setLoading(true)
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password 
-      })
-      
-      if (error) {
-        console.error('Login error:', error)
-        setError(error.message)
-      } else {
-        console.log('Login successful')
-        navigate('/map')
-      }
+      await signInWithEmailAndPassword(auth, email, password)
+      console.log('Login successful')
+      navigate('/map')
     } catch (err) {
-      console.error('Login exception:', err)
-      setError('An unexpected error occurred. Please try again.')
+      console.error('Login error:', err)
+      setError(err.message)
     } finally {
       setLoading(false)
     }

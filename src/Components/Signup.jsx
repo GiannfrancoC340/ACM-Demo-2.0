@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { supabase } from '../supabaseClient'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../firebaseConfig'
 import { useNavigate } from 'react-router-dom'
 import './Auth.css'
 
@@ -16,36 +17,10 @@ export default function Signup() {
     setError(null)
     
     try {
-      // Sign up the user
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          // Data will be immediately available in the session
-          data: {
-            email_confirmed: true
-          }
-        }
-      })
-
-      if (error) {
-        setError(error.message)
-      } else if (data.user) {
-        // Since email verification is disabled, we can directly sign in
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        })
-        
-        if (signInError) {
-          setError(signInError.message)
-        } else {
-          // Redirect to the map page or dashboard
-          navigate('/map')
-        }
-      }
+      await createUserWithEmailAndPassword(auth, email, password)
+      navigate('/map')
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError(err.message)
       console.error(err)
     } finally {
       setLoading(false)
