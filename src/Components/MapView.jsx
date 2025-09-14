@@ -4,8 +4,6 @@ import L from 'leaflet'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import './MapView.css'
-import { collection, getDocs, onSnapshot } from 'firebase/firestore'
-import { db } from '../firebaseConfig'
 
 // Fix for the default icon
 let DefaultIcon = L.icon({
@@ -33,7 +31,7 @@ const redIcon = L.icon({
   popupAnchor: [1, -34]
 });
 
-// Flight data (moved from FlightInfo.jsx)
+// Flight data (detailed flight information for modal)
 const flightData = {
   'flight-1': {
     route: "RDU to BCT",
@@ -454,13 +452,13 @@ function FlightInfoModal({ flightId, onClose }) {
 }
 
 export default function MapView() {
-  const [locations, setLocations] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [hoveredFlight, setHoveredFlight] = useState(null)
   const [showAllFlights, setShowAllFlights] = useState(false)
-  const [selectedFlightId, setSelectedFlightId] = useState(null) // New state for modal
+  const [selectedFlightId, setSelectedFlightId] = useState(null)
   
+  // Hardcoded Boca Raton Airport data with flight list
   const bocaRatonAirport = {
     lat: 26.3785,
     lng: -80.1077,
@@ -474,46 +472,6 @@ export default function MapView() {
       { id: "flight-5", route: "MCO to BCT", time: "7:30 PM" }
     ]
   };
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const locationsRef = collection(db, 'locations')
-        const snapshot = await getDocs(locationsRef)
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-        console.log("Fetched locations:", data)
-        setLocations(data || [])
-      } catch (err) {
-        console.error("Exception:", err)
-        setError(`Exception: ${err.message}`)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  // Add this useEffect for real-time aircraft positions
-  useEffect(() => {
-    const aircraftRef = collection(db, 'aircraft_positions')
-    
-    const unsubscribe = onSnapshot(aircraftRef, (snapshot) => {
-      const aircraftData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-      
-      // Update your aircraft positions on the map
-      setAircraftPositions(aircraftData)
-    }, (error) => {
-      console.error("Error listening to aircraft positions:", error)
-    })
-
-    return () => unsubscribe()
-  }, [])
 
   const handlePopupClose = () => {
     setShowAllFlights(false)
@@ -604,16 +562,6 @@ export default function MapView() {
             </div>
           </Popup>
         </Marker>
-        
-        {locations && locations.length > 0 && locations.map(loc => (
-          <Marker 
-            key={loc.id} 
-            position={[loc.lat, loc.lng]} 
-            icon={redIcon}
-          >
-            <Popup>{loc.description}</Popup>
-          </Marker>
-        ))}
       </MapContainer>
 
       {/* Flight Info Modal */}
