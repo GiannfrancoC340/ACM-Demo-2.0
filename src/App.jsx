@@ -6,6 +6,7 @@ import FlightInfo from './Components/FlightInfo'
 import ProtectedRoute from './routes/ProtectedRoute'
 import './App.css'
 import './Components/FlightInfo.css'
+import AudioPlayer from './Components/AudioPlayer'
 
 // Route info component to show current route
 function RouteInfo() {
@@ -37,6 +38,7 @@ function Home() {
         <div className="home-links">
           <a href="/login">Login</a>
           <a href="/signup">Sign Up</a>
+          <a href="/audio">Audio Recordings</a>  {/* Add this */}
         </div>
       </div>
     </div>
@@ -50,6 +52,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/audio" element={<AudioPlayer />} />  {/* Add this */}
         <Route 
           path="/map" 
           element={
