@@ -1,0 +1,6 @@
+Example recording1.txt content:
+   
+   Tower: November 1234, cleared for takeoff runway 23.
+   Pilot: Cleared for takeoff runway 23, November 1234.
+   Tower: Contact departure on 124.5.
+   Pilot: 124.5, November 1234.
