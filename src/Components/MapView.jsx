@@ -6,6 +6,7 @@ import L from 'leaflet'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import './MapView.css'
+import { Link } from 'react-router-dom'
 
 // Fix for the default icon
 let DefaultIcon = L.icon({
@@ -540,6 +541,29 @@ export default function MapView() {
 
   return (
     <div className="map-page">
+        {/* Audio Recordings Button */}
+      <Link 
+        to="/audio" 
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
+          padding: '12px 24px',
+          backgroundColor: '#e04141',
+          color: 'white',
+          textDecoration: 'none',
+          borderRadius: '8px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        🎧 Audio Recordings
+      </Link>
+
       <MapContainer 
         center={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
         zoom={13} 
