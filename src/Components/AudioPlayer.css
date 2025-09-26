@@ -26,11 +26,6 @@
   padding: 2rem;
   margin-bottom: 2rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
 }
 
 .now-playing-title {
@@ -54,29 +49,33 @@
 
 .progress-bar {
   width: 100%;
-  height: 0.5rem;
-  background-color: #4b5563;
+  height: 0.4rem; 
+  background-color: #d1d5db; 
   border-radius: 0.5rem;
   cursor: pointer;
   appearance: none;
+  outline: none;
 }
 
 .progress-bar::-webkit-slider-thumb {
   appearance: none;
   width: 1rem;
   height: 1rem;
-  background-color: #e04141;
+  background-color: #2563eb;
   border-radius: 50%;
   cursor: pointer;
+  border: none;
+  box-shadow: 0 0 0 2px #1f2937;
 }
 
 .progress-bar::-moz-range-thumb {
   width: 1rem;
   height: 1rem;
-  background-color: #e04141;
+  background-color: #2563eb;
   border-radius: 50%;
   cursor: pointer;
   border: none;
+  box-shadow: 0 0 0 2px #1f2937;
 }
 
 .time-display {
@@ -90,10 +89,9 @@
 /* Controls */
 .controls-container {
   display: flex;
-  flex-direction: center;
   align-items: center;
-  gap: 1rem;
-  margin: 0 auto;
+  justify-content: center;
+  gap: 1.5rem;
 }
 
 .control-btn {
@@ -105,11 +103,6 @@
   cursor: pointer;
   transition: all 0.3s;
   font-size: 1.5rem;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .control-btn:hover:not(:disabled) {
@@ -122,7 +115,7 @@
 }
 
 .play-pause-btn {
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 9999px;
   background-color: #e04141;
   border: none;
@@ -130,11 +123,6 @@
   cursor: pointer;
   transition: all 0.3s;
   font-size: 1.875rem;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .play-pause-btn:hover {
