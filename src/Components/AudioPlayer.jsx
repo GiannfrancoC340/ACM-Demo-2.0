@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import './AudioPlayer.css'
 
 export default function AudioPlayer() {
   const [playlist, setPlaylist] = useState([]);
