@@ -1,34 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 
 export default function AudioPlayer() {
-  const [playlist] = useState([
-    // Add your MP3 files here - place them in /public/audio/ folder
-    { 
-      id: 1, 
-      title: "Flight Recording 1", 
-      url: "/audio/recording1.mp3",
-      transcript: "/audio/recording1.txt"
-    },
-    { 
-      id: 2, 
-      title: "Flight Recording 2", 
-      url: "/audio/recording2.mp3",
-      transcript: "/audio/recording2.txt"
-    },
-    { 
-      id: 3, 
-      title: "Flight Recording 3", 
-      url: "/audio/recording3.mp3",
-      transcript: "/audio/recording3.txt"
-    },
-    // Add more files as needed
-    { 
-    id: 4, 
-    title: "Flight Recording 4 - Hudson", 
-    url: "/audio/hudson.mp3",
-    transcript: "/audio/hudson_processed_enhanced.txt"
-  },
-  ]);
+  const [playlist, setPlaylist] = useState([]);
+
+useEffect(() => {
+  const fetchPlaylist = () => {
+    fetch('http://localhost:3001/api/playlist')
+      .then(res => res.json())
+      .then(data => setPlaylist(data))
+      .catch(err => console.error('Error loading playlist:', err));
+  };
+  
+  fetchPlaylist();
+  const interval = setInterval(fetchPlaylist, 10000); // Check every 10 seconds
+  
+  return () => clearInterval(interval);
+}, []);
   
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
