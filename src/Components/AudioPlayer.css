@@ -29,6 +29,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 400px;
 }
 
 .now-playing-title {
@@ -88,10 +90,9 @@
 /* Controls */
 .controls-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: center;
   align-items: center;
   gap: 1rem;
-  width: 100%;
 }
 
 .control-btn {
