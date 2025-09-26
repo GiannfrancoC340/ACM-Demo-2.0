@@ -115,14 +115,18 @@
 }
 
 .play-pause-btn {
-  padding: 1rem;
-  border-radius: 9999px;
+  width: 4.2rem;   /* fixed size */
+  height: 4.2rem;  /* fixed size */
+  border-radius: 50%;
   background-color: #e04141;
   border: none;
   color: white;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 1.875rem;
+  font-size: 2rem; /* scale icon size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .play-pause-btn:hover {
