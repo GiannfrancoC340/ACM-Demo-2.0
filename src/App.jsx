@@ -38,7 +38,6 @@ function Home() {
         <div className="home-links">
           <a href="/login">Login</a>
           <a href="/signup">Sign Up</a>
-          <a href="/audio">Audio Recordings</a>  {/* Add this */}
         </div>
       </div>
     </div>
@@ -52,7 +51,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/audio" element={<AudioPlayer />} />  {/* Add this */}
+        <Route path="/audio" element={<AudioPlayer />} />
         <Route 
           path="/map" 
           element={
