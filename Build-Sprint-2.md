@@ -1,8 +1,22 @@
-# ACM Flight Tracking & Audio Communications Project
+# Airplane Communications Mapping Project - Build Sprint 2
+
+This project was created by Giannfranco Crovetto.
+
+Valid for Engineering Design 2 - Fall 2025. From August 16 2025 - September 14 2025.
 
 ## Project Overview
 
-A real-time flight tracking application for Boca Raton Airport (BCT) that integrates SDR (Software Defined Radio) audio communications with an interactive map interface. The system displays flight information, tracks aircraft positions, and provides access to recorded ATC (Air Traffic Control) communications with automatic transcriptions.
+Our group project - Airplane Communications Mapping - is a system that captures, organizes, and analyzes real-time air traffic control 
+(ATC) communications using software-defined radios (SDRs). It pairs live audio with real-time aircraft tracking and transcribes the 
+conversations using speech-to-text tools. The system also uses stress detection algorithms to flag when a pilot may be under 
+emotional strain. This information is presented through a web-based dashboard designed for aviation analysts, students, and enthusiasts 
+to review live and past flight communications more easily and effectively. 
+
+This is Build Spring 2, which is the current build of the project. The way this project is planned this semester is 2 build sprints - Build Spring 1, ranging from August 16 - September 14, and Build Spring 2, ranging from September 14 to the present. The reason for this is because after updating the home + login + signup, the next order of business was to migrate from Supabase to Firebase, and that was a big change. So, it made sense to do another build sprint for everything post Firebase setup. The core functionality remains the same, there are a ton of new features and QOL changes. For starters, there is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests.
+
+## Time Spent
+
+Time spent on this project: **5 hours**. Spans from September 14 2025 - present
 
 **Tech Stack:**
 - Frontend: React (Vite), Leaflet.js for mapping
@@ -343,12 +357,13 @@ hudson.mp3  →  hudson_processed.txt  ❌
 
 ## Team
 
-ACM Project Team - Fall 2024
-Project Deadline: December 2024
+ACM Project Team - Spring 2025
+Project Deadline: December 2025
 
 ---
 
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
