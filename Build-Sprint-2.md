@@ -1,4 +1,3 @@
-[acm_readme.md](https://github.com/user-attachments/files/22662717/acm_readme.md)
 # ACM Flight Tracking & Audio Communications Project
 
 ## Project Overview
@@ -352,3 +351,4 @@ Project Deadline: December 2024
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
