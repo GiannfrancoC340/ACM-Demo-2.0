@@ -60,7 +60,18 @@ function Home() {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            zIndex: 1000
+            zIndex: 1000,
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#3367d6';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(66, 133, 244, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#4285f4';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
           }}
         >
           ⚙️ Settings
