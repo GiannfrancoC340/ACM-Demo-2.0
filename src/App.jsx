@@ -7,6 +7,7 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import './App.css'
 import './Components/FlightInfo.css'
 import AudioPlayer from './Components/AudioPlayer'
+import acmLogo from './assets/ACM Logo.png'
 
 // Route info component to show current route
 function RouteInfo() {
@@ -39,6 +40,7 @@ function Home() {
           <a href="/login">Login</a>
           <a href="/signup">Sign Up</a>
         </div>
+        <img src={acmLogo} className="image-logo" alt="ACM Logo" />
       </div>
     </div>
   );
