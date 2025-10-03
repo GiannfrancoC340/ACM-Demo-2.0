@@ -564,6 +564,29 @@ export default function MapView() {
         🎧 Audio Recordings
       </Link>
 
+      {/* Settings Button */}
+      <Link 
+        to="/settings" 
+        style={{
+          position: 'absolute',
+          top: '20px',
+          left: '20px',
+          zIndex: 1000,
+          padding: '12px 24px',
+          backgroundColor: '#4285f4',
+          color: 'white',
+          textDecoration: 'none',
+          borderRadius: '8px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        ⚙️ Settings
+      </Link>
+
       <MapContainer 
         center={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
         zoom={13} 
