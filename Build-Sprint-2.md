@@ -2,7 +2,7 @@
 
 This project was created by Giannfranco Crovetto.
 
-Valid for Engineering Design 2 - Fall 2025. From August 16 2025 - September 14 2025.
+Valid for Engineering Design 2 - Fall 2025. From September 14 2025 - October 6 2025.
 
 ## Project Overview
 
@@ -12,7 +12,17 @@ conversations using speech-to-text tools. The system also uses stress detection 
 emotional strain. This information is presented through a web-based dashboard designed for aviation analysts, students, and enthusiasts 
 to review live and past flight communications more easily and effectively. 
 
-This is Build Spring 2, which is the current build of the project. The way this project is planned this semester is 2 build sprints - Build Spring 1, ranging from August 16 - September 14, and Build Spring 2, ranging from September 14 to the present. The reason for this is because after updating the home + login + signup, the next order of business was to migrate from Supabase to Firebase, and that was a big change. So, it made sense to do another build sprint for everything post Firebase setup. The core functionality remains the same, there are a ton of new features and QOL changes. For starters, there is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests.
+This is Build Spring 2, which is the current build of the project. The way this project is planned this semester is ~~2 build sprints - Build Spring 1, ranging from August 16 - September 14, and Build Spring 2, ranging from September 14 to the present.~~ *UPDATE: As of October 6 2025, there will be 3 build sprints. The schedule is below this paragraph.* The reason for this is because after updating the home + login + signup, the next order of business was to migrate from Supabase to Firebase, and that was a big change. So, it made sense to do another build sprint for everything post Firebase setup until the first demo as it will be a lot of hard work to continue on. The core functionality remains the same, there are a ton of new features and QOL changes. For starters, there is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests.
+This is our schedule for the build sprints:
+- [x] **Build Sprint 1:** August 16 2025 - September 14 2025
+* Accounts for picking up work since Spring 2025 and adds an audio section within FlightInfo.jsx, modal popup for individual flights, and a new and improved home + login + signup pages.
+
+- [x] **Build Sprint 2:** September 14 2025 - October 6 2025
+* Accounts for everything since BS1/Firebase migration until the first demo. Essentially this is the work done starting with Firebase migration up to the first demo.
+* There is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests.
+
+- [x] **Build Sprint 3:** October 6 2025 - December 2 2025
+* Accounts for everything since BS2/first demo until the final deadline.
 
 **Tech Stack:**
 - Frontend: React (Vite), Leaflet.js for mapping
@@ -22,7 +32,7 @@ This is Build Spring 2, which is the current build of the project. The way this 
 
 ## Time Spent
 
-Time spent on this project: **5 hours**. Spans from September 14 2025 - present
+Time spent on this project: **5 hours**. Spans from September 14 2025 - October 6 2025.
 
 ## Process
 
@@ -470,6 +480,7 @@ Project Deadline: December 2025
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
 
 
