@@ -19,7 +19,7 @@ This is our schedule for the build sprints:
 
 - [x] **Build Sprint 2:** September 14 2025 - October 6 2025
 * Accounts for everything since BS1/Firebase migration until the first demo. Essentially this is the work done starting with Firebase migration up to the first demo.
-* There is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests.
+* There is Firebase database integration, a working audio player with audio detection, enhanced map interface, backend API server to handle audio requests, and updated project styles.
 
 - [x] **Build Sprint 3:** October 6 2025 - December 2 2025
 * Accounts for everything since BS2/first demo until the final deadline.
@@ -32,7 +32,7 @@ This is our schedule for the build sprints:
 
 ## Time Spent
 
-Time spent on this project: **5 hours**. Spans from September 14 2025 - October 6 2025.
+Time spent on this project: **6 hours and 20 minuutes**. Spans from September 14 2025 - October 6 2025.
 
 ## Process
 
@@ -43,6 +43,8 @@ On September 14, I consulted with Claude to create a pipeline migration guide fo
 On September 25, I created an audio player to have the user listen to stored audios. First, I created an audio folder under public, created an AudioPlayer.jsx and AudioPlayer.css. Next, I added a button on MapView to take me to a new page to view these audios, I also added the route to App.jsx. Once done, I created sample MP3 files to see if they are visible and it was working. I also decided to include the transcriptions in .txt, and I got that to work no problem. These files are under audios, and everytime I have a new listing, I would update the array in AudioPlayer.jsx. I needed to update the transcript component so that was simple. I made sure to update the CSS and it was working perfectly. I did encounter a small error where some styles would not appear but I forgot to import AudioPlayer.css to AudioPlayer.jsx so I felt really stupid. But it is all good now. I added a live audio that we got along with the transcript file and it displayed perfectly, confirming a huge progress in our project.
 
 Next, one of my groupmates suggested we use PHP to auto update everything when a new file is uploaded. However, React/Vite projects can't directly use PHP files so I had work with something different. So the following day, I ultimately decided to create a backend API file to handle updates. Claude suggested this was the least destructive manner so I decided to go with this. First, I had to install the dependencies, and then create a backend file using Node.js and CommonJS. Next, I had to update the AudioPlayer.jsx to incorporate auto update from the backend, and finally test it by running 2 separate servers. I then encountered an error where the backend file was using CommonJS syntax, but it caused an error because my project is using an ES module. I needed to change it to use ES6 import syntax, as this does not work with CommonJS. I used Express.js instead and it was surprisingly easy, I never did this before and it makes me feel good about getting it right with the proper help. Then I began to run it but I initially did not know that both servers had to be running at the same time in 2 separate files simultaneously, I was doing it in 1 file. So, I ran both in 2 separate files and saw that everything was working except the live audio file, we will call this hudson as it is the audio recording of the Hudson River crash back in January. I then suspected that the backend had to have matching MP3 and txt files, so I changed the names of both files to match and voila, it was perfect. 
+
+A week later, I decided to test out the project functionality by having a friend of mines test the project out. I consulted with a friend of mine who had not seen this project before, and I had him go through the project as a demo. He went through it no problem whatsoever and got to experience every feature of the project. At the end, I sent him a document that would have him type his experience, what he liked and didn't like and any feedback. He suggested a password requirements component so I made a note for a future task. Afterward, I got his feedback typed on the document and recorded it for feedback purposes. Names are not needed, so it was confidential. I also did a lot of GitHub document work as it is noticeable with these markdown files. So, I went to work on the next task which was to update the styles and implement the password requirement component. First, I added the logo to the home page as that was requested by Justin. So, I did that by adding the logo as an image under the assets folder and wrote code to insert it. Next, I created the Settings.jsx and Settings.css files to create settings. Right now, the settings do not apply anything as it is just for show but hopefully I can get that working soon. I created some sample settings to make it look professional. Next, I added a button to both MapView.jsx and App.jsx to allow the user to be taken to the settings page when clicked. I added the route to the routes section and updated the styles once again to ensure grid centering is enabled and hover effects are enabled. Third, I changed the background of the Login.jsx and Signup.jsx to have the leaflet map blurred, and then having that be set as the background. I had to add TileLayers to the login and signup to enable leaflet access, and I had to import leaflet to the 2 files. I changed Auth.css to update the styles accordingly by adding a blurred map container and added an overlay to dim the map and improve readibility. Lastly, I added the password requirement functionality to ensure that NEW users can have a stricter password. I created a password validation function, updated password validity conditions, and added a feature where it would check password requirements before submitting to Firebase. I added the password requirement display in the return function; all of this is within the Signup.jsx file. Also I updated the Auth.css file to use the new styles and it looks great.
 
 Now, I need to implement the SDR receiver to be connected to my project using direct file outputting or another manner, and we should be virtually done with the project. Some polishing and style changes would be necessary too but that is afterwards. For the 1st demo of the Fall semester, my groupmates agreed that everything I had done was sufficient for demos, and if possible, getting SDR data to my project before the demo would be awesome but even after the demo it is fine. It just depends on if there is any work to be done with the SDR receiver.
 
@@ -68,6 +70,24 @@ Now, I need to implement the SDR receiver to be connected to my project using di
 - Audio recordings button for easy navigation
 - Real-time aircraft position tracking capability (SDR-ready)
 
+### 4. Settings Button
+- Created a Settings file to view settings
+- On the home page, a button is available to view settings
+- On the map page, there is a button available to view settings as well
+- Professional settings display
+
+### 5. Updated Style Changes and Improvements
+- Added the Logo to the home page
+- It is clickable with a neat feature present
+- Updated the background of the signup and login to have a blurred map
+- Uses leaflet map with blur as a purely visual background element
+
+### 6. Password Requirement Component
+- Real-time password validation
+- Added several password requirements
+- Visual feedback and disabled submit button until requirements met
+- Improved UI experience
+
 ---
 
 ## Required Features
@@ -77,18 +97,32 @@ The following **required** functionality is completed:
 
 - [x] **Web Page includes a home, login, and signup screens**
   - Users can see the home page when they first load into the project
+  - Users can see the logo on the home page
+  - Users can click on the logo for a neat surprise
   - Users can click on the login and signup buttons to be taken to either login or signup
   - Users can navigate between all 3 screens seamlessly
   - The home + login + signup have new and improved styles such as hover effects and background gradients to look more modern!
+  - The user can see and click on the Settings button to view settings
 - [x] **Users can signup for an account or login to an account**
-  - Web page must support signup and login functionality thanks to Supabase
+  - Web page must support signup and login functionality thanks to Firebase
   - If the user is new, they must signup for an account. The user can signup using:
     - Email
     - Password
     - No email verification is necessary 
   - If the user has an account, they can login using their email and password
+  - The user must meet the requirements for creating a password
+  - It will not work until the user successfully meets the requirements
   - Once either is completed, the user will be taken to the MapView screen
   - The user can log out by clicking the back button on their browser
+  - The user can see the leaflet map as a purely visual background element on both the login and signup screen.
+- [x] **Users can click on the logo for a surprise**
+  - The user is able to click on the logo
+  - The surprise is a fun little surprise that not everyone will think about
+- [x] **Settings button is viewable to everyone**
+  - The Settings button can be clicked by everyone
+  - The user can see all available settings
+  - None of these settings actually affect the app's behavior
+  - The user can exit out of the settings
 - [x] **Web Page includes a MapView component**
   - The MapView component is the next screen all users will see after logging in
   - The map will be centered over the Boca Raton Airport
@@ -108,6 +142,9 @@ The following **required** functionality is completed:
   - The user can close the marker by clicking on it again or clicking outside the popup
   - The user can click on each individual flight to see all details
   - The user can see an Audio Recordings button to click and view available audios for listening.
+  - The user can see a Settings button to click
+  - The user can view the settings and exit freely
+  - The user cannot change any settings as none of these settings actually affect the app's behavior
 - [x] **Users can click on any individual flight**
   - If the user wants to view all the flight details for an individual flight, they are able to
   - When the user clicks on an individual flight, they will be able to see the flight detail within the same page thanks to modal popup
@@ -233,6 +270,48 @@ public/audio/
 ```
 Firebase Firestore → MapView.jsx → Airport Popup → Flight Modal
 ```
+
+### Settings Implementation
+
+**Steps Completed:**
+1. Created Settings.jsx to hold Settings logic
+2. Created Settings.css to create proper styling
+3. Added a Settings button to App.jsx and MapView.jsx for easy navigation
+4. Updated routes section on App.jsx
+
+**Key Files Modified:**
+- `src/Components/Settings.jsx` - Settings file
+- `src/Components/Settings.css` - Settings styles
+- `src/Components/MapView.jsx` - Added Settings button
+- `src/Components/App.jsx` - Added Settings button and updated routing
+
+### Password Requirements Component
+
+**Steps Completed:**
+1. Updated Signup.jsx to add requirement logic and real-time validation
+2. Added a password requirement display to Signup.jsx
+3. Updated Auth.css to incorporate new style changes
+
+**Key Files Modified:**
+- `src/Components/Signup.jsx` - Added password requirement functionality
+- `src/Components/Auth.css` - New display styles
+
+### Updated Style Changes
+
+**Steps Completed:**
+1. Updated App.jsx to add the logo
+2. Added the logo to `public/assets/`
+3. Updated Signup.jsx and Login.jsx to incorporate a leaflet map background
+4. Updated Auth.css to style the blurred map background
+5. Updated App.jsx to enable clicking functionality to the logo
+6. Created a new popup surprise
+
+**Key Files Modified:**
+- `src/Components/App.jsx` - Added logo and clicking feature
+- `public/assets/` - Added the logo for reference
+- `src/Components/Signup.jsx` - Added leaflet map background
+- `src/Components/Login.jsx` - Added leaflet map background
+- `src/Components/Auth.css` - Added blurred map background styles
 
 ---
 
@@ -480,6 +559,7 @@ Project Deadline: December 2025
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
 
 
