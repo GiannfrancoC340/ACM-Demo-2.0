@@ -12,14 +12,14 @@ conversations using speech-to-text tools. The system also uses stress detection 
 emotional strain. This information is presented through a web-based dashboard designed for aviation analysts, students, and enthusiasts 
 to review live and past flight communications more easily and effectively. 
 
-This is Build Spring 2, which is the current build of the project. The way this project is planned this semester is ~~2 build sprints - Build Spring 1, ranging from August 16 - September 14, and Build Spring 2, ranging from September 14 to the present.~~ *UPDATE: As of October 6 2025, there will be 3 build sprints. The schedule is below this paragraph.* The reason for this is because after updating the home + login + signup, the next order of business was to migrate from Supabase to Firebase, and that was a big change. So, it made sense to do another build sprint for everything post Firebase setup until the first demo as it will be a lot of hard work to continue on. The core functionality remains the same, there are a ton of new features and QOL changes. For starters, there is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests.
+This is Build Spring 2, which is the current build of the project. The way this project is planned this semester is ~~2 build sprints - Build Spring 1, ranging from August 16 - September 14, and Build Spring 2, ranging from September 14 to the present.~~ *UPDATE: As of October 6 2025, there will be 3 build sprints. The schedule is below this paragraph.* The reason for this is because after updating the home + login + signup, the next order of business was to migrate from Supabase to Firebase, and that was a big change. So, it made sense to do another build sprint for everything post Firebase setup until the first demo as it will be a lot of hard work to continue on. The core functionality remains the same, there are a ton of new features and QOL changes. For starters, there is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests. On top of that, there is a Settings button to view settings, password requirements component, updated styles including adding the logo and clicking the logo, and incorporated a leaflet map background purely for visuals.
 This is our schedule for the build sprints:
 - [x] **Build Sprint 1:** August 16 2025 - September 14 2025
 * Accounts for picking up work since Spring 2025 and adds an audio section within FlightInfo.jsx, modal popup for individual flights, and a new and improved home + login + signup pages.
 
 - [x] **Build Sprint 2:** September 14 2025 - October 6 2025
 * Accounts for everything since BS1/Firebase migration until the first demo. Essentially this is the work done starting with Firebase migration up to the first demo.
-* There is Firebase database integration, a working audio player with audio detection, enhanced map interface, backend API server to handle audio requests, and updated project styles.
+* There is Firebase database integration, a working audio player with audio detection, enhanced map interface, backend API server to handle audio requests, password requirements component, settings button, and updated project styles.
 
 - [x] **Build Sprint 3:** October 6 2025 - December 2 2025
 * Accounts for everything since BS2/first demo until the final deadline.
@@ -70,10 +70,10 @@ Now, I need to implement the SDR receiver to be connected to my project using di
 - Audio recordings button for easy navigation
 - Real-time aircraft position tracking capability (SDR-ready)
 
-### 4. Settings Button
+### 4. Settings Page
 - Created a Settings file to view settings
 - On the home page, a button is available to view settings
-- On the map page, there is a button available to view settings as well
+- On the map page, there is a button available to view settings page as well
 - Professional settings display
 
 ### 5. Updated Style Changes and Improvements
@@ -102,7 +102,7 @@ The following **required** functionality is completed:
   - Users can click on the login and signup buttons to be taken to either login or signup
   - Users can navigate between all 3 screens seamlessly
   - The home + login + signup have new and improved styles such as hover effects and background gradients to look more modern!
-  - The user can see and click on the Settings button to view settings
+  - The user can see and click on the Settings button to view the settings page
 - [x] **Users can signup for an account or login to an account**
   - Web page must support signup and login functionality thanks to Firebase
   - If the user is new, they must signup for an account. The user can signup using:
@@ -118,11 +118,11 @@ The following **required** functionality is completed:
 - [x] **Users can click on the logo for a surprise**
   - The user is able to click on the logo
   - The surprise is a fun little surprise that not everyone will think about
-- [x] **Settings button is viewable to everyone**
+- [x] **Settings page is viewable for everyone**
   - The Settings button can be clicked by everyone
   - The user can see all available settings
   - None of these settings actually affect the app's behavior
-  - The user can exit out of the settings
+  - The user can exit out of the settings page
 - [x] **Web Page includes a MapView component**
   - The MapView component is the next screen all users will see after logging in
   - The map will be centered over the Boca Raton Airport
@@ -143,7 +143,7 @@ The following **required** functionality is completed:
   - The user can click on each individual flight to see all details
   - The user can see an Audio Recordings button to click and view available audios for listening.
   - The user can see a Settings button to click
-  - The user can view the settings and exit freely
+  - The user can view the settings page and exit freely
   - The user cannot change any settings as none of these settings actually affect the app's behavior
 - [x] **Users can click on any individual flight**
   - If the user wants to view all the flight details for an individual flight, they are able to
@@ -300,7 +300,7 @@ Firebase Firestore → MapView.jsx → Airport Popup → Flight Modal
 
 **Steps Completed:**
 1. Updated App.jsx to add the logo
-2. Added the logo to `public/assets/`
+2. Added the logo to `src/assets/`
 3. Updated Signup.jsx and Login.jsx to incorporate a leaflet map background
 4. Updated Auth.css to style the blurred map background
 5. Updated App.jsx to enable clicking functionality to the logo
@@ -319,6 +319,7 @@ Firebase Firestore → MapView.jsx → Airport Popup → Flight Modal
 
 ### ✅ Authentication System
 - User registration and login
+- Password requirements component for improved password validation
 - Session management with Firebase Auth
 - Protected routes (map access requires authentication)
 - Automatic session persistence
@@ -329,6 +330,7 @@ Firebase Firestore → MapView.jsx → Airport Popup → Flight Modal
 - Flight list in popup (shows first 2, expandable to all)
 - Real-time data from Firebase Firestore
 - Navigation button to audio recordings page
+- Settings button to settings page
 
 ### ✅ Flight Information System
 - Flight data stored in Firebase (route, time, status, airline, aircraft type)
@@ -360,6 +362,19 @@ Firebase Firestore → MapView.jsx → Airport Popup → Flight Modal
 - Automatic folder scanning
 - CORS enabled for local development
 - ES6 module syntax
+
+### ✅ Settings Implementation
+- A new component with various settings options
+- Created styles for the settings page
+- Done in JSX and CSS respectively
+- The settings are saved to localStorage when you click "Save Settings"
+- However, none of these settings actually affect the app's behavior right now
+
+### ✅ Various Style Changes
+- Added logo to the home page
+- Clicking the logo is enabled
+- Incorporated a leaflet background map for signup and login pages as purely visual
+- Added settings button on the home page
 
 ---
 
@@ -417,20 +432,35 @@ acm-demo-2.0/
 │       ├── *.mp3
 │       └── *.txt
 ├── src/
+│   ├── assets/
+│       └── ACM Logo.png          # ACM Logo
 │   ├── Components/
-│   │   ├── AudioPlayer.jsx       # Audio player with auto-detection
 │   │   ├── AudioPlayer.css       # Audio player styling
+│   │   ├── AudioPlayer.jsx       # Audio player with auto-detection
+│   │   ├── Auth.css              # Login and Signup styling
+│   │   ├── Debug.jsx             # Checks if database connection is working
+│   │   ├── FlightInfo.css        # Flight Info styling
+│   │   ├── FlightInfo.jsx        # Contains sample hardcoded data for flights
 │   │   ├── Login.jsx             # Firebase authentication
-│   │   ├── Signup.jsx            # User registration
+│   │   ├── MapView.css           # Map styling
 │   │   ├── MapView.jsx           # Interactive flight map
-│   │   └── MapView.css           # Map styling
+│   │   ├── Settings.css          # Settings styling
+│   │   ├── Settings.jsx          # Settings component
+│   │   └── Signup.jsx            # User registration
 │   ├── routes/
 │   │   └── ProtectedRoute.jsx    # Auth guard for routes
 │   ├── firebaseConfig.js         # Firebase initialization
 │   ├── App.jsx                   # Main routing component
-│   └── App.css                   # Global styles
+│   ├── App.css                   # Global styles
+│   ├── index.css                 # Root styles
+│   ├── main.jsx                  # App rendering with React Router Dom
+│   └── supabaseClient.js         # Firebase initialization (will delete soon)
 ├── server.js                     # Backend API for audio files
 ├── package.json
+├── index.html
+├── Build-Sprint-1.md
+├── Build-Sprint-2.md
+├── Build-Sprint-3.md
 └── README.md
 ```
 
@@ -559,6 +589,7 @@ Project Deadline: December 2025
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
 
 
