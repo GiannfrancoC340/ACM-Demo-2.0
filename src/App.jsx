@@ -43,16 +43,13 @@ function Home() {
     // Check if it's 41 or 67 clicks
     if (newCount === 41 || newCount === 67) {
       setShowPopup(true);
-      // Reset counter after showing popup
-      setTimeout(() => {
-        setClickCount(0);
-      }, 2000);
+      // Don't reset counter here anymore
     }
   };
 
   const closePopup = () => {
     setShowPopup(false);
-    setClickCount(0);
+    // Counter continues from where it was
   };
 
   return (
