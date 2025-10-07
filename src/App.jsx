@@ -74,6 +74,13 @@ function Home() {
           style={{ cursor: 'pointer' }}
         />
         
+        {/* Click Counter Display */}
+        {clickCount > 0 && (
+          <div className="click-counter">
+            Clicks: {clickCount}
+          </div>
+        )}
+        
         {/* Settings Button */}
         <Link 
           to="/settings"
