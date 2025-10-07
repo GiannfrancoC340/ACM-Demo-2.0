@@ -9,6 +9,7 @@ import './Components/FlightInfo.css'
 import AudioPlayer from './Components/AudioPlayer'
 import acmLogo from './assets/ACM Logo.png'
 import Settings from './Components/Settings'
+import { useState } from 'react'
 
 // Route info component to show current route
 function RouteInfo() {
@@ -32,6 +33,28 @@ function RouteInfo() {
 }
 
 function Home() {
+  const [clickCount, setClickCount] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handleLogoClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+
+    // Check if it's 41 or 67 clicks
+    if (newCount === 41 || newCount === 67) {
+      setShowPopup(true);
+      // Reset counter after showing popup
+      setTimeout(() => {
+        setClickCount(0);
+      }, 2000);
+    }
+  };
+
+  const closePopup = () => {
+    setShowPopup(false);
+    setClickCount(0);
+  };
+
   return (
     <div className="home-page">
       <div className="home-container">
@@ -41,8 +64,16 @@ function Home() {
           <a href="/login">Login</a>
           <a href="/signup">Sign Up</a>
         </div>
-        <img src={acmLogo} className="image-logo" alt="ACM Logo" />
-
+        
+        {/* Clickable Logo */}
+        <img 
+          src={acmLogo} 
+          className="image-logo" 
+          alt="ACM Logo" 
+          onClick={handleLogoClick}
+          style={{ cursor: 'pointer' }}
+        />
+        
         {/* Settings Button */}
         <Link 
           to="/settings"
@@ -77,6 +108,28 @@ function Home() {
           ⚙️ Settings
         </Link>
       </div>
+
+      {/* Easter Egg Popup */}
+      {showPopup && (
+        <div 
+          className="easter-egg-overlay"
+          onClick={closePopup}
+        >
+          <div 
+            className="easter-egg-popup"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>🎉 Haha funny number 🎉</h2>
+            <p>You found the secret!</p>
+            <button 
+              className="close-easter-egg"
+              onClick={closePopup}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

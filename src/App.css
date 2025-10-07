@@ -134,4 +134,84 @@ nav a:hover {
   border-radius: 20px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   mix-blend-mode: multiply; /* or darken, depending on the logo */
+  transition: transform 0.2s ease;
+}
+
+.image-logo:hover {
+  transform: scale(1.01);
+}
+
+/* Easter Egg Styles */
+.easter-egg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.easter-egg-popup {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  max-width: 400px;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.easter-egg-popup h2 {
+  margin: 0 0 15px 0;
+  color: #4285f4;
+  font-size: 1.8rem;
+}
+
+.easter-egg-popup p {
+  margin: 0 0 25px 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.close-easter-egg {
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-easter-egg:hover {
+  background: #3367d6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
 }
