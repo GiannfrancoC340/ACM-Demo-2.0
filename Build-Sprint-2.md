@@ -32,7 +32,7 @@ This is our schedule for the build sprints:
 
 ## Time Spent
 
-Time spent on this project: **7 hours and 10 minuutes**. Spans from September 14 2025 - October 6 2025.
+Time spent on this project: **7 hours and 10 minutes**. Spans from September 14 2025 - October 6 2025.
 
 ## Process
 
@@ -593,6 +593,7 @@ Project Deadline: December 2025
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
 
 
