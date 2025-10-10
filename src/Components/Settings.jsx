@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebaseConfig';
+import { signOut } from 'firebase/auth';
 import './Settings.css';
 
 export default function Settings() {
@@ -12,6 +14,18 @@ export default function Settings() {
     showFlightDetails: true,
     mapStyle: 'standard'
   });
+  const [username, setUsername] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  // Get username from Firebase auth
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user && user.email) {
+      const emailUsername = user.email.split('@')[0];
+      setUsername(emailUsername);
+      setUserEmail(user.email);
+    }
+  }, []);
 
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({
@@ -29,6 +43,17 @@ export default function Settings() {
     navigate(-1);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      alert('Logged out successfully!');
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      alert('Error logging out. Please try again.');
+    }
+  };
+
   return (
     <div className="settings-page">
       <div className="settings-container">
@@ -40,6 +65,14 @@ export default function Settings() {
         </div>
 
         <div className="settings-content">
+          {/* Welcome Section */}
+          {username && (
+            <div className="welcome-section">
+              <h2>👋 Welcome back, {username}!</h2>
+              <p className="welcome-message">{userEmail}</p>
+            </div>
+          )}
+
           <div className="settings-section">
             <h2>General</h2>
             
@@ -144,12 +177,33 @@ export default function Settings() {
             </div>
           </div>
 
+          {/* Account Section - Only shows if user is logged in */}
+          {username && (
+            <div className="settings-section">
+              <h2>Account</h2>
+              <div className="account-actions">
+                <button className="logout-button" onClick={handleLogout}>
+                  🚪 Logout
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="settings-section">
             <h2>About</h2>
             <div className="about-info">
               <p><strong>App Version:</strong> 1.0.0</p>
               <p><strong>Build:</strong> 2025.10.03</p>
               <p><strong>Developer:</strong> ACM Team</p>
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <h2>Thanks</h2>
+            <div className="thanks-info">
+              <p>I want to thank the following people for helping out on this project:</p>
+              <p>Joshua Castro-Munoz for demo testing the project</p>
+              <p>Lorem ipsum</p>
             </div>
           </div>
 

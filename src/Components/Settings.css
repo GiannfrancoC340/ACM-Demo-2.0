@@ -17,7 +17,8 @@
   background: #4285f4;
   color: white;
   padding: 20px 30px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.5fr 5fr 1.5fr;
   align-items: center;
   gap: 20px;
 }
@@ -174,6 +175,18 @@
   color: #555;
 }
 
+/* Thanks Section */
+.thanks-info {
+  background: #f8f9fb;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.thanks-info p {
+  margin: 10px 0;
+  color: #555;
+}
+
 /* Action Buttons */
 .settings-actions {
   display: flex;
@@ -247,4 +260,51 @@
   .settings-actions {
     flex-direction: column;
   }
+}
+
+/* Welcome Section */
+.welcome-section {
+  background: linear-gradient(135deg, #4285f4, #3367d6);
+  padding: 25px 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+}
+
+.welcome-section h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.6rem;
+  color: white;
+  font-weight: 700;
+}
+
+.welcome-message {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+}
+
+/* Account Section */
+.account-actions {
+  padding: 15px 0;
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px 24px;
+  background: #e04141;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: #c63030;
+  box-shadow: 0 4px 12px rgba(224, 65, 65, 0.3);
 }
