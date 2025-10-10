@@ -1,22 +1,38 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './AudioPlayer.css'
 
 export default function AudioPlayer() {
   const [playlist, setPlaylist] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [backendError, setBackendError] = useState(false);
 
-useEffect(() => {
-  const fetchPlaylist = () => {
-    fetch('http://localhost:3001/api/playlist')
-      .then(res => res.json())
-      .then(data => setPlaylist(data))
-      .catch(err => console.error('Error loading playlist:', err));
-  };
-  
-  fetchPlaylist();
-  const interval = setInterval(fetchPlaylist, 10000); // Check every 10 seconds
-  
-  return () => clearInterval(interval);
-}, []);
+  useEffect(() => {
+    const fetchPlaylist = () => {
+      fetch('http://localhost:3001/api/playlist')
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Backend server is offline');
+          }
+          return res.json();
+        })
+        .then(data => {
+          setPlaylist(data);
+          setLoading(false);
+          setBackendError(false);
+        })
+        .catch(err => {
+          console.error('Error loading playlist:', err);
+          setBackendError(true);
+          setLoading(false);
+        });
+    };
+    
+    fetchPlaylist();
+    const interval = setInterval(fetchPlaylist, 10000); // Check every 10 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
   
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -42,7 +58,9 @@ useEffect(() => {
       }
     };
     
-    loadTranscript();
+    if (playlist.length > 0) {
+      loadTranscript();
+    }
   }, [currentTrack, playlist]);
 
   useEffect(() => {
@@ -113,9 +131,109 @@ useEffect(() => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // Backend Error State
+  if (backendError) {
+    return (
+      <div className="audio-player-page">
+        <div className="audio-player-container">
+          {/* Back to Map Button */}
+          <Link 
+            to="/map" 
+            className="back-to-map-btn"
+          >
+            ← Back to Map
+          </Link>
+
+          <h1 className="audio-player-title">Audio Player</h1>
+          
+          <div className="error-state">
+            <div className="error-icon">⚠️</div>
+            <h2>Backend Server Offline</h2>
+            <p>Unable to connect to the audio server. Please make sure the backend is running.</p>
+            <div className="error-details">
+              <p><strong>To start the server:</strong></p>
+              <code>node server.js</code>
+            </div>
+            <button 
+              className="retry-button"
+              onClick={() => window.location.reload()}
+            >
+              🔄 Retry Connection
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading State
+  if (loading) {
+    return (
+      <div className="audio-player-page">
+        <div className="audio-player-container">
+          {/* Back to Map Button */}
+          <Link 
+            to="/map" 
+            className="back-to-map-btn"
+          >
+            ← Back to Map
+          </Link>
+
+          <h1 className="audio-player-title">Audio Player</h1>
+          
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading playlist...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty Playlist State
+  if (playlist.length === 0) {
+    return (
+      <div className="audio-player-page">
+        <div className="audio-player-container">
+          {/* Back to Map Button */}
+          <Link 
+            to="/map" 
+            className="back-to-map-btn"
+          >
+            ← Back to Map
+          </Link>
+
+          <h1 className="audio-player-title">Audio Player</h1>
+          
+          <div className="empty-state">
+            <div className="empty-icon">🎵</div>
+            <h2>No Audio Files Found</h2>
+            <p>Your playlist is empty. Add some audio files to get started!</p>
+            <div className="empty-instructions">
+              <p><strong>To add audio files:</strong></p>
+              <ol>
+                <li>Place .mp3 files in the <code>public/audio</code> folder</li>
+                <li>Optionally add .txt transcripts with matching filenames</li>
+                <li>Refresh this page</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="audio-player-page">
       <div className="audio-player-container">
+        {/* Back to Map Button */}
+        <Link 
+          to="/map" 
+          className="back-to-map-btn"
+        >
+          ← Back to Map
+        </Link>
+
         <h1 className="audio-player-title">Audio Player</h1>
         
         <audio ref={audioRef} src={playlist[currentTrack]?.url} />
@@ -144,30 +262,30 @@ useEffect(() => {
           </div>
 
           {/* Controls */}
-            <div className="controls-container">
+          <div className="controls-container">
             <button
-                onClick={handlePrevious}
-                disabled={currentTrack === 0}
-                className="control-btn"
+              onClick={handlePrevious}
+              disabled={currentTrack === 0}
+              className="control-btn"
             >
-                ⏮️
+              ⏮️
             </button>
 
             <button
-                onClick={togglePlayPause}
-                className="play-pause-btn"
+              onClick={togglePlayPause}
+              className="play-pause-btn"
             >
-                {isPlaying ? '⏸️' : '▶️'}
+              {isPlaying ? '⏸️' : '▶️'}
             </button>
 
             <button
-                onClick={handleNext}
-                disabled={currentTrack === playlist.length - 1}
-                className="control-btn"
+              onClick={handleNext}
+              disabled={currentTrack === playlist.length - 1}
+              className="control-btn"
             >
-                ⏭️
+              ⏭️
             </button>
-            </div>
+          </div>
         </div>
 
         {/* Playlist */}
