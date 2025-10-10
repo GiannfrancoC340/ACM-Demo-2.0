@@ -19,7 +19,7 @@ As a recap, this is the schedule of the build sprints:
 
 - [x] **Build Sprint 2:** September 14 2025 - October 6 2025
 * Accounts for everything since BS1/Firebase migration until the first demo. Essentially this is the work done starting with Firebase migration up to the first demo.
-* There is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests.
+* There is Firebase database integration, a working audio player with audio detection, enhanced map interface, backend API server to handle audio requests, password requirements component, settings button, and updated project styles.
 
 - [x] **Build Sprint 3:** October 6 2025 - December 2 2025
 * Accounts for everything since BS2/first demo until the final deadline.
@@ -27,3 +27,5 @@ As a recap, this is the schedule of the build sprints:
 ## Time Spent
 
 Time spent on this project: **8 minutes**. Spans from October 6 2025 - December 2 2025.
+
+
