@@ -275,18 +275,35 @@ const flightData = {
 };
 
 // Flight Info Modal Component
-function FlightInfoModal({ flightId, onClose }) {
+function FlightInfoModal({ flightId, flights, onClose }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [selectedAudio, setSelectedAudio] = useState(0);
   const audioRef = useRef(null);
   
-  const flight = flightData[flightId];
-  
+  // Get flight from Firebase flights state instead of hardcoded flightData
+  const [flightDetails, setFlightDetails] = useState(null);
+
+  useEffect(() => {
+    const firebaseFlight = flights.find(f => f.flightId === flightId);
+    
+    if (firebaseFlight) {
+      // Use Firebase data if available
+      setFlightDetails(firebaseFlight);
+    } else {
+      // Fallback to hardcoded data if not in Firebase
+      setFlightDetails(flightData[flightId]);
+    }
+  }, [flightId, flights]);
+
+  const flight = flightDetails;
+    
   if (!flight) return null;
   
-  const currentAudio = flight.audioRecordings[selectedAudio];
+  const currentAudio = flight.audioRecordings && flight.audioRecordings[selectedAudio] 
+  ? flight.audioRecordings[selectedAudio] 
+  : null;
   
   const togglePlayPause = () => {
     if (!currentAudio.audioUrl) {
@@ -387,7 +404,8 @@ function FlightInfoModal({ flightId, onClose }) {
               
               <div className="audio-recordings-list">
                 <h3>Available Recordings:</h3>
-                {flight.audioRecordings.map((recording, index) => (
+                {flight.audioRecordings && flight.audioRecordings.length > 0 ? (
+                  flight.audioRecordings.map((recording, index) => (
                   <div 
                     key={recording.id} 
                     className={`audio-item ${selectedAudio === index ? 'active' : ''}`}
@@ -402,50 +420,55 @@ function FlightInfoModal({ flightId, onClose }) {
                       <span className="audio-timestamp">Recorded at {recording.timestamp}</span>
                     </div>
                   </div>
-                ))}
+                ))
+              ) : (
+                <p className="audio-placeholder">No audio recordings available for this flight yet.</p>
+              )}
               </div>
 
               {/* Audio Player */}
-              <div className="audio-player">
-                <h3>Now Playing: {currentAudio.title}</h3>
-                
-                <audio 
-                  ref={audioRef} 
-                  src={currentAudio.audioUrl} 
-                  style={{ display: 'none' }}
-                />
-                
-                <div className="audio-controls">
-                  <button 
-                    className="play-pause-btn" 
-                    onClick={togglePlayPause}
-                    disabled={!currentAudio.audioUrl}
-                  >
-                    {isPlaying ? '⏸️' : '▶️'}
-                  </button>
+              {currentAudio && (
+                <div className="audio-player">
+                  <h3>Now Playing: {currentAudio.title}</h3>
                   
-                  <div className="audio-progress">
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
-                      ></div>
-                    </div>
-                    <div className="time-display">
-                      <span>{formatTime(currentTime)}</span>
-                      <span>/</span>
-                      <span>{currentAudio.duration}</span>
+                  <audio 
+                    ref={audioRef} 
+                    src={currentAudio.audioUrl} 
+                    style={{ display: 'none' }}
+                  />
+                  
+                  <div className="audio-controls">
+                    <button 
+                      className="play-pause-btn" 
+                      onClick={togglePlayPause}
+                      disabled={!currentAudio.audioUrl}
+                    >
+                      {isPlaying ? '⏸️' : '▶️'}
+                    </button>
+                    
+                    <div className="audio-progress">
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-fill" 
+                          style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
+                        ></div>
+                      </div>
+                      <div className="time-display">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>/</span>
+                        <span>{currentAudio.duration}</span>
+                      </div>
                     </div>
                   </div>
+                  
+                  {!currentAudio.audioUrl && (
+                    <div className="audio-placeholder">
+                      <p>Audio recording will be available here once uploaded</p>
+                      <p>File format: MP3, WAV, or OGG</p>
+                    </div>
+                  )}
                 </div>
-                
-                {!currentAudio.audioUrl && (
-                  <div className="audio-placeholder">
-                    <p>Audio recording will be available here once uploaded</p>
-                    <p>File format: MP3, WAV, or OGG</p>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -494,14 +517,9 @@ export default function MapView() {
         // Validate and transform Firebase data to match expected format
         const validFlights = firebaseFlights.filter(flight => 
           flight.route && flight.time && flight.flightId
-        ).map(flight => ({
-          flightId: flight.flightId,
-          route: flight.route,
-          time: flight.time,
-          status: flight.status || "On Time"
-        }))
-        
-        console.log("Valid transformed flights:", validFlights)
+        )
+
+        console.log("Valid flights with all data:", validFlights)
         
         if (validFlights.length > 0) {
           setFlights(validFlights)
@@ -663,7 +681,8 @@ export default function MapView() {
       {/* Flight Info Modal */}
       {selectedFlightId && (
         <FlightInfoModal 
-          flightId={selectedFlightId} 
+          flightId={selectedFlightId}
+          flights={flights}  // Add this prop
           onClose={closeModal}
         />
       )}
