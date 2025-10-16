@@ -66,7 +66,7 @@ const flightData = {
         id: 1,
         title: "Pre-flight Communications",
         description: "Ground control and taxi instructions",
-        audioUrl: null,
+        audioUrl: "/audio/flight1-preflight.mp3",
         duration: "2:34",
         timestamp: "2:20 PM"
       },
@@ -276,55 +276,182 @@ const flightData = {
 
 // Flight Info Modal Component
 function FlightInfoModal({ flightId, flights, onClose }) {
+  // ===== ALL HOOKS MUST BE AT THE TOP - NO EARLY RETURNS BEFORE THIS SECTION =====
+  
+  // ALL useState declarations
+  const [flightDetails, setFlightDetails] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [selectedAudio, setSelectedAudio] = useState(0);
-  const audioRef = useRef(null);
   
-  // Get flight from Firebase flights state instead of hardcoded flightData
-  const [flightDetails, setFlightDetails] = useState(null);
+  // ALL useRef declarations
+  const audioRef = useRef(null);
 
+  // ALL useEffect declarations
+  
+  // 1. Load flight details from backend API or fallback data
   useEffect(() => {
-    const firebaseFlight = flights.find(f => f.flightId === flightId);
-    
-    if (firebaseFlight) {
-      // Use Firebase data if available
-      setFlightDetails(firebaseFlight);
-    } else {
-      // Fallback to hardcoded data if not in Firebase
-      setFlightDetails(flightData[flightId]);
-    }
+    // Try to fetch from backend API first
+    fetch(`http://localhost:3001/api/flight/${flightId}`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Backend API not available');
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('Loaded flight from backend API:', data);
+        // Merge backend data with hardcoded flightData for complete info
+        const hardcodedFlight = flightData[flightId];
+        setFlightDetails({
+          ...hardcodedFlight, // Use hardcoded data as base
+          audioRecordings: data.audioRecordings || hardcodedFlight.audioRecordings // Override with backend audio if available
+        });
+      })
+      .catch(err => {
+        console.log('Backend API error, using hardcoded data:', err.message);
+        // Fallback to hardcoded data
+        const hardcodedFlight = flightData[flightId];
+        if (hardcodedFlight) {
+          console.log('Using hardcoded flight data for:', flightId);
+          setFlightDetails(hardcodedFlight);
+        } else {
+          // Last resort: check Firebase
+          const firebaseFlight = flights.find(f => f.flightId === flightId);
+          if (firebaseFlight) {
+            console.log('Using Firebase flight data for:', flightId);
+            setFlightDetails(firebaseFlight);
+          }
+        }
+      });
   }, [flightId, flights]);
 
-  const flight = flightDetails;
+  // 2. Handle play/pause logic
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      console.log('No audio ref');
+      return;
+    }
     
-  if (!flight) return null;
+    // Get current audio URL safely
+    const audioUrl = flightDetails?.audioRecordings?.[selectedAudio]?.audioUrl;
+    console.log('Current audio URL:', audioUrl);
+    console.log('Audio element src:', audio.src);
+    console.log('Is playing:', isPlaying);
+    
+    if (!audioUrl) {
+      console.log('No audio URL available');
+      return;
+    }
+
+    if (isPlaying) {
+      console.log('Attempting to play audio...');
+      audio.play().catch(err => {
+        console.error('Error playing audio:', err);
+        console.error('Error details:', err.message);
+        setIsPlaying(false);
+      });
+    } else {
+      console.log('Pausing audio...');
+      audio.pause();
+    }
+  }, [isPlaying, flightDetails, selectedAudio]);
+
+  // 3. Set up audio event listeners whenever flightDetails or selectedAudio changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      console.log('Time update:', audio.currentTime);
+      setCurrentTime(audio.currentTime);
+    };
+    const handleLoadedMetadata = () => {
+      console.log('Metadata loaded, duration:', audio.duration);
+      setDuration(audio.duration);
+    };
+    const handleEnded = () => {
+      console.log('Audio ended');
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+
+    // If audio is already loaded, set duration immediately
+    if (audio.duration && !isNaN(audio.duration)) {
+      setDuration(audio.duration);
+    }
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [flightDetails, selectedAudio]); // Re-attach listeners when audio source changes
+
+  // 4. Reset audio when selection changes and load new source
+  useEffect(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+    
+    const audio = audioRef.current;
+    if (audio) {
+      audio.currentTime = 0;
+      
+      // Get the new audio URL
+      const newAudioUrl = flightDetails?.audioRecordings?.[selectedAudio]?.audioUrl;
+      console.log('Loading new audio source:', newAudioUrl);
+      
+      if (newAudioUrl) {
+        audio.src = newAudioUrl;
+        audio.load(); // Force the browser to load the new source
+        console.log('Audio loaded, src set to:', audio.src);
+      }
+    }
+  }, [selectedAudio, flightDetails]);
+
+  // ===== END OF HOOKS SECTION - NOW WE CAN DO CONDITIONAL LOGIC =====
+
+  // Early return check - MUST be after all hooks
+  if (!flightDetails) {
+    return null;
+  }
+
+  // Safe to access flightDetails now
+  const flight = flightDetails;
+  const currentAudio = flight.audioRecordings?.[selectedAudio] || null;
   
-  const currentAudio = flight.audioRecordings && flight.audioRecordings[selectedAudio] 
-  ? flight.audioRecordings[selectedAudio] 
-  : null;
-  
+  // Handler functions
   const togglePlayPause = () => {
-    if (!currentAudio.audioUrl) {
+    console.log('Toggle play/pause clicked');
+    console.log('Current audio:', currentAudio);
+    
+    if (!currentAudio?.audioUrl) {
+      console.log('No audio URL - showing alert');
       alert('Audio file not available yet. This is a placeholder for future audio recordings.');
       return;
     }
+    
+    console.log('Setting isPlaying to:', !isPlaying);
     setIsPlaying(!isPlaying);
   };
 
   const handleAudioSelect = (index) => {
     setSelectedAudio(index);
-    setIsPlaying(false);
-    setCurrentTime(0);
   };
 
   const formatTime = (time) => {
+    if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // Render
   return (
     <div className="flight-modal-overlay" onClick={onClose}>
       <div className="flight-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -406,24 +533,24 @@ function FlightInfoModal({ flightId, flights, onClose }) {
                 <h3>Available Recordings:</h3>
                 {flight.audioRecordings && flight.audioRecordings.length > 0 ? (
                   flight.audioRecordings.map((recording, index) => (
-                  <div 
-                    key={recording.id} 
-                    className={`audio-item ${selectedAudio === index ? 'active' : ''}`}
-                    onClick={() => handleAudioSelect(index)}
-                  >
-                    <div className="audio-item-header">
-                      <span className="audio-title">{recording.title}</span>
-                      <span className="audio-duration">{recording.duration}</span>
+                    <div 
+                      key={recording.id} 
+                      className={`audio-item ${selectedAudio === index ? 'active' : ''}`}
+                      onClick={() => handleAudioSelect(index)}
+                    >
+                      <div className="audio-item-header">
+                        <span className="audio-title">{recording.title}</span>
+                        <span className="audio-duration">{recording.duration}</span>
+                      </div>
+                      <div className="audio-item-details">
+                        <span className="audio-description-text">{recording.description}</span>
+                        <span className="audio-timestamp">Recorded at {recording.timestamp}</span>
+                      </div>
                     </div>
-                    <div className="audio-item-details">
-                      <span className="audio-description-text">{recording.description}</span>
-                      <span className="audio-timestamp">Recorded at {recording.timestamp}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="audio-placeholder">No audio recordings available for this flight yet.</p>
-              )}
+                  ))
+                ) : (
+                  <p className="audio-placeholder">No audio recordings available for this flight yet.</p>
+                )}
               </div>
 
               {/* Audio Player */}
@@ -431,10 +558,9 @@ function FlightInfoModal({ flightId, flights, onClose }) {
                 <div className="audio-player">
                   <h3>Now Playing: {currentAudio.title}</h3>
                   
+                  {/* Remove src from here - we'll set it dynamically in useEffect */}
                   <audio 
-                    ref={audioRef} 
-                    src={currentAudio.audioUrl} 
-                    style={{ display: 'none' }}
+                    ref={audioRef}
                   />
                   
                   <div className="audio-controls">
@@ -456,7 +582,7 @@ function FlightInfoModal({ flightId, flights, onClose }) {
                       <div className="time-display">
                         <span>{formatTime(currentTime)}</span>
                         <span>/</span>
-                        <span>{currentAudio.duration}</span>
+                        <span>{formatTime(duration)}</span>
                       </div>
                     </div>
                   </div>
