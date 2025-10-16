@@ -1,0 +1,35 @@
+===== STRESS ANALYSIS =====
+Analyzing: flight1-preflight.mp3
+--------------------------------------------------
+Duration: 35.04 seconds
+
+📊 STRESS ANALYSIS:
+   Overall Stress Level: 67.5%
+   Pitch Stress:        100.0%
+   Voice Quality Stress: 100.0%
+   Arousal Level:        31.6%
+   Spectral Tension:     38.6%
+   Anger Level:          55.0%
+   Panic Level:          56.5%
+
+🎭 EMOTION CLASSIFICATION:
+   Dominant Emotion: STRESSED
+   Confidence:       67.5%
+   Emotional State:  moderate_stress
+
+🔑 KEY FEATURES:
+   Pitch Mean:       606.16 Hz
+   Pitch Variability: 1.1215
+   Intensity Mean:    4.66
+   Tempo:            117.45 BPM
+   Energy Mean:      0.0038
+
+💬 INTERPRETATION:
+   High stress detected with significant vocal tension.
+
+============================================================
+Analysis Complete
+============================================================
+===== TRANSCRIPT =====
+
+[00:00:00.000 – 00:00:35.040] now we go into system overview and here we have a use case diagram so this diagram shows the primary user interactions within the system the user can eat the user can log into the web app they can search for fight and it can also filter for flights to us they could listen to associated htc audio the transcripts and explore stress level for each communication in our system is designed to handle these interactive it is designed to handle these interactions seamlessly while maintain secure access and reliable data presentation.
