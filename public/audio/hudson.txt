@@ -1,40 +1,85 @@
-[00:00] the.
+===== STRESS ANALYSIS =====
+Analyzing: hudson.mp3
+--------------------------------------------------
+Duration: 273.79 seconds
 
-[00:10] company i take every day the.
-[00:17] guys that are returning your thoughts as you can i quiet and think they can maintain one zero thousand.
-[00:23] the.
+📊 STRESS ANALYSIS:
+   Overall Stress Level: 54.0%
+   Pitch Stress:        100.0%
+   Voice Quality Stress: 70.0%
+   Arousal Level:        28.1%
+   Spectral Tension:     5.1%
+   Anger Level:          55.0%
+   Panic Level:          55.4%
 
-[00:45] gaga thirteen point nine turn the thing to some there Cactus fifteen.
-[00:50] thursday night is the first or last run the course LaGuardia.
-[00:55] okay yeah you need to return nobody turn left heading about you to them to deserve.
-[01:01] ooh very happy the park has got emergency returning!
-[01:06] fifteen twenty nine in p a bird strike he lost all engine he lost the thread in the engine to the!
-[01:11] turning immediately act is fifteen twenty nine which engines he lost thrust in both engines he?
-[01:16] said got it i get fifteen twenty nine we can get it for.
-[01:21] you wanna try to land winery one brain for labour we may end up up native.
-[01:29] going twice i think he turned out there are some there are certain cases.
-[01:44] PILOT: i can't get fifteen point i can be left traffic runway three one unable!
-[01:49] PILOT: okay what do you need the land?
-[01:58] PILOT: jagged fifteen point nine runway for the available poi make laptop of run a poor area.
-[02:03] PILOT: the game away what's that were to arrive at a new jersey maybe Teterboro?
-[02:08] PILOT: okay yeah you're right side is Teterboro airport.
-[02:14] PILOT: do i try to go to Teterboro cabo.
-[02:19] PILOT: empire aka LaGuardia park gae murphy and bam hey go khakis thinking twain.
-[02:24] PILOT: i know the george washington bridge once go to europe i right now conceal our project if you need assistance.
-[02:29] PILOT: ah yes here it was a barged i can i get him in for runway one what do i want that jacket?
-[02:34] PILOT: fifteen twenty nine turn right to a theory key landmarks i wanted to do it.
-[02:39] PILOT: okay which one way would you like at Teterboro w?
-[02:44] PILOT: who am i'm sorry say again Cactus.
-[02:52] PILOT: time the only twenty cents safety contain you're going to save money.
-[02:58] PILOT: ha.
-[03:03] PILOT: jacket Cactus fifteen point nine radar contact is lost!
-[03:08] PILOT: you also got Newark airport at the two o'clock in about seven month.
-[03:18] PILOT: eagle five point seven eighteen carola thing to there giorgio.
-[03:23] PILOT: our voice of an eighteenth i think he said he was going to the hudson institute client.
-[03:28] PILOT: i know he thought.
-[03:35] PILOT: Cactus fifteen twenty nine if he kina he added runway two nine.
-[03:40] PILOT: available at Newark or be two o'clock in some month e five.
-[03:45] PILOT: point seven eighteen comments and one two thousand one thousand and five.
-[03:50] PILOT: acquitted ninety five point.
-[03:55] PILOT: seven eighty nine so i missed that sagan the twelve thousand.
-[04:00] PILOT: two hundred on his luck i think eg five point than eighteen cannot see to them unfortunately.
+🎭 EMOTION CLASSIFICATION:
+   Dominant Emotion: PANICKED
+   Confidence:       55.4%
+   Emotional State:  moderate_stress
+
+🔑 KEY FEATURES:
+   Pitch Mean:       838.56 Hz
+   Pitch Variability: 1.2358
+   Intensity Mean:    2.43
+   Tempo:            117.45 BPM
+   Energy Mean:      0.0014
+
+💬 INTERPRETATION:
+   Moderate stress levels detected in voice patterns.
+
+============================================================
+Analysis Complete
+============================================================
+===== TRANSCRIPT =====
+
+===== STRESS ANALYSIS =====
+Analyzing: hudson.mp3
+--------------------------------------------------
+Duration: 273.79 seconds
+
+📊 STRESS ANALYSIS:
+   Overall Stress Level: 54.0%
+   Pitch Stress:        100.0%
+   Voice Quality Stress: 70.0%
+   Arousal Level:        28.1%
+   Spectral Tension:     5.1%
+   Anger Level:          55.0%
+   Panic Level:          55.4%
+
+🎭 EMOTION CLASSIFICATION:
+   Dominant Emotion: PANICKED
+   Confidence:       55.4%
+   Emotional State:  moderate_stress
+
+🔑 KEY FEATURES:
+   Pitch Mean:       838.56 Hz
+   Pitch Variability: 1.2358
+   Intensity Mean:    2.43
+   Tempo:            117.45 BPM
+   Energy Mean:      0.0014
+
+💬 INTERPRETATION:
+   Moderate stress levels detected in voice patterns.
+
+============================================================
+Analysis Complete
+============================================================
+===== TRANSCRIPT =====
+
+[00:00:10.020 – 00:00:13.020] every day.
+[00:00:15.390 – 00:00:23.520] they are trying to do what you have to wait and see fig i made him wonder that and.
+[00:00:23.610 – 00:00:26.940] without going on.
+[00:00:45.450 – 00:01:00.900] yeah i did for two point nine per month into some their jackets fifty for a lot is for sale flaws rather than focus on surgery like towards what why okay i you need to return a little buddy turned left heading about fifty there.
+[00:01:01.440 – 00:01:26.520] probably to park you ve got hammered say returning the  bird strike   bird strike  to drive near into trying immediately active fifteen twenty nine which engines he loves what s important is he said got it after fifteen point i couldn t get it feed you want to try to land one three one three or four losses!
+[00:01:29.130 – 00:01:35.220] yeah i do i can take each are like they are some there.
+[00:01:43.530 – 00:01:48.930] i got you fucking point i could be less traffic  runway  three one how they want.
+[00:01:49.050 – 00:01:51.540] okay what you need to win.
+[00:01:58.440 – 00:02:11.760] he argued for two point nine one wait for the mailbox you want me claptrap the run a poor area got really really really wanted that were to i write it is a new jersey maybe through arab okay yeah you re right sided teterboro airport.
+[00:02:14.400 – 00:02:48.240] you i try to go to cheat of are hereby around and part actually leaguewide a part timer team that guy you faggot city twenty nine of the george washington bridge want go to europe or right now also our project that you need assistance or yeah see i was obliged i can i get a month for i ve only one one way one that can get you to teach when i turned my to a deregulated morning i wanted to drop your okay which one way we d like a seat about him as i say you re in texas.
+[00:02:52.260 – 00:03:01.350] you don t wait until because then you re going to take on it.
+[00:03:02.880 – 00:03:05.610] there are good too.
+[00:03:05.490 – 00:03:11.880] try to critique when i read or contact you thought you also got newark airport be too cocky about them off.
+[00:03:16.230 – 00:03:30.120] five boys are making curl up into one day off and water allow for your ha i ve got about ninety eight or nine now on.
+[00:03:35.100 – 00:03:43.260] pretty twenty nine if he kinda the i die right away at to nine available at your coffee to caught in some off.
+[00:03:44.400 – 00:03:51.960] he likely to really think i made for one two thousand and they want to try to idiot.
+[00:03:54.210 – 00:04:06.480] betty white boy turned eighteen and sign that that s a good get our through twelve thousand to a you have a lucky thank eighty five voice anything so lucky to them.
