@@ -7,6 +7,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import './MapView.css'
 import { Link } from 'react-router-dom'
+import LiveAircraftLayer from './LiveAircraftLayer';
 
 // Fix for the default icon
 let DefaultIcon = L.icon({
@@ -610,6 +611,7 @@ export default function MapView() {
   const [hoveredFlight, setHoveredFlight] = useState(null)
   const [showAllFlights, setShowAllFlights] = useState(false)
   const [selectedFlightId, setSelectedFlightId] = useState(null)
+  const [showLiveAircraft, setShowLiveAircraft] = useState(true);
   
   // Hardcoded Boca Raton Airport location (this stays the same)
   const bocaRatonAirport = {
@@ -731,6 +733,30 @@ export default function MapView() {
         ⚙️ Settings
       </Link>
 
+      {/* NEW: Toggle button for live aircraft */}
+      <button
+        onClick={() => setShowLiveAircraft(!showLiveAircraft)}
+        style={{
+          position: 'absolute',
+          top: '80px',
+          right: '20px',
+          zIndex: 1000,
+          padding: '12px 24px',
+          backgroundColor: showLiveAircraft ? '#10b981' : '#6b7280',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
+        ✈️ {showLiveAircraft ? 'Live Aircraft ON' : 'Live Aircraft OFF'}
+      </button>
+
       <MapContainer 
         center={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
         zoom={13} 
@@ -802,6 +828,12 @@ export default function MapView() {
             </div>
           </Popup>
         </Marker>
+
+        {/* NEW: Add live aircraft layer */}
+        <LiveAircraftLayer 
+          enabled={showLiveAircraft}
+          refreshInterval={30000} // Update every 30 seconds
+        />
       </MapContainer>
 
       {/* Flight Info Modal */}
