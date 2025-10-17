@@ -291,11 +291,18 @@
 .aircraft-icon {
   background: transparent !important;
   border: none !important;
+  box-shadow: none !important;
   transition: transform 0.3s ease;
 }
 
 .aircraft-icon:hover {
   transform: scale(1.2);
+}
+
+/* Remove any default Leaflet divIcon backgrounds */
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Pulse animation for loading indicator */
