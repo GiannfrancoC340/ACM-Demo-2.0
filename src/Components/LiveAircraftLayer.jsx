@@ -11,21 +11,22 @@ import {
 
 // Create airplane icon that rotates based on heading
 function createAirplaneIcon(heading) {
-  const svgIcon = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-      <g transform="rotate(${heading || 0}, 16, 16)">
-        <path fill="#2563eb" stroke="#ffffff" stroke-width="1.5" 
-          d="M16,2 L18,14 L28,16 L18,18 L16,30 L14,18 L4,16 L14,14 Z"/>
-        <circle cx="16" cy="16" r="2" fill="#ffffff"/>
-      </g>
-    </svg>
-  `;
+  const rotation = heading || 0;
   
   return L.divIcon({
-    html: svgIcon,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
+    html: `
+      <div style="
+        font-size: 24px;
+        transform: rotate(${rotation}deg);
+        transform-origin: center;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      ">
+        ✈️
+      </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
     className: 'aircraft-icon'
   });
 }
