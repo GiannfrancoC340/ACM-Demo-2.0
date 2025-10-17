@@ -6,10 +6,17 @@ const OPENSKY_BASE_URL = 'https://opensky-network.org/api';
 const BCT_COORDS = {
   lat: 26.3785,
   lng: -80.1077,
-  radius: 50 // km radius for search
+  radius: 50 // km radius for search - ADJUST THIS VALUE!
+  // Recommended values:
+  // - 25 km: Very close traffic only (arrivals/departures)
+  // - 50 km: Default - good balance for regional traffic
+  // - 100 km: Wider area including Miami and Fort Lauderdale traffic
+  // - 150 km: Very wide coverage (will show many more aircraft)
 };
 
-// Calculate bounding box around Boca Raton Airport
+/**
+ * Calculate bounding box around Boca Raton Airport
+ */
 function getBoundingBox(lat, lng, radiusKm) {
   const latDelta = radiusKm / 111; // roughly 111km per degree latitude
   const lngDelta = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
@@ -22,17 +29,20 @@ function getBoundingBox(lat, lng, radiusKm) {
   };
 }
 
-
-// Fetch live aircraft data near Boca Raton Airport
-// Rate limit: max 400 requests per day (free tier)
-
-export async function fetchLiveAircraft() {
+/**
+ * Fetch live aircraft data near Boca Raton Airport
+ * Rate limit: max 400 requests per day (free tier)
+ * @param {number} radiusKm - Search radius in kilometers (default: 50)
+ */
+export async function fetchLiveAircraft(radiusKm = 50) {
   try {
-    const bbox = getBoundingBox(BCT_COORDS.lat, BCT_COORDS.lng, BCT_COORDS.radius);
+    const bbox = getBoundingBox(BCT_COORDS.lat, BCT_COORDS.lng, radiusKm);
     
     const url = `${OPENSKY_BASE_URL}/states/all?` + 
       `lamin=${bbox.lamin}&lamax=${bbox.lamax}&` +
       `lomin=${bbox.lomin}&lomax=${bbox.lomax}`;
+    
+    console.log(`Fetching aircraft within ${radiusKm}km of BCT...`);
     
     const response = await fetch(url);
     
@@ -50,13 +60,13 @@ export async function fetchLiveAircraft() {
   }
 }
 
-
-// Transform OpenSky API response to usable format
-// OpenSky state vector format:
-// [0] icao24, [1] callsign, [2] origin_country, [3] time_position,
-// [4] last_contact, [5] longitude, [6] latitude, [7] baro_altitude,
-// [8] on_ground, [9] velocity, [10] true_track, [11] vertical_rate
-
+/**
+ * Transform OpenSky API response to usable format
+ * OpenSky state vector format:
+ * [0] icao24, [1] callsign, [2] origin_country, [3] time_position,
+ * [4] last_contact, [5] longitude, [6] latitude, [7] baro_altitude,
+ * [8] on_ground, [9] velocity, [10] true_track, [11] vertical_rate
+ */
 function transformAircraftData(data) {
   if (!data || !data.states) {
     return { aircraft: [], timestamp: Date.now() };
@@ -87,10 +97,10 @@ function transformAircraftData(data) {
   };
 }
 
-
-// Get flight route information (requires authentication for full access)
-// This is a placeholder - full route data requires OpenSky premium
-
+/**
+ * Get flight route information (requires authentication for full access)
+ * This is a placeholder - full route data requires OpenSky premium
+ */
 export async function getFlightRoute(icao24, timestamp) {
   try {
     const url = `${OPENSKY_BASE_URL}/tracks/all?icao24=${icao24}&time=${timestamp}`;
@@ -107,24 +117,27 @@ export async function getFlightRoute(icao24, timestamp) {
   }
 }
 
-
-// Format altitude for display
+/**
+ * Format altitude for display
+ */
 export function formatAltitude(meters) {
   if (!meters) return 'N/A';
   const feet = Math.round(meters * 3.28084);
   return `${feet.toLocaleString()} ft`;
 }
 
-
-// Format speed for display
+/**
+ * Format speed for display
+ */
 export function formatSpeed(metersPerSecond) {
   if (!metersPerSecond) return 'N/A';
   const knots = Math.round(metersPerSecond * 1.94384);
   return `${knots} kts`;
 }
 
-
-// Calculate distance from Boca Raton Airport
+/**
+ * Calculate distance from Boca Raton Airport
+ */
 export function calculateDistance(lat, lng) {
   const R = 6371; // Earth's radius in km
   const dLat = (lat - BCT_COORDS.lat) * Math.PI / 180;

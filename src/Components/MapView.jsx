@@ -7,7 +7,8 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import './MapView.css'
 import { Link } from 'react-router-dom'
-import LiveAircraftLayer from './LiveAircraftLayer';
+import LiveAircraftLayer from './LiveAircraftLayer'
+import SearchRadiusCircle from './SearchRadiusCircle'
 
 // Fix for the default icon
 let DefaultIcon = L.icon({
@@ -611,7 +612,11 @@ export default function MapView() {
   const [hoveredFlight, setHoveredFlight] = useState(null)
   const [showAllFlights, setShowAllFlights] = useState(false)
   const [selectedFlightId, setSelectedFlightId] = useState(null)
-  const [showLiveAircraft, setShowLiveAircraft] = useState(true);
+
+  // NEW STATES FOR LIVE AIRCRAFT
+  const [showLiveAircraft, setShowLiveAircraft] = useState(true)
+  const [showRadius, setShowRadius] = useState(true)
+  const [searchRadius, setSearchRadius] = useState(50) // km
   
   // Hardcoded Boca Raton Airport location (this stays the same)
   const bocaRatonAirport = {
@@ -733,29 +738,83 @@ export default function MapView() {
         ⚙️ Settings
       </Link>
 
-      {/* NEW: Toggle button for live aircraft */}
-      <button
-        onClick={() => setShowLiveAircraft(!showLiveAircraft)}
-        style={{
-          position: 'absolute',
-          top: '80px',
-          right: '20px',
-          zIndex: 1000,
-          padding: '12px 24px',
-          backgroundColor: showLiveAircraft ? '#10b981' : '#6b7280',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontWeight: 'bold',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}
-      >
-        ✈️ {showLiveAircraft ? 'Live Aircraft ON' : 'Live Aircraft OFF'}
-      </button>
+      {/* NEW: Live Aircraft Control Panel */}
+      <div style={{
+        position: 'absolute',
+        top: '80px',
+        right: '20px',
+        zIndex: 1000,
+        background: 'white',
+        padding: '15px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        minWidth: '250px'
+      }}>
+        <div style={{ marginBottom: '12px' }}>
+          <button
+            onClick={() => setShowLiveAircraft(!showLiveAircraft)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: showLiveAircraft ? '#10b981' : '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+            }}
+          >
+            ✈️ Live Aircraft: {showLiveAircraft ? 'ON' : 'OFF'}
+          </button>
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            fontSize: '0.9rem',
+            color: '#374151'
+          }}>
+            <input
+              type="checkbox"
+              checked={showRadius}
+              onChange={(e) => setShowRadius(e.target.checked)}
+            />
+            Show search radius
+          </label>
+        </div>
+
+        <div>
+          <label style={{ 
+            display: 'block',
+            fontSize: '0.9rem',
+            color: '#374151',
+            marginBottom: '8px'
+          }}>
+            Search Radius: <strong>{searchRadius} km</strong>
+          </label>
+          <input
+            type="range"
+            min="10"
+            max="150"
+            step="10"
+            value={searchRadius}
+            onChange={(e) => setSearchRadius(Number(e.target.value))}
+            style={{ width: '100%' }}
+          />
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            fontSize: '0.75rem',
+            color: '#9ca3af',
+            marginTop: '4px'
+          }}>
+            <span>10 km</span>
+            <span>150 km</span>
+          </div>
+        </div>
+      </div>
 
       <MapContainer 
         center={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
@@ -829,10 +888,17 @@ export default function MapView() {
           </Popup>
         </Marker>
 
-        {/* NEW: Add live aircraft layer */}
+        {/* NEW: Visual search radius circle */}
+        <SearchRadiusCircle 
+          radiusKm={searchRadius}
+          visible={showRadius}
+        />
+
+        {/* NEW: Live aircraft layer with dynamic radius */}
         <LiveAircraftLayer 
           enabled={showLiveAircraft}
-          refreshInterval={30000} // Update every 30 seconds
+          radiusKm={searchRadius}
+          refreshInterval={30000}
         />
       </MapContainer>
 
