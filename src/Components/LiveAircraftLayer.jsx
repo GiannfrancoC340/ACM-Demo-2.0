@@ -30,7 +30,7 @@ function createAirplaneIcon(heading) {
   });
 }
 
-export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30000 }) {
+export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30000, radiusKm = 50 }) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -42,10 +42,10 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
     const updateAircraft = async () => {
       setLoading(true);
       try {
-        const data = await fetchLiveAircraft();
+        const data = await fetchLiveAircraft(radiusKm); // Pass radius parameter
         setAircraft(data.aircraft);
         setLastUpdate(new Date(data.timestamp * 1000));
-        console.log(`Loaded ${data.aircraft.length} live aircraft`);
+        console.log(`Loaded ${data.aircraft.length} live aircraft within ${radiusKm}km`);
       } catch (error) {
         console.error('Failed to update aircraft:', error);
       } finally {
@@ -60,7 +60,7 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
     const interval = setInterval(updateAircraft, refreshInterval);
 
     return () => clearInterval(interval);
-  }, [enabled, refreshInterval]);
+  }, [enabled, refreshInterval, radiusKm]); // Add radiusKm to dependencies
 
   if (!enabled) return null;
 
