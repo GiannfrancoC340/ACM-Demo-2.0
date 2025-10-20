@@ -41,9 +41,19 @@ export async function fetchLiveAircraft(radiusKm = 50) {
   try {
     const bbox = getBoundingBox(BCT_COORDS.lat, BCT_COORDS.lng, radiusKm);
     
-    const url = `${OPENSKY_BASE_URL}/states/all?` + 
-      `lamin=${bbox.lamin}&lamax=${bbox.lamax}&` +
-      `lomin=${bbox.lomin}&lomax=${bbox.lomax}`;
+    // BUILD URL BASED ON PROXY SETTING
+    let url;
+    if (USE_PROXY) {
+      // Use our backend proxy to avoid CORS
+      url = `${PROXY_URL}?` + 
+        `lamin=${bbox.lamin}&lamax=${bbox.lamax}&` +
+        `lomin=${bbox.lomin}&lomax=${bbox.lomax}`;
+    } else {
+      // Direct API call (may have CORS issues)
+      url = `${OPENSKY_BASE_URL}/states/all?` + 
+        `lamin=${bbox.lamin}&lamax=${bbox.lamax}&` +
+        `lomin=${bbox.lomin}&lomax=${bbox.lomax}`;
+    }
     
     console.log(`🛫 Fetching aircraft within ${radiusKm}km of BCT...`);
     console.log('📍 Bounding box:', bbox);
@@ -56,7 +66,15 @@ export async function fetchLiveAircraft(radiusKm = 50) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ API Error Response:', errorText);
-      throw new Error(`OpenSky API error: ${response.status} - ${errorText}`);
+      
+      // Provide helpful error messages
+      if (response.status === 503) {
+        throw new Error('OpenSky Network is temporarily unavailable. Try again in a few minutes.');
+      } else if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Wait a few minutes before trying again.');
+      } else {
+        throw new Error(`OpenSky API error: ${response.status} - ${errorText}`);
+      }
     }
     
     const data = await response.json();
@@ -72,16 +90,14 @@ export async function fetchLiveAircraft(radiusKm = 50) {
   } catch (error) {
     console.error('💥 Error fetching live aircraft:', error);
     console.error('📋 Error details:', error.message);
-    return { aircraft: [], timestamp: Date.now() };
+    
+    // Return empty result instead of crashing
+    return { aircraft: [], timestamp: Date.now(), error: error.message };
   }
 }
 
 /**
  * Transform OpenSky API response to usable format
- * OpenSky state vector format:
- * [0] icao24, [1] callsign, [2] origin_country, [3] time_position,
- * [4] last_contact, [5] longitude, [6] latitude, [7] baro_altitude,
- * [8] on_ground, [9] velocity, [10] true_track, [11] vertical_rate
  */
 function transformAircraftData(data) {
   if (!data || !data.states) {
@@ -111,26 +127,6 @@ function transformAircraftData(data) {
     aircraft,
     timestamp: data.time || Date.now()
   };
-}
-
-/**
- * Get flight route information (requires authentication for full access)
- * This is a placeholder - full route data requires OpenSky premium
- */
-export async function getFlightRoute(icao24, timestamp) {
-  try {
-    const url = `${OPENSKY_BASE_URL}/tracks/all?icao24=${icao24}&time=${timestamp}`;
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error('Route data unavailable');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.warn('Route data not available:', error);
-    return null;
-  }
 }
 
 /**
