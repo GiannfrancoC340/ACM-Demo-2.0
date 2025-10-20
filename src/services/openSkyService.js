@@ -1,6 +1,9 @@
 // src/services/openSkyService.js
 
 const OPENSKY_BASE_URL = 'https://opensky-network.org/api';
+// Use proxy for CORS bypass
+const USE_PROXY = true; // Set to false if CORS is fixed
+const PROXY_URL = 'http://localhost:3001/api/opensky';
 
 // Boca Raton Airport coordinates with search radius
 const BCT_COORDS = {
@@ -42,20 +45,33 @@ export async function fetchLiveAircraft(radiusKm = 50) {
       `lamin=${bbox.lamin}&lamax=${bbox.lamax}&` +
       `lomin=${bbox.lomin}&lomax=${bbox.lomax}`;
     
-    console.log(`Fetching aircraft within ${radiusKm}km of BCT...`);
+    console.log(`🛫 Fetching aircraft within ${radiusKm}km of BCT...`);
+    console.log('📍 Bounding box:', bbox);
+    console.log('🔗 API URL:', url);
     
     const response = await fetch(url);
     
+    console.log('📡 Response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`OpenSky API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ API Error Response:', errorText);
+      throw new Error(`OpenSky API error: ${response.status} - ${errorText}`);
     }
     
     const data = await response.json();
+    console.log('📦 Raw API data:', data);
+    console.log('✈️ Total states returned:', data.states?.length || 0);
     
     // Transform OpenSky data to our format
-    return transformAircraftData(data);
+    const result = transformAircraftData(data);
+    console.log('✅ Processed aircraft:', result.aircraft.length);
+    console.log('🛩️ Aircraft details:', result.aircraft);
+    
+    return result;
   } catch (error) {
-    console.error('Error fetching live aircraft:', error);
+    console.error('💥 Error fetching live aircraft:', error);
+    console.error('📋 Error details:', error.message);
     return { aircraft: [], timestamp: Date.now() };
   }
 }

@@ -120,6 +120,7 @@ function estimateTimestamp(filename, audioDir) {
   }
 }
 
+// Audio playlist endpoint
 app.get('/api/playlist', (req, res) => {
   const audioDir = path.join(__dirname, 'public/audio');
   
@@ -146,6 +147,7 @@ app.get('/api/playlist', (req, res) => {
   });
 });
 
+// Flight audio endpoint
 app.get('/api/flight/:flightId', (req, res) => {
   const flightId = req.params.flightId;
   const audioDir = path.join(__dirname, 'public', 'audio');
@@ -190,6 +192,67 @@ app.get('/api/flight/:flightId', (req, res) => {
   }
 });
 
+// NEW: OpenSky API Proxy (to bypass CORS)
+app.get('/api/opensky', async (req, res) => {
+  try {
+    const { lamin, lamax, lomin, lomax } = req.query;
+    
+    // Validate parameters
+    if (!lamin || !lamax || !lomin || !lomax) {
+      return res.status(400).json({ 
+        error: 'Missing required parameters: lamin, lamax, lomin, lomax' 
+      });
+    }
+    
+    console.log(`🛫 Proxying OpenSky request: lat ${lamin}-${lamax}, lon ${lomin}-${lomax}`);
+    
+    // Build OpenSky API URL
+    const openSkyUrl = `https://opensky-network.org/api/states/all?` +
+      `lamin=${lamin}&lamax=${lamax}&lomin=${lomin}&lomax=${lomax}`;
+    
+    console.log('🔗 Fetching from:', openSkyUrl);
+    
+    // Fetch from OpenSky
+    const response = await fetch(openSkyUrl);
+    
+    if (!response.ok) {
+      console.error(`❌ OpenSky API error: ${response.status}`);
+      
+      // Handle specific error codes
+      if (response.status === 503) {
+        return res.status(503).json({ 
+          error: 'OpenSky Network is temporarily unavailable',
+          message: 'The service is down or under maintenance. Try again in a few minutes.'
+        });
+      } else if (response.status === 429) {
+        return res.status(429).json({ 
+          error: 'Rate limit exceeded',
+          message: 'Too many requests. Please wait before trying again.'
+        });
+      }
+      
+      return res.status(response.status).json({ 
+        error: `OpenSky API returned status ${response.status}` 
+      });
+    }
+    
+    const data = await response.json();
+    console.log(`✅ Retrieved ${data.states?.length || 0} aircraft states`);
+    
+    // Forward the response to the client
+    res.json(data);
+    
+  } catch (error) {
+    console.error('💥 Proxy error:', error);
+    res.status(500).json({ 
+      error: 'Proxy error',
+      message: error.message 
+    });
+  }
+});
+
 app.listen(3001, () => {
-  console.log('Audio API running on http://localhost:3001');
+  console.log('🚀 Server running on http://localhost:3001');
+  console.log('📡 Audio API: http://localhost:3001/api/playlist');
+  console.log('✈️  OpenSky Proxy: http://localhost:3001/api/opensky');
 });
