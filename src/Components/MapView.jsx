@@ -898,7 +898,7 @@ export default function MapView() {
         <LiveAircraftLayer 
           enabled={showLiveAircraft}
           radiusKm={searchRadius}
-          refreshInterval={30000}
+          refreshInterval={90000}
         />
       </MapContainer>
 
