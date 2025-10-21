@@ -124,3 +124,35 @@ Two weeks later and I was told by my groupmates that whenever a user clicks on a
 
 The next part was to update the home, login, and signup section of my project. I decided to go full scale modern with these files. I went with updating the login and signup first. I updated the buttons to make them stand out more, form containers to add a card look and gradient background, inputs for rounded corners, error and success messages to make them more color-oriented, and added a subtle fade-in animation when the login and signup cards appear. I created Auth.css to store these changes, and cleaned up App.css to remove redundant files. Then, I went ahead and worked on the home page. I added a layout to make it have a card-like layout, and it worked except for one thing: the background gradient was not wrapping around the whole screen, so I did some debugging with ChatGPT and found out that some part of App.css had a gray background and not white, so that fixed it. Ultimately, the changes I have made while they were small, they impacted our group and our project tremendously. 
 
+## GIFs
+
+### Progress Report 1 (8/25/25 - 8/31/25)
+
+Here are the GIFs showcasing the functionality of the project:
+
+**User Login**
+
+![ACM Fall 2025 progress report 1-1](https://github.com/user-attachments/assets/83b854d4-73c4-4ddc-8353-9562ae18fe11)
+
+**Flight Modal Popup + Audio recordings section**
+
+![ACM Fall 2025 progress report 1-2](https://github.com/user-attachments/assets/08f8f009-fe38-439d-93c9-e5e91d2e64bf)
+
+**Full Video Walkthrough**
+
+https://github.com/user-attachments/assets/e3206e2b-84ef-4ba8-b241-421f9b883413
+
+
+### Progress Report 2 (9/1/25 - 9/7/25)
+
+**User Login**
+
+![ACM Fall 2025 progress report 2-1](https://github.com/user-attachments/assets/291aa560-5f8d-4030-832d-3b41377f627c)
+
+**Updated Login and Signup**
+
+![ACM Fall 2025 progress report 2-2](https://github.com/user-attachments/assets/1fcb2d29-d837-46de-ada5-7f9d5c395923)
+
+**Full Video Walkthrough**
+
+https://github.com/user-attachments/assets/b0ee756a-0a1c-42d0-8674-cbd0b0a02b4c
