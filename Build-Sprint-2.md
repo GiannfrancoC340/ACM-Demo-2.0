@@ -259,6 +259,8 @@ https://github.com/user-attachments/assets/d14eb297-8352-4781-8064-8cfaa13c4ef8
 
 **Full Video Walkthrough**
 
+https://github.com/user-attachments/assets/7ad13271-0e92-46c9-ae28-cc3b392bfee1
+
 ---
 
 ## Implementation Process
@@ -653,6 +655,7 @@ Project Deadline: December 2025
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
 
 
