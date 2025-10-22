@@ -12,7 +12,7 @@ conversations using speech-to-text tools. The system also uses stress detection 
 emotional strain. This information is presented through a web-based dashboard designed for aviation analysts, students, and enthusiasts 
 to review live and past flight communications more easily and effectively. 
 
-This is Build Spring 2, which is the current build of the project. The way this project is planned this semester is ~~2 build sprints - Build Spring 1, ranging from August 16 - September 14, and Build Spring 2, ranging from September 14 to the present.~~ *UPDATE: As of October 6 2025, there will be 3 build sprints. The schedule is below this paragraph.* The reason for this is because after updating the home + login + signup, the next order of business was to migrate from Supabase to Firebase, and that was a big change. So, it made sense to do another build sprint for everything post Firebase setup until the first demo as it will be a lot of hard work to continue on. The core functionality remains the same, there are a ton of new features and QOL changes. For starters, there is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests. On top of that, there is a Settings button to view settings, password requirements component, updated styles including adding the logo and clicking the logo, and incorporated a leaflet map background purely for visuals.
+This is Build Spring 2, which is the current build of the project. The way this project is planned this semester is ~~2 build sprints - Build Spring 1, ranging from August 16 - September 14, and Build Spring 2, ranging from September 14 to the present.~~ *UPDATE: As of October 6 2025, there will be 3 build sprints. The schedule is below this paragraph.* The reason for this is because after updating the home + login + signup, the next order of business was to migrate from Supabase to Firebase, and that was a big change. So, it made sense to do another build sprint for everything post Firebase setup until the first demo as it will be a lot of hard work to continue on. The core functionality remains the same, there are a ton of new features and QOL changes. For starters, there is Firebase database integration, a working audio player with audio detection, enhanced map interface, and a backend API server to handle audio requests. On top of that, there is a Settings button to view settings, password requirements component, updated styles including adding the logo ~~and clicking the logo, and incorporated a leaflet map background purely for visuals.~~
 This is our schedule for the build sprints:
 - [x] **Build Sprint 1:** August 16 2025 - September 14 2025
 * Accounts for picking up work since Spring 2025 and adds an audio section within FlightInfo.jsx, modal popup for individual flights, and a new and improved home + login + signup pages.
@@ -44,7 +44,7 @@ On September 25, I created an audio player to have the user listen to stored aud
 
 Next, one of my groupmates suggested we use PHP to auto update everything when a new file is uploaded. However, React/Vite projects can't directly use PHP files so I had work with something different. So the following day, I ultimately decided to create a backend API file to handle updates. Claude suggested this was the least destructive manner so I decided to go with this. First, I had to install the dependencies, and then create a backend file using Node.js and CommonJS. Next, I had to update the AudioPlayer.jsx to incorporate auto update from the backend, and finally test it by running 2 separate servers. I then encountered an error where the backend file was using CommonJS syntax, but it caused an error because my project is using an ES module. I needed to change it to use ES6 import syntax, as this does not work with CommonJS. I used Express.js instead and it was surprisingly easy, I never did this before and it makes me feel good about getting it right with the proper help. Then I began to run it but I initially did not know that both servers had to be running at the same time in 2 separate files simultaneously, I was doing it in 1 file. So, I ran both in 2 separate files and saw that everything was working except the live audio file, we will call this hudson as it is the audio recording of the Hudson River crash back in January. I then suspected that the backend had to have matching MP3 and txt files, so I changed the names of both files to match and voila, it was perfect. 
 
-A week later, I decided to test out the project functionality by having a friend of mines test the project out. I consulted with a friend of mine who had not seen this project before, and I had him go through the project as a demo. He went through it no problem whatsoever and got to experience every feature of the project. At the end, I sent him a document that would have him type his experience, what he liked and didn't like and any feedback. He suggested a password requirements component so I made a note for a future task. Afterward, I got his feedback typed on the document and recorded it for feedback purposes. Names are not needed, so it was confidential. I also did a lot of GitHub document work as it is noticeable with these markdown files. So, I went to work on the next task which was to update the styles and implement the password requirement component. First, I added the logo to the home page as that was requested by Justin. So, I did that by adding the logo as an image under the assets folder and wrote code to insert it. Next, I created the Settings.jsx and Settings.css files to create settings. Right now, the settings do not apply anything as it is just for show but hopefully I can get that working soon. I created some sample settings to make it look professional. Next, I added a button to both MapView.jsx and App.jsx to allow the user to be taken to the settings page when clicked. I added the route to the routes section and updated the styles once again to ensure grid centering is enabled and hover effects are enabled. Third, I changed the background of the Login.jsx and Signup.jsx to have the leaflet map blurred, and then having that be set as the background. I had to add TileLayers to the login and signup to enable leaflet access, and I had to import leaflet to the 2 files. I changed Auth.css to update the styles accordingly by adding a blurred map container and added an overlay to dim the map and improve readibility. Lastly, I added the password requirement functionality to ensure that NEW users can have a stricter password. I created a password validation function, updated password validity conditions, and added a feature where it would check password requirements before submitting to Firebase. I added the password requirement display in the return function; all of this is within the Signup.jsx file. Also I updated the Auth.css file to use the new styles and it looks great. Also, I added a clicking feature to the logo where if the user clicks it for a certain amount of times, a funny easter egg pops up. I made sure to add hover and animation styles. I updated the Home function in App.jsx to add clicking using useState, and I added CSS styles to App.css. I find it neat and niche so that is cool.
+A week later, I decided to test out the project functionality by having a friend of mines test the project out. I consulted with a friend of mine who had not seen this project before, and I had him go through the project as a demo. He went through it no problem whatsoever and got to experience every feature of the project. At the end, I sent him a document that would have him type his experience, what he liked and didn't like and any feedback. He suggested a password requirements component so I made a note for a future task. Afterward, I got his feedback typed on the document and recorded it for feedback purposes. Names are not needed, so it was confidential. I also did a lot of GitHub document work as it is noticeable with these markdown files. So, I went to work on the next task which was to update the styles and implement the password requirement component. First, I added the logo to the home page as that was requested by Justin. So, I did that by adding the logo as an image under the assets folder and wrote code to insert it. Next, I created the Settings.jsx and Settings.css files to create settings. Right now, the settings do not apply anything as it is just for show but hopefully I can get that working soon. I created some sample settings to make it look professional. Next, I added a button to both MapView.jsx and App.jsx to allow the user to be taken to the settings page when clicked. I added the route to the routes section and updated the styles once again to ensure grid centering is enabled and hover effects are enabled. ~~Third, I changed the background of the Login.jsx and Signup.jsx to have the leaflet map blurred, and then having that be set as the background. I had to add TileLayers to the login and signup to enable leaflet access, and I had to import leaflet to the 2 files. I changed Auth.css to update the styles accordingly by adding a blurred map container and added an overlay to dim the map and improve readibility.~~ Lastly, I added the password requirement functionality to ensure that NEW users can have a stricter password. I created a password validation function, updated password validity conditions, and added a feature where it would check password requirements before submitting to Firebase. I added the password requirement display in the return function; all of this is within the Signup.jsx file. Also I updated the Auth.css file to use the new styles and it looks great. ~~Also, I added a clicking feature to the logo where if the user clicks it for a certain amount of times, a funny easter egg pops up. I made sure to add hover and animation styles. I updated the Home function in App.jsx to add clicking using useState, and I added CSS styles to App.css. I find it neat and niche so that is cool.~~
 
 Now, I need to implement the SDR receiver to be connected to my project using direct file outputting or another manner, and we should be virtually done with the project. Some polishing and style changes would be necessary too but that is afterwards. For the 1st demo of the Fall semester, my groupmates agreed that everything I had done was sufficient for demos, and if possible, getting SDR data to my project before the demo would be awesome but even after the demo it is fine. It just depends on if there is any work to be done with the SDR receiver.
 
@@ -78,10 +78,10 @@ Now, I need to implement the SDR receiver to be connected to my project using di
 
 ### 5. Updated Style Changes and Improvements
 - Added the Logo to the home page
-- It is clickable with a neat easter egg
+- ~~It is clickable with a neat easter egg~~
 - Added respective styling
-- Updated the background of the signup and login to have a blurred map
-- Uses leaflet map with blur as a purely visual background element
+- ~~Updated the background of the signup and login to have a blurred map~~
+- ~~Uses leaflet map with blur as a purely visual background element~~
 
 ### 6. Password Requirement Component
 - Real-time password validation
@@ -99,7 +99,7 @@ The following **required** functionality is completed:
 - [x] **Web Page includes a home, login, and signup screens**
   - Users can see the home page when they first load into the project
   - Users can see the logo on the home page
-  - Users can click on the logo for a neat easter egg
+  - ~~Users can click on the logo for a neat easter egg~~
   - Users can click on the login and signup buttons to be taken to either login or signup
   - Users can navigate between all 3 screens seamlessly
   - The home + login + signup have new and improved styles such as hover effects and background gradients to look more modern!
@@ -115,10 +115,10 @@ The following **required** functionality is completed:
   - It will not work until the user successfully meets the requirements
   - Once either is completed, the user will be taken to the MapView screen
   - The user can log out by clicking the back button on their browser
-  - The user can see the leaflet map as a purely visual background element on both the login and signup screen.
-- [x] **Users can click on the logo for an easter egg**
-  - The user is able to click on the logo
-  - The surprise is a fun little surprise that not everyone will think about
+  - ~~The user can see the leaflet map as a purely visual background element on both the login and signup screen.~~
+- [x] ~~**Users can click on the logo for an easter egg**~~
+  - ~~The user is able to click on the logo~~
+  - ~~The surprise is a fun little surprise that not everyone will think about~~
 - [x] **Settings page is viewable for everyone**
   - The Settings button can be clicked by everyone
   - The user can see all available settings
@@ -198,6 +198,66 @@ The following **required** functionality is completed:
   - The user can select any audio from the playlist
   - The user can see the transcript for each selected audio
   - The user can go back by clicking the back button 
+
+---
+
+## GIFs
+
+### Progress Report 3 (9/8/25 - 9/14/25)
+
+Here are the GIFs showcasing the functionality of the project:
+
+**User Login (with Firebase)**
+
+![ACM Fall 2025 progress report 3-1](https://github.com/user-attachments/assets/7eb5d216-8127-4a7a-b431-e3cd609d984d)
+
+**Flight Modal Popup + Audio recordings section**
+
+![ACM Fall 2025 progress report 3-2](https://github.com/user-attachments/assets/55422bae-aed9-4988-a3bf-325e6d35de8b)
+
+**Full Video Walkthrough**
+
+https://github.com/user-attachments/assets/86d48823-802a-4543-ae77-9a68cd9292c2
+
+
+### Progress Report 4 (9/15/25 - 9/21/25)
+
+**User Login**
+
+![ACM Fall 2025 progress report 4-1](https://github.com/user-attachments/assets/9c8356cf-2a43-45ea-a9b7-f836d8ea5838)
+
+**Flight Modal Popup + Audio recordings section**
+
+![ACM Fall 2025 progress report 4-2](https://github.com/user-attachments/assets/dfefbe43-6a71-401d-925b-6468a3b2a52d)
+
+**Full Video Walkthrough**
+
+https://github.com/user-attachments/assets/d14eb297-8352-4781-8064-8cfaa13c4ef8
+
+
+### Progress Report 5 (9/22/25 - 9/28/25)
+
+**User Login**
+
+![ACM Fall 2025 progress report 5-1](https://github.com/user-attachments/assets/29db2644-ced3-4712-af0a-d8bb68bf6f46)
+
+**Flight Modal Popup + Audio recordings section**
+
+![ACM Fall 2025 progress report 5-2](https://github.com/user-attachments/assets/dd3549ae-8883-4148-9781-09200f3f795e)
+
+**Audio Player**
+
+![ACM Fall 2025 progress report 5-3](https://github.com/user-attachments/assets/7f6469ac-41fe-44d7-8270-b5c56d0c013e)
+
+**Audio now playing**
+
+![ACM Fall 2025 progress report 5-4](https://github.com/user-attachments/assets/a34c61a0-ab60-4a1b-831d-ac1c53659d74)
+
+**Terminal commands**
+
+![ACM Fall 2025 progress report 5-5](https://github.com/user-attachments/assets/b75f9482-86c8-4f24-9c10-8760e531ae04)
+
+**Full Video Walkthrough**
 
 ---
 
@@ -302,18 +362,18 @@ Firebase Firestore → MapView.jsx → Airport Popup → Flight Modal
 **Steps Completed:**
 1. Updated App.jsx to add the logo
 2. Added the logo to `src/assets/`
-3. Updated Signup.jsx and Login.jsx to incorporate a leaflet map background
-4. Updated Auth.css to style the blurred map background
-5. Updated App.jsx to enable clicking functionality to the logo
-6. Created a new logo easter egg within App.jsx
+3. ~~Updated Signup.jsx and Login.jsx to incorporate a leaflet map background~~
+4. ~~Updated Auth.css to style the blurred map background~~
+5. ~~Updated App.jsx to enable clicking functionality to the logo~~
+6. ~~Created a new logo easter egg within App.jsx~~
 7. Updated App.css to include proper styles
 
 **Key Files Modified:**
 - `src/Components/App.jsx` - Added logo and clicking feature
 - `public/assets/` - Added the logo for reference
-- `src/Components/Signup.jsx` - Added leaflet map background
-- `src/Components/Login.jsx` - Added leaflet map background
-- `src/Components/Auth.css` - Added blurred map background styles
+- ~~`src/Components/Signup.jsx` - Added leaflet map background~~
+- ~~`src/Components/Login.jsx` - Added leaflet map background~~
+- ~~`src/Components/Auth.css` - Added blurred map background styles~~
 - `src/Components/App.css` - Added click effect styles
 
 ---
@@ -375,10 +435,10 @@ Firebase Firestore → MapView.jsx → Airport Popup → Flight Modal
 
 ### ✅ Various Style Changes
 - Added logo to the home page
-- Clicking the logo is enabled
-- Incorporated a leaflet background map for signup and login pages as purely visual
+- ~~Clicking the logo is enabled~~
+- ~~Incorporated a leaflet background map for signup and login pages as purely visual~~
 - Added settings button on the home page
-- Added styles for click effect
+- ~~Added styles for click effect~~
 
 ---
 
@@ -593,6 +653,7 @@ Project Deadline: December 2025
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
 
 
