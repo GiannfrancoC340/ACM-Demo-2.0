@@ -24,8 +24,6 @@ As a recap, this is the schedule of the build sprints:
 - [x] **Build Sprint 3:** October 6 2025 - December 2 2025
 * Accounts for everything since BS2/first demo until the final deadline.
 
-After our first demo presentation on October 6, insert the process here
-
 ## Time Spent
 
 Time spent on this project: **3 hours and 30 minutes**. Spans from October 6 2025 - December 2 2025.
@@ -118,7 +116,9 @@ The following **required** functionality is completed:
 
 ## Process
 
-Talk about the process here
+After our demo on October 6, we all felt good for completing the demo and being proud of the work we did. It was a quick celebratory moment and then back to work for us. Later that day, I went back to work on the project. I added a clicking feature to the logo where if the user clicks it for a certain amount of times, a funny easter egg pops up. I made sure to add hover and animation styles. I updated the Home function in App.jsx to add clicking using useState, and I added CSS styles to App.css. I find it neat and niche so that is cool. Later, I added a logout functionality to the project, where the user is now able to logout from the Settings page whenever. I added a  useEffect and a const handleLogout function, made to handle each part respectively. Also, I added more styles to the project. The first one is changing the layout of the settings to grid from flex. Then, I added a thanks section within the settings, to give thanks for the people who gave me advice on the project. I also added a welcome section to greet the user within the settings, whenever a user is logged in. I also added a back to map button in the AudioPlayer screen, added style effects to the loading state when the audio player is empty, and added styles for error handling if the backend is offline. These style changes make the project look much more modern and dynamic.
+
+The next thing I did after is 
 
 ## GIFs
 
@@ -181,4 +181,5 @@ https://github.com/user-attachments/assets/a702f016-cbda-4346-9a01-433a913677c9
 
 
 https://github.com/user-attachments/assets/dab58390-1613-40cd-b449-dcd999a2f1f6
+
 
