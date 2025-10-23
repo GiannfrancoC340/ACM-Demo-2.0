@@ -261,6 +261,35 @@ https://github.com/user-attachments/assets/d14eb297-8352-4781-8064-8cfaa13c4ef8
 
 https://github.com/user-attachments/assets/7ad13271-0e92-46c9-ae28-cc3b392bfee1
 
+
+### Progress Report 6 (9/29/25 - 10/5/25)
+
+**Settings Button**
+
+![ACM Fall 2025 progress report 6-1](https://github.com/user-attachments/assets/b67558ff-d481-46e9-ad60-648bc3c39919)
+
+**New and improved User Signup**
+
+![ACM Fall 2025 progress report 6-2](https://github.com/user-attachments/assets/dd39d1cf-b41d-43c1-abb9-44f79a46f8ea)
+
+**Map View Functionality**
+
+![ACM Fall 2025 progress report 6-3](https://github.com/user-attachments/assets/6f19c377-a44d-43c2-af4c-d7a58546d863)
+
+**Audio Player**
+
+![ACM Fall 2025 progress report 6-4](https://github.com/user-attachments/assets/ce4f1a71-b415-4d49-8ebc-93f7fe6ed50a)
+
+**Terminal commands**
+
+![ACM Fall 2025 progress report 5-5](https://github.com/user-attachments/assets/aa758a8c-b669-495d-b03f-e2e8fda9354b)
+
+**Full Video Walkthrough**
+
+https://github.com/user-attachments/assets/9cadd783-27e2-4502-a153-84ed5446de39
+
+https://github.com/user-attachments/assets/cf287e07-0d9e-48fe-9ad6-e793745b1448
+
 ---
 
 ## Implementation Process
@@ -655,6 +684,7 @@ Project Deadline: December 2025
 ## License
 
 Educational project - Boca Raton Airport Flight Tracking System
+
 
 
 
