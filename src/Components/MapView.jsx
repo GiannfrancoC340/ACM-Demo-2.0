@@ -617,6 +617,7 @@ export default function MapView() {
   const [showLiveAircraft, setShowLiveAircraft] = useState(true)
   const [showRadius, setShowRadius] = useState(true)
   const [searchRadius, setSearchRadius] = useState(50) // km
+  const [demoMode, setDemoMode] = useState(false);
   
   // Hardcoded Boca Raton Airport location (this stays the same)
   const bocaRatonAirport = {
@@ -785,6 +786,41 @@ export default function MapView() {
           </label>
         </div>
 
+        {/* After the "Show search radius" checkbox */}
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            fontSize: '0.9rem',
+            color: '#374151',
+            cursor: 'pointer'
+          }}>
+            <input
+              type="checkbox"
+              checked={demoMode}
+              onChange={(e) => setDemoMode(e.target.checked)}
+            />
+            <span>
+              🎬 Demo Mode 
+              <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: '4px' }}>
+                (faster updates)
+              </span>
+            </span>
+          </label>
+          
+          {demoMode && (
+            <div style={{
+              fontSize: '0.7rem',
+              color: '#ef4444',
+              marginTop: '4px',
+              marginLeft: '24px'
+            }}>
+              ⚠️ Uses more API calls
+            </div>
+          )}
+        </div>
+
         <div>
           <label style={{ 
             display: 'block',
@@ -898,7 +934,7 @@ export default function MapView() {
         <LiveAircraftLayer 
           enabled={showLiveAircraft}
           radiusKm={searchRadius}
-          refreshInterval={90000}
+          refreshInterval={demoMode ? 20000 : 90000}
         />
       </MapContainer>
 
