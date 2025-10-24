@@ -39,7 +39,7 @@ function createAirplaneIcon(heading) {
   });
 }
 
-export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30000, radiusKm = 50 }) {
+export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30000, radiusKm = 50, onAircraftUpdate = null }) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -57,6 +57,11 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
         setLastUpdate(new Date(data.timestamp * 1000));
         console.log(`Loaded ${data.aircraft.length} live aircraft within ${radiusKm}km`);
         
+        // NEW: Share aircraft data with parent component
+        if (onAircraftUpdate) {
+          onAircraftUpdate(data.aircraft);
+        }
+
         // Update flight trails
         setFlightTrails(prevTrails => {
           const newTrails = { ...prevTrails };
