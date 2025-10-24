@@ -36,6 +36,44 @@ const redIcon = L.icon({
   popupAnchor: [1, -34]
 });
 
+// Helper: Calculate distance between two points
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Helper: Get BCT-related flights
+function getBCTFlights(aircraft) {
+  const BCT_LAT = 26.3785;
+  const BCT_LNG = -80.1077;
+  const NEARBY_THRESHOLD = 10; // km
+  const LOW_ALTITUDE_THRESHOLD = 3000; // meters (~10,000 ft)
+  
+  const nearby = aircraft.filter(plane => {
+    const distance = calculateDistance(BCT_LAT, BCT_LNG, plane.latitude, plane.longitude);
+    return distance <= NEARBY_THRESHOLD && plane.altitude && plane.altitude < LOW_ALTITUDE_THRESHOLD;
+  });
+  
+  const departing = nearby.filter(plane => 
+    plane.vertical_rate && plane.vertical_rate > 2 // Climbing (m/s)
+  );
+  
+  const arriving = nearby.filter(plane => 
+    plane.vertical_rate && plane.vertical_rate < -2 // Descending (m/s)
+  );
+  
+  return { departing, arriving, total: nearby.length };
+}
+
 // Flight data (detailed flight information for modal - this will eventually come from Firebase too)
 const flightData = {
   'flight-1': {
@@ -606,27 +644,24 @@ function FlightInfoModal({ flightId, flights, onClose }) {
 }
 
 export default function MapView() {
-  const [flights, setFlights] = useState([]) // Firebase flights for popup list
+  const [flights, setFlights] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [hoveredFlight, setHoveredFlight] = useState(null)
   const [showAllFlights, setShowAllFlights] = useState(false)
   const [selectedFlightId, setSelectedFlightId] = useState(null)
-
-  // NEW STATES FOR LIVE AIRCRAFT
   const [showLiveAircraft, setShowLiveAircraft] = useState(true)
   const [showRadius, setShowRadius] = useState(true)
-  const [searchRadius, setSearchRadius] = useState(50) // km
-  const [demoMode, setDemoMode] = useState(false);
+  const [searchRadius, setSearchRadius] = useState(50)
+  const [demoMode, setDemoMode] = useState(false)
+  const [liveAircraft, setLiveAircraft] = useState([]) // NEW: Store live aircraft data
   
-  // Hardcoded Boca Raton Airport location (this stays the same)
   const bocaRatonAirport = {
     lat: 26.3785,
     lng: -80.1077,
     description: "Boca Raton Airport (BCT)",
   };
 
-  // Hardcoded fallback flights (same format as before)
   const fallbackFlights = [
     { flightId: "flight-1", route: "RDU to BCT", time: "2:56 PM" },
     { flightId: "flight-2", route: "BCT to MIA", time: "4:30 PM" },
@@ -635,7 +670,6 @@ export default function MapView() {
     { flightId: "flight-5", route: "MCO to BCT", time: "7:30 PM" }
   ];
 
-  // Fetch flights from Firebase (this will eventually be replaced by SDR data)
   useEffect(() => {
     async function fetchFlights() {
       try {
@@ -648,7 +682,6 @@ export default function MapView() {
         
         console.log("Fetched Firebase flights:", firebaseFlights)
         
-        // Validate and transform Firebase data to match expected format
         const validFlights = firebaseFlights.filter(flight => 
           flight.route && flight.time && flight.flightId
         )
@@ -664,7 +697,7 @@ export default function MapView() {
         
       } catch (err) {
         console.error("Error fetching flights:", err)
-        setFlights(fallbackFlights) // Use fallback on error
+        setFlights(fallbackFlights)
       } finally {
         setLoading(false)
       }
@@ -693,7 +726,6 @@ export default function MapView() {
 
   return (
     <div className="map-page">
-        {/* Audio Recordings Button */}
       <Link 
         to="/audio" 
         style={{
@@ -716,7 +748,6 @@ export default function MapView() {
         🎧 Audio Recordings
       </Link>
 
-      {/* Settings Button */}
       <Link 
         to="/settings" 
         style={{
@@ -739,7 +770,6 @@ export default function MapView() {
         ⚙️ Settings
       </Link>
 
-      {/* NEW: Live Aircraft Control Panel */}
       <div style={{
         position: 'absolute',
         top: '80px',
@@ -786,7 +816,6 @@ export default function MapView() {
           </label>
         </div>
 
-        {/* After the "Show search radius" checkbox */}
         <div style={{ marginBottom: '12px' }}>
           <label style={{ 
             display: 'flex', 
@@ -862,7 +891,6 @@ export default function MapView() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
-        {/* Single red marker for Boca Raton Airport */}
         <Marker 
           position={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
           icon={redIcon}
@@ -871,10 +899,77 @@ export default function MapView() {
             <div className="airport-popup">
               <h3>{bocaRatonAirport.description}</h3>
               <p>A public-use airport serving South Florida</p>
-              <p style={{ fontWeight: 'bold' }}>Number of flights: {flights.length}</p>
               
-              <div style={{ marginTop: '10px' }}>
-                <h4>Today's Flights:</h4>
+              {/* NEW: Show live flight count */}
+              {liveAircraft.length > 0 ? (
+                <>
+                  <p style={{ fontWeight: 'bold', color: '#10b981', marginTop: '10px' }}>
+                    🔴 LIVE: {getBCTFlights(liveAircraft).total} aircraft nearby
+                  </p>
+                  
+                  {/* Departing Flights */}
+                  <div style={{ marginTop: '15px' }}>
+                    <h4 style={{ color: '#2563eb', margin: '0 0 10px 0' }}>
+                      🛫 Departing ({getBCTFlights(liveAircraft).departing.length})
+                    </h4>
+                    {getBCTFlights(liveAircraft).departing.length > 0 ? (
+                      <ul className="flights-list">
+                        {getBCTFlights(liveAircraft).departing.map((plane) => (
+                          <li key={plane.icao24}>
+                            <div className="flight-item">
+                              <span className="flight-icon">🛫</span>
+                              <div>
+                                <span className="flight-route">{plane.callsign}</span>
+                                <span style={{ fontSize: '0.85rem', color: '#666', display: 'block' }}>
+                                  Alt: {Math.round(plane.altitude * 3.28084)} ft | 
+                                  ↗ {Math.round(plane.vertical_rate * 196.85)} ft/min
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p style={{ fontSize: '0.9rem', color: '#666' }}>No departures detected</p>
+                    )}
+                  </div>
+                  
+                  {/* Arriving Flights */}
+                  <div style={{ marginTop: '15px' }}>
+                    <h4 style={{ color: '#10b981', margin: '0 0 10px 0' }}>
+                      🛬 Arriving ({getBCTFlights(liveAircraft).arriving.length})
+                    </h4>
+                    {getBCTFlights(liveAircraft).arriving.length > 0 ? (
+                      <ul className="flights-list">
+                        {getBCTFlights(liveAircraft).arriving.map((plane) => (
+                          <li key={plane.icao24}>
+                            <div className="flight-item">
+                              <span className="flight-icon">🛬</span>
+                              <div>
+                                <span className="flight-route">{plane.callsign}</span>
+                                <span style={{ fontSize: '0.85rem', color: '#666', display: 'block' }}>
+                                  Alt: {Math.round(plane.altitude * 3.28084)} ft | 
+                                  ↘ {Math.abs(Math.round(plane.vertical_rate * 196.85))} ft/min
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p style={{ fontSize: '0.9rem', color: '#666' }}>No arrivals detected</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p style={{ fontWeight: 'bold', marginTop: '10px' }}>
+                  Enable Live Aircraft to see BCT traffic
+                </p>
+              )}
+              
+              {/* Keep your hardcoded flights as backup/historical data */}
+              <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '2px solid #ddd' }}>
+                <h4>📅 Today's Scheduled Flights ({flights.length})</h4>
                 <ul className="flights-list">
                   {(showAllFlights ? flights : initialFlightsToShow).map((flight) => (
                     <li key={flight.flightId}>
@@ -888,61 +983,56 @@ export default function MapView() {
                           <span className="flight-icon">✈️</span>
                           <div>
                             <span className="flight-route">{flight.route}</span> - {flight.time}
-                            <span className="flight-info-hint">
-                              {hoveredFlight === flight.flightId ? '→ View flight details' : 'Click for details'}
-                            </span>
                           </div>
                         </div>
                       </div>
                     </li>
                   ))}
                 </ul>
+                
+                {!showAllFlights && flights.length > initialFlightsToShow.length && (
+                  <button 
+                    className="see-more-button" 
+                    onClick={() => setShowAllFlights(true)}
+                  >
+                    See All Flights ({flights.length})
+                  </button>
+                )}
+                
+                {showAllFlights && (
+                  <button 
+                    className="see-less-button" 
+                    onClick={() => setShowAllFlights(false)}
+                  >
+                    Show Less
+                  </button>
+                )}
               </div>
               
               <div className="coordinates-info">
                 Coordinates: {bocaRatonAirport.lat.toFixed(4)}, {bocaRatonAirport.lng.toFixed(4)}
               </div>
-              
-              {!showAllFlights && flights.length > initialFlightsToShow.length && (
-                <button 
-                  className="see-more-button" 
-                  onClick={() => setShowAllFlights(true)}
-                >
-                  See All Flights ({flights.length})
-                </button>
-              )}
-              
-              {showAllFlights && (
-                <button 
-                  className="see-less-button" 
-                  onClick={() => setShowAllFlights(false)}
-                >
-                  Show Less
-                </button>
-              )}
             </div>
           </Popup>
         </Marker>
 
-        {/* NEW: Visual search radius circle */}
         <SearchRadiusCircle 
           radiusKm={searchRadius}
           visible={showRadius}
         />
 
-        {/* NEW: Live aircraft layer with dynamic radius */}
         <LiveAircraftLayer 
           enabled={showLiveAircraft}
           radiusKm={searchRadius}
           refreshInterval={demoMode ? 20000 : 90000}
+          onAircraftUpdate={setLiveAircraft}
         />
       </MapContainer>
 
-      {/* Flight Info Modal */}
       {selectedFlightId && (
         <FlightInfoModal 
           flightId={selectedFlightId}
-          flights={flights}  // Add this prop
+          flights={flights}
           onClose={closeModal}
         />
       )}
