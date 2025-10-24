@@ -197,7 +197,6 @@ app.get('/api/opensky', async (req, res) => {
   try {
     const { lamin, lamax, lomin, lomax } = req.query;
     
-    // Validate parameters
     if (!lamin || !lamax || !lomin || !lomax) {
       return res.status(400).json({ 
         error: 'Missing required parameters: lamin, lamax, lomin, lomax' 
@@ -206,28 +205,29 @@ app.get('/api/opensky', async (req, res) => {
     
     console.log(`🛫 Proxying OpenSky request: lat ${lamin}-${lamax}, lon ${lomin}-${lomax}`);
     
-    // Build OpenSky API URL
     const openSkyUrl = `https://opensky-network.org/api/states/all?` +
       `lamin=${lamin}&lamax=${lamax}&lomin=${lomin}&lomax=${lomax}`;
     
     console.log('🔗 Fetching from:', openSkyUrl);
     
-    // Fetch from OpenSky
+    // Use anonymous access (400 requests/day)
+    console.log('⚠️ Using anonymous access (400 requests/day limit)');
     const response = await fetch(openSkyUrl);
     
     if (!response.ok) {
       console.error(`❌ OpenSky API error: ${response.status}`);
       
-      // Handle specific error codes
       if (response.status === 503) {
         return res.status(503).json({ 
           error: 'OpenSky Network is temporarily unavailable',
-          message: 'The service is down or under maintenance. Try again in a few minutes.'
+          message: 'Try again in a few minutes'
         });
-      } else if (response.status === 429) {
+      }
+      
+      if (response.status === 429) {
         return res.status(429).json({ 
           error: 'Rate limit exceeded',
-          message: 'Too many requests. Please wait before trying again.'
+          message: 'Too many requests. Wait before trying again or increase refresh interval'
         });
       }
       
@@ -237,9 +237,8 @@ app.get('/api/opensky', async (req, res) => {
     }
     
     const data = await response.json();
-    console.log(`✅ Retrieved ${data.states?.length || 0} aircraft states`);
+    console.log(`✅ Retrieved ${data.states?.length || 0} aircraft states (anonymous)`);
     
-    // Forward the response to the client
     res.json(data);
     
   } catch (error) {
