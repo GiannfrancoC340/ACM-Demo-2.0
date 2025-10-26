@@ -1,10 +1,10 @@
 // FlightInfoModal.jsx - Modal component for displaying detailed flight information
 
 import { useState, useRef, useEffect } from 'react';
-import { flightData } from './maphelpers';
+import { flightData, convertLiveAircraftToFlight, getBCTFlights } from './maphelpers';
 // import './FlightInfo.css';
 
-export default function FlightInfoModal({ flightId, flights, onClose }) {
+export default function FlightInfoModal({ flightId, flights, liveAircraft = [], onClose }) {
   // ===== ALL HOOKS MUST BE AT THE TOP - NO EARLY RETURNS BEFORE THIS SECTION =====
   
   // ALL useState declarations
@@ -21,8 +21,29 @@ export default function FlightInfoModal({ flightId, flights, onClose }) {
 
   // ALL useEffect declarations
   
-  // 1. Load flight details with Firebase fallback
+  // 1. Load flight details with live aircraft support
   useEffect(() => {
+    // Check if this is a live flight
+    if (flightId.startsWith('live-')) {
+      const icao24 = flightId.replace('live-', '');
+      
+      // Find the aircraft in live data
+      const liveFlights = getBCTFlights(liveAircraft);
+      const allLive = [...liveFlights.departing, ...liveFlights.arriving];
+      const aircraft = allLive.find(a => a.icao24 === icao24);
+      
+      if (aircraft) {
+        const direction = liveFlights.departing.find(a => a.icao24 === icao24) 
+          ? 'departing' 
+          : 'arriving';
+        const convertedFlight = convertLiveAircraftToFlight(aircraft, direction);
+        console.log('âœ… Using live aircraft data for:', flightId);
+        setFlightDetails(convertedFlight);
+        return;
+      }
+    }
+
+    // Original hardcoded/Firebase logic
     const hardcodedFlight = flightData[flightId];
     
     if (hardcodedFlight) {
