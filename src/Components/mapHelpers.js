@@ -88,7 +88,9 @@ export function convertLiveAircraftToFlight(plane, direction) {
     code: "BCT",
     name: "Boca Raton Airport",
     city: "Boca Raton",
-    state: "Florida"
+    state: "Florida",
+    lat: 26.3785,
+    lng: -80.1077
   };
   
   const isDeparture = direction === 'departing';
@@ -99,6 +101,23 @@ export function convertLiveAircraftToFlight(plane, direction) {
     hour12: true 
   });
   
+  // Calculate actual distance
+  const distanceFromBCT = calculateDistance(
+    BCT.lat, 
+    BCT.lng, 
+    plane.latitude, 
+    plane.longitude
+  ).toFixed(1);
+  
+  // Estimate duration based on speed and distance
+  const estimatedDuration = plane.velocity > 0 
+    ? Math.round((parseFloat(distanceFromBCT) / plane.velocity) * 60) // minutes
+    : null;
+  
+  const durationStr = estimatedDuration 
+    ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)`
+    : "Unknown";
+  
   return {
     flightId: `live-${plane.icao24}`,
     route: isDeparture 
@@ -107,23 +126,23 @@ export function convertLiveAircraftToFlight(plane, direction) {
     time: timeStr,
     boardingTime: isDeparture ? timeStr : 'N/A',
     arrivalTime: !isDeparture ? timeStr : 'N/A',
-    airline: "Unknown Carrier",
-    flightNumber: plane.callsign || plane.icao24.toUpperCase(),
-    aircraft: "Unknown Aircraft",
-    status: "In Flight (Live)",
-    gate: "TBD",
-    terminal: "Unknown",
-    duration: "Unknown",
-    distance: `${calculateDistance(BCT.lat, BCT.lng, plane.latitude, plane.longitude).toFixed(1)} km from BCT`,
+    airline: "Live Flight", // Changed from "Unknown Carrier"
+    flightNumber: plane.callsign?.trim() || plane.icao24.toUpperCase(),
+    aircraft: "Aircraft Type Unknown", // More descriptive
+    status: isDeparture ? "Departing (Live)" : "Arriving (Live)",
+    gate: "Not Available",
+    terminal: "Live Flight - No Gate Info",
+    duration: durationStr,
+    distance: `${distanceFromBCT} km`,
     departureAirport: isDeparture ? BCT : {
       code: "UNK",
-      name: "Unknown Airport",
+      name: "Origin Unknown",
       city: plane.origin_country,
       state: ""
     },
     arrivalAirport: !isDeparture ? BCT : {
       code: "UNK",
-      name: "Unknown Airport", 
+      name: "Destination Unknown", 
       city: plane.origin_country,
       state: ""
     },
