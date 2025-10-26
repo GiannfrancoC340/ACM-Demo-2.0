@@ -275,13 +275,13 @@ export default function FlightInfoModal({ flightId, flights, onClose }) {
             <div className="flight-card audio-section">
               <h2>🎧 Audio Communications</h2>
               <p className="audio-description">Listen to recorded air traffic control communications for this flight</p>
-              
+              <h3>Available Recordings:</h3>
               {loadingAudio ? (
                 <p>Loading audio recordings...</p>
               ) : audioRecordings.length > 0 ? (
                 <>
                   <div className="audio-recordings-list">
-                    <h3>Available Recordings:</h3>
+                    {/* <h3>Available Recordings:</h3> */}
                     {audioRecordings.map((recording, index) => (
                       <div 
                         key={recording.id} 
@@ -347,7 +347,6 @@ export default function FlightInfoModal({ flightId, flights, onClose }) {
               ) : (
                 <div className="audio-placeholder">
                   <p>📡 No audio recordings available for this flight</p>
-                  <p>Add audio files to the <code>public/audio</code> folder with the naming pattern: <code>{flightId}-*.mp3</code></p>
                 </div>
               )}
             </div>
