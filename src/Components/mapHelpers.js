@@ -80,6 +80,68 @@ export function getBCTFlights(aircraft) {
   return { departing, arriving, total: nearby.length };
 }
 
+/**
+ * Convert live aircraft data to flight detail format for modal
+ */
+export function convertLiveAircraftToFlight(plane, direction) {
+  const BCT = {
+    code: "BCT",
+    name: "Boca Raton Airport",
+    city: "Boca Raton",
+    state: "Florida"
+  };
+  
+  const isDeparture = direction === 'departing';
+  const currentTime = new Date();
+  const timeStr = currentTime.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit',
+    hour12: true 
+  });
+  
+  return {
+    flightId: `live-${plane.icao24}`,
+    route: isDeparture 
+      ? `BCT to ${plane.origin_country}` 
+      : `${plane.origin_country} to BCT`,
+    time: timeStr,
+    boardingTime: isDeparture ? timeStr : 'N/A',
+    arrivalTime: !isDeparture ? timeStr : 'N/A',
+    airline: "Unknown Carrier",
+    flightNumber: plane.callsign || plane.icao24.toUpperCase(),
+    aircraft: "Unknown Aircraft",
+    status: "In Flight (Live)",
+    gate: "TBD",
+    terminal: "Unknown",
+    duration: "Unknown",
+    distance: `${calculateDistance(BCT.lat, BCT.lng, plane.latitude, plane.longitude).toFixed(1)} km from BCT`,
+    departureAirport: isDeparture ? BCT : {
+      code: "UNK",
+      name: "Unknown Airport",
+      city: plane.origin_country,
+      state: ""
+    },
+    arrivalAirport: !isDeparture ? BCT : {
+      code: "UNK",
+      name: "Unknown Airport", 
+      city: plane.origin_country,
+      state: ""
+    },
+    // Live flight specific data
+    liveData: {
+      icao24: plane.icao24,
+      latitude: plane.latitude,
+      longitude: plane.longitude,
+      altitude: plane.altitude,
+      velocity: plane.velocity,
+      heading: plane.heading,
+      vertical_rate: plane.vertical_rate,
+      on_ground: plane.on_ground
+    },
+    audioRecordings: [] // Live flights won't have recordings yet
+  };
+}
+
 // ============================================================================
 // FLIGHT DATA
 // ============================================================================

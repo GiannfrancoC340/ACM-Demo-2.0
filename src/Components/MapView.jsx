@@ -269,60 +269,74 @@ export default function MapView() {
                   <p style={{ fontWeight: 'bold', color: '#10b981', marginTop: '10px' }}>
                     🔴 LIVE: {getBCTFlights(liveAircraft).total} aircraft nearby
                   </p>
-                  
-                  {/* Departing Flights */}
-                  <div style={{ marginTop: '15px' }}>
-                    <h4 style={{ color: '#2563eb', margin: '0 0 10px 0' }}>
-                      🛫 Departing ({getBCTFlights(liveAircraft).departing.length})
-                    </h4>
-                    {getBCTFlights(liveAircraft).departing.length > 0 ? (
-                      <ul className="flights-list">
-                        {getBCTFlights(liveAircraft).departing.map((plane) => (
-                          <li key={plane.icao24}>
-                            <div className="flight-item">
-                              <span className="flight-icon">🛫</span>
-                              <div>
-                                <span className="flight-route">{plane.callsign}</span>
-                                <span style={{ fontSize: '0.85rem', color: '#666', display: 'block' }}>
-                                  Alt: {Math.round(plane.altitude * 3.28084)} ft | 
-                                  ↗ {Math.round(plane.vertical_rate * 196.85)} ft/min
-                                </span>
-                              </div>
+
+              {/* Departing Flights */}
+              <div style={{ marginTop: '15px' }}>
+                <h4 style={{ color: '#2563eb', margin: '0 0 10px 0' }}>
+                  🛫 Departing ({getBCTFlights(liveAircraft).departing.length})
+                </h4>
+                {getBCTFlights(liveAircraft).departing.length > 0 ? (
+                  <ul className="flights-list">
+                    {getBCTFlights(liveAircraft).departing.map((plane) => (
+                      <li key={plane.icao24}>
+                        <div 
+                          className={`flight-link ${hoveredFlight === `live-${plane.icao24}` ? 'hover' : ''}`}
+                          onClick={() => handleFlightClick(`live-${plane.icao24}`)}
+                          onMouseEnter={() => setHoveredFlight(`live-${plane.icao24}`)}
+                          onMouseLeave={() => setHoveredFlight(null)}
+                        >
+                          <div className="flight-item">
+                            <span className="flight-icon">🛫</span>
+                            <div>
+                              <span className="flight-route">{plane.callsign}</span>
+                              <span style={{ fontSize: '0.85rem', color: '#666', display: 'block' }}>
+                                Alt: {Math.round(plane.altitude * 3.28084)} ft | 
+                                ↗ {Math.round(plane.vertical_rate * 196.85)} ft/min
+                              </span>
                             </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p style={{ fontSize: '0.9rem', color: '#666' }}>No departures detected</p>
-                    )}
-                  </div>
-                  
-                  {/* Arriving Flights */}
-                  <div style={{ marginTop: '15px' }}>
-                    <h4 style={{ color: '#10b981', margin: '0 0 10px 0' }}>
-                      🛬 Arriving ({getBCTFlights(liveAircraft).arriving.length})
-                    </h4>
-                    {getBCTFlights(liveAircraft).arriving.length > 0 ? (
-                      <ul className="flights-list">
-                        {getBCTFlights(liveAircraft).arriving.map((plane) => (
-                          <li key={plane.icao24}>
-                            <div className="flight-item">
-                              <span className="flight-icon">🛬</span>
-                              <div>
-                                <span className="flight-route">{plane.callsign}</span>
-                                <span style={{ fontSize: '0.85rem', color: '#666', display: 'block' }}>
-                                  Alt: {Math.round(plane.altitude * 3.28084)} ft | 
-                                  ↘ {Math.abs(Math.round(plane.vertical_rate * 196.85))} ft/min
-                                </span>
-                              </div>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p style={{ fontSize: '0.9rem', color: '#666' }}>No departures detected</p>
+                )}
+              </div>
+
+              {/* Arriving Flights */}
+              <div style={{ marginTop: '15px' }}>
+                <h4 style={{ color: '#10b981', margin: '0 0 10px 0' }}>
+                  🛬 Arriving ({getBCTFlights(liveAircraft).arriving.length})
+                </h4>
+                {getBCTFlights(liveAircraft).arriving.length > 0 ? (
+                  <ul className="flights-list">
+                    {getBCTFlights(liveAircraft).arriving.map((plane) => (
+                      <li key={plane.icao24}>
+                        <div 
+                          className={`flight-link ${hoveredFlight === `live-${plane.icao24}` ? 'hover' : ''}`}
+                          onClick={() => handleFlightClick(`live-${plane.icao24}`)}
+                          onMouseEnter={() => setHoveredFlight(`live-${plane.icao24}`)}
+                          onMouseLeave={() => setHoveredFlight(null)}
+                        >
+                          <div className="flight-item">
+                            <span className="flight-icon">🛬</span>
+                            <div>
+                              <span className="flight-route">{plane.callsign}</span>
+                              <span style={{ fontSize: '0.85rem', color: '#666', display: 'block' }}>
+                                Alt: {Math.round(plane.altitude * 3.28084)} ft | 
+                                ↘ {Math.abs(Math.round(plane.vertical_rate * 196.85))} ft/min
+                              </span>
                             </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p style={{ fontSize: '0.9rem', color: '#666' }}>No arrivals detected</p>
-                    )}
-                  </div>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p style={{ fontSize: '0.9rem', color: '#666' }}>No arrivals detected</p>
+                )}
+              </div>
                 </>
               ) : (
                 <p style={{ fontWeight: 'bold', marginTop: '10px' }}>
@@ -396,6 +410,7 @@ export default function MapView() {
         <FlightInfoModal 
           flightId={selectedFlightId}
           flights={flights}
+          liveAircraft={liveAircraft}
           onClose={closeModal}
         />
       )}
