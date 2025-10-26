@@ -219,6 +219,14 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // Helper function for cardinal directions
+  const getCardinalDirection = (heading) => {
+    if (!heading && heading !== 0) return '';
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const index = Math.round(((heading % 360) / 45)) % 8;
+    return directions[index];
+  };
+
   // Render
   return (
     <div className="flight-modal-overlay" onClick={onClose}>
@@ -290,6 +298,76 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
               </div>
             </div>
           </div>
+
+          {/* NEW: Live Flight Real-Time Data - Only show for live flights */}
+          {flight.liveData && (
+            <div className="flight-details">
+              <div className="flight-card" style={{ 
+                flex: '100%', 
+                backgroundColor: '#f0fff4',
+                borderLeft: '4px solid #10b981' 
+              }}>
+                <h2>📡 Live Flight Data</h2>
+                <table className="details-table">
+                  <tbody>
+                    <tr>
+                      <td>ICAO24 Address:</td>
+                      <td style={{ fontFamily: 'monospace' }}>{flight.liveData.icao24.toUpperCase()}</td>
+                    </tr>
+                    <tr>
+                      <td>Current Position:</td>
+                      <td>
+                        {flight.liveData.latitude.toFixed(4)}°N, {Math.abs(flight.liveData.longitude).toFixed(4)}°W
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Current Altitude:</td>
+                      <td>
+                        {Math.round(flight.liveData.altitude * 3.28084).toLocaleString()} feet
+                        ({Math.round(flight.liveData.altitude)} meters)
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Ground Speed:</td>
+                      <td>
+                        {Math.round(flight.liveData.velocity * 1.94384)} knots
+                        ({Math.round(flight.liveData.velocity * 3.6)} km/h)
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Heading:</td>
+                      <td>
+                        {flight.liveData.heading?.toFixed(0)}° {getCardinalDirection(flight.liveData.heading)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Vertical Rate:</td>
+                      <td style={{ 
+                        color: flight.liveData.vertical_rate > 0 ? '#10b981' : '#ef4444',
+                        fontWeight: 'bold'
+                      }}>
+                        {flight.liveData.vertical_rate > 0 ? '↗ Climbing' : '↘ Descending'} at{' '}
+                        {Math.abs(Math.round(flight.liveData.vertical_rate * 196.85)).toLocaleString()} ft/min
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>On Ground:</td>
+                      <td>{flight.liveData.on_ground ? '✅ Yes' : '❌ No (In Flight)'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style={{ 
+                  marginTop: '15px', 
+                  fontSize: '0.9em', 
+                  color: '#666',
+                  fontStyle: 'italic' 
+                }}>
+                  ⚠️ Live flight data is limited. Full flight details (airline, aircraft type, gates) 
+                  are not available from OpenSky Network API.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Audio Communications Section */}
           <div className="flight-details">
