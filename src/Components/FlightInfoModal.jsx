@@ -37,12 +37,12 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
           ? 'departing' 
           : 'arriving';
         const convertedFlight = convertLiveAircraftToFlight(aircraft, direction);
-        console.log('âœ… Using live aircraft data for:', flightId);
+        console.log('✅ Using live aircraft data for:', flightId);
         setFlightDetails(convertedFlight);
         return;
       }
     }
-
+    
     // Original hardcoded/Firebase logic
     const hardcodedFlight = flightData[flightId];
     
@@ -61,7 +61,7 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
         console.error('❌ No flight data found for:', flightId);
       }
     }
-  }, [flightId, flights]);
+  }, [flightId, flights, liveAircraft]);
 
   // 2. Fetch audio recordings from backend
   useEffect(() => {
@@ -380,7 +380,6 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
               ) : audioRecordings.length > 0 ? (
                 <>
                   <div className="audio-recordings-list">
-                    {/* <h3>Available Recordings:</h3> */}
                     {audioRecordings.map((recording, index) => (
                       <div 
                         key={recording.id} 
