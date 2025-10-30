@@ -23,11 +23,11 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
   
   // 1. Load flight details with live aircraft support
   useEffect(() => {
+  const loadFlightDetails = async () => {
     // Check if this is a live flight
     if (flightId.startsWith('live-')) {
       const icao24 = flightId.replace('live-', '');
       
-      // Find the aircraft in live data
       const liveFlights = getBCTFlights(liveAircraft);
       const allLive = [...liveFlights.departing, ...liveFlights.arriving];
       const aircraft = allLive.find(a => a.icao24 === icao24);
@@ -36,7 +36,9 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
         const direction = liveFlights.departing.find(a => a.icao24 === icao24) 
           ? 'departing' 
           : 'arriving';
-        const convertedFlight = convertLiveAircraftToFlight(aircraft, direction);
+        
+        // This is now async and will enrich with API
+        const convertedFlight = await convertLiveAircraftToFlight(aircraft, direction, true);
         console.log('✅ Using live aircraft data for:', flightId);
         setFlightDetails(convertedFlight);
         return;
@@ -50,7 +52,6 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
       console.log('✅ Using hardcoded flight data for:', flightId);
       setFlightDetails(hardcodedFlight);
     } else {
-      // Firebase fallback
       console.log('⚠️ No hardcoded data, checking Firebase...');
       const firebaseFlight = flights.find(f => f.flightId === flightId);
       
@@ -61,7 +62,10 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
         console.error('❌ No flight data found for:', flightId);
       }
     }
-  }, [flightId, flights, liveAircraft]);
+  };
+  
+  loadFlightDetails();
+}, [flightId, flights, liveAircraft]);
 
   // 2. Fetch audio recordings from backend
   useEffect(() => {

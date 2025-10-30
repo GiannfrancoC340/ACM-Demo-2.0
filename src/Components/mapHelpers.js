@@ -3,6 +3,7 @@
 import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { getFlightDetails } from '../services/aviationStackService';
 
 // ============================================================================
 // ICON DEFINITIONS
@@ -82,8 +83,9 @@ export function getBCTFlights(aircraft) {
 
 /**
  * Convert live aircraft data to flight detail format for modal
+ * Now with optional API enrichment
  */
-export function convertLiveAircraftToFlight(plane, direction) {
+export async function convertLiveAircraftToFlight(plane, direction, enrichWithAPI = true) {
   const BCT = {
     code: "BCT",
     name: "Boca Raton Airport",
@@ -101,7 +103,6 @@ export function convertLiveAircraftToFlight(plane, direction) {
     hour12: true 
   });
   
-  // Calculate actual distance
   const distanceFromBCT = calculateDistance(
     BCT.lat, 
     BCT.lng, 
@@ -109,44 +110,54 @@ export function convertLiveAircraftToFlight(plane, direction) {
     plane.longitude
   ).toFixed(1);
   
-  // Estimate duration based on speed and distance
   const estimatedDuration = plane.velocity > 0 
-    ? Math.round((parseFloat(distanceFromBCT) / plane.velocity) * 60) // minutes
+    ? Math.round((parseFloat(distanceFromBCT) / plane.velocity) * 60)
     : null;
   
   const durationStr = estimatedDuration 
     ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)`
     : "Unknown";
+
+  // Try to enrich with external API data
+  let enrichedData = null;
+  if (enrichWithAPI && plane.callsign) {
+    console.log(`🔍 Attempting to enrich flight data for: ${plane.callsign}`);
+    enrichedData = await getFlightDetails(plane.callsign);
+    if (enrichedData) {
+      console.log(`✅ Successfully enriched data for ${plane.callsign}:`, enrichedData);
+    } else {
+      console.log(`⚠️ No enriched data found for ${plane.callsign}`);
+    }
+  }
   
   return {
     flightId: `live-${plane.icao24}`,
-    route: isDeparture 
-      ? `BCT to ${plane.origin_country}` 
-      : `${plane.origin_country} to BCT`,
+    route: enrichedData 
+      ? `${enrichedData.departure.iata || 'UNK'} to ${enrichedData.arrival.iata || 'UNK'}`
+      : (isDeparture ? `BCT to ${plane.origin_country}` : `${plane.origin_country} to BCT`),
     time: timeStr,
-    boardingTime: isDeparture ? timeStr : 'N/A',
-    arrivalTime: !isDeparture ? timeStr : 'N/A',
-    airline: "Live Flight", // Changed from "Unknown Carrier"
-    flightNumber: plane.callsign?.trim() || plane.icao24.toUpperCase(),
-    aircraft: "Aircraft Type Unknown", // More descriptive
-    status: isDeparture ? "Departing (Live)" : "Arriving (Live)",
-    gate: "Not Available",
-    terminal: "Live Flight - No Gate Info",
+    boardingTime: enrichedData?.departure.scheduledTime || (isDeparture ? timeStr : 'N/A'),
+    arrivalTime: enrichedData?.arrival.scheduledTime || (!isDeparture ? timeStr : 'N/A'),
+    airline: enrichedData?.airline || "Live Flight",
+    flightNumber: enrichedData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
+    aircraft: enrichedData?.aircraftType || "Aircraft Type Unknown",
+    status: enrichedData?.status || (isDeparture ? "Departing (Live)" : "Arriving (Live)"),
+    gate: enrichedData?.departure.gate || enrichedData?.arrival.gate || "Not Available",
+    terminal: enrichedData?.departure.terminal || enrichedData?.arrival.terminal || "Live Flight - No Gate Info",
     duration: durationStr,
     distance: `${distanceFromBCT} km`,
     departureAirport: isDeparture ? BCT : {
-      code: "UNK",
-      name: "Origin Unknown",
+      code: enrichedData?.departure.iata || "UNK",
+      name: enrichedData?.departure.airport || "Origin Unknown",
       city: plane.origin_country,
       state: ""
     },
     arrivalAirport: !isDeparture ? BCT : {
-      code: "UNK",
-      name: "Destination Unknown", 
+      code: enrichedData?.arrival.iata || "UNK",
+      name: enrichedData?.arrival.airport || "Destination Unknown", 
       city: plane.origin_country,
       state: ""
     },
-    // Live flight specific data
     liveData: {
       icao24: plane.icao24,
       latitude: plane.latitude,
@@ -157,7 +168,7 @@ export function convertLiveAircraftToFlight(plane, direction) {
       vertical_rate: plane.vertical_rate,
       on_ground: plane.on_ground
     },
-    audioRecordings: [] // Live flights won't have recordings yet
+    audioRecordings: []
   };
 }
 
