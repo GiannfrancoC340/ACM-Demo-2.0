@@ -15,7 +15,7 @@ function parseAudioMetadata(filename) {
   // Remove .mp3 extension and flight ID prefix
   // e.g., "flight1-preflight.mp3" -> "preflight"
   // e.g., "flight1-takeoff-clearance.mp3" -> "takeoff clearance"
-  const withoutExt = filename.replace('.mp3', '');
+  const withoutExt = filename.replace(/\.(mp3|wav)$/, '');
   const parts = withoutExt.split('-');
   
   // Remove the flight ID part (e.g., "flight1")
@@ -129,10 +129,12 @@ app.get('/api/playlist', (req, res) => {
       return res.status(500).json({ error: 'Unable to read directory' });
     }
     
-    const mp3Files = files.filter(file => file.endsWith('.mp3'));
+    const audioFiles = files.filter(file => 
+      file.endsWith('.mp3') || file.endsWith('.wav')
+    );
     
-    const playlist = mp3Files.map((file, index) => {
-      const baseName = file.replace('.mp3', '');
+    const playlist = audioFiles.map((file, index) => {
+      const baseName = file.replace(/\.(mp3|wav)$/, '');
       const transcriptExists = fs.existsSync(path.join(audioDir, `${baseName}.txt`));
       
       return {
@@ -161,7 +163,10 @@ app.get('/api/flight/:flightId', (req, res) => {
     // Find all audio files matching this flight
     const files = fs.readdirSync(audioDir);
     const flightAudios = files
-      .filter(file => file.endsWith('.mp3') && file.startsWith(normalizedFlightId))
+      .filter(file => 
+        (file.endsWith('.mp3') || file.endsWith('.wav')) && 
+        file.startsWith(normalizedFlightId)
+      )
       .map((file, index) => {
         const metadata = parseAudioMetadata(file);
         const timestamp = estimateTimestamp(file, audioDir);
