@@ -10,6 +10,7 @@ import LiveAircraftLayer from './LiveAircraftLayer';
 import SearchRadiusCircle from './SearchRadiusCircle';
 import FlightInfoModal from './FlightInfoModal';
 import { redIcon, getBCTFlights } from './maphelpers';
+import { getAPICallCount } from '../services/aviationStackService';
 
 export default function MapView() {
   const [flights, setFlights] = useState([]);
@@ -23,6 +24,7 @@ export default function MapView() {
   const [searchRadius, setSearchRadius] = useState(50);
   const [demoMode, setDemoMode] = useState(false);
   const popupRef = useRef(null);
+  const [apiCallCount, setApiCallCount] = useState(0);
   
   const initialFlightsToShow = flights.slice(0, 3);
 
@@ -62,6 +64,14 @@ export default function MapView() {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Add this useEffect to update the counter display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setApiCallCount(getAPICallCount());
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleFlightClick = (flightId) => {
@@ -242,6 +252,20 @@ export default function MapView() {
             <span>150 km</span>
           </div>
         </div>
+
+        {/* ADD THIS - API Counter Display */}
+          <div style={{ 
+            marginTop: '15px',
+            padding: '10px', 
+            backgroundColor: apiCallCount >= 95 ? '#fee2e2' : apiCallCount >= 80 ? '#fff3cd' : '#f0f9ff',
+            borderRadius: '4px',
+            fontSize: '0.9rem',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            border: `2px solid ${apiCallCount >= 95 ? '#ef4444' : apiCallCount >= 80 ? '#f59e0b' : '#3b82f6'}`
+          }}>
+            {apiCallCount >= 95 ? '🚨' : apiCallCount >= 80 ? '⚠️' : '📊'} Session API Calls: {apiCallCount}/100
+          </div>
       </div>
 
       <MapContainer 
