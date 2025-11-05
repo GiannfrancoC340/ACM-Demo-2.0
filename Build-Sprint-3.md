@@ -26,7 +26,7 @@ As a recap, this is the schedule of the build sprints:
 
 ## Time Spent
 
-Time spent on this project: **9 hours and 30 minutes**. Spans from October 6 2025 - December 3 2025.
+Time spent on this project: **10 hours and 50 minutes**. Spans from October 6 2025 - December 3 2025.
 
 ## Required Features
 
@@ -313,3 +313,4 @@ https://github.com/user-attachments/assets/438b82ef-8efb-4ddf-b5c2-0b2926c161bd
 
 
 https://github.com/user-attachments/assets/0c57a716-40a5-4699-a517-12ff90d3b3dd
+
