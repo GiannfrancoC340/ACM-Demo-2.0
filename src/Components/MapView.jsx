@@ -145,7 +145,7 @@ export default function MapView() {
       {/* Live Aircraft Controls - Top Right Below Audio */}
       <div style={{
         position: 'absolute',
-        top: '80px',
+        top: '130px',
         right: '20px',
         zIndex: 1000,
         background: 'white',
