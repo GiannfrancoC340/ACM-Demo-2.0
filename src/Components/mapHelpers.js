@@ -129,6 +129,9 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       console.log(`⚠️ No enriched data found for ${plane.callsign}`);
     }
   }
+
+  // Check if OpenSky provided aircraft type
+  const aircraftType = plane.aircraft_type || "Aircraft Type Unknown";
   
   return {
     flightId: `live-${plane.icao24}`,
@@ -140,7 +143,7 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     arrivalTime: enrichedData?.arrival.scheduledTime || (!isDeparture ? timeStr : 'N/A'),
     airline: enrichedData?.airline || "Live Flight",
     flightNumber: enrichedData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
-    aircraft: enrichedData?.aircraftType || "Aircraft Type Unknown",
+    aircraft: enrichedData?.aircraftType || aircraftType, // Use OpenSky's type as fallback
     status: enrichedData?.status || (isDeparture ? "Departing (Live)" : "Arriving (Live)"),
     gate: enrichedData?.departure.gate || enrichedData?.arrival.gate || "Not Available",
     terminal: enrichedData?.departure.terminal || enrichedData?.arrival.terminal || "Live Flight - No Gate Info",
