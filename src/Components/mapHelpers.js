@@ -4,6 +4,7 @@ import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { getFlightDetails } from '../services/aviationStackService';
+import { getAircraftDetails } from '../services/aeroDataBoxService';
 
 // ============================================================================
 // ICON DEFINITIONS
@@ -118,46 +119,47 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)`
     : "Unknown";
 
-  // Try to enrich with external API data
-  let enrichedData = null;
+  // Try to enrich with external APIs
+  let flightData = null;
+  let aircraftData = null;
+  
   if (enrichWithAPI && plane.callsign) {
-    console.log(`🔍 Attempting to enrich flight data for: ${plane.callsign}`);
-    enrichedData = await getFlightDetails(plane.callsign);
-    if (enrichedData) {
-      console.log(`✅ Successfully enriched data for ${plane.callsign}:`, enrichedData);
-    } else {
-      console.log(`⚠️ No enriched data found for ${plane.callsign}`);
+    // Step 1: Try AviationStack (commercial flights)
+    console.log(`🔍 Step 1: Checking AviationStack for ${plane.callsign}`);
+    flightData = await getFlightDetails(plane.callsign);
+    
+    // Step 2: If no flight data, try aircraft registration lookup
+    if (!flightData && plane.icao24) {
+      console.log(`🔍 Step 2: Checking AeroDataBox for aircraft ${plane.icao24}`);
+      aircraftData = await getAircraftDetails(plane.icao24);
     }
   }
-
-  // Check if OpenSky provided aircraft type
-  const aircraftType = plane.aircraft_type || "Aircraft Type Unknown";
   
   return {
     flightId: `live-${plane.icao24}`,
-    route: enrichedData 
-      ? `${enrichedData.departure.iata || 'UNK'} to ${enrichedData.arrival.iata || 'UNK'}`
+    route: flightData 
+      ? `${flightData.departure.iata || 'UNK'} to ${flightData.arrival.iata || 'UNK'}`
       : (isDeparture ? `BCT to ${plane.origin_country}` : `${plane.origin_country} to BCT`),
     time: timeStr,
-    boardingTime: enrichedData?.departure.scheduledTime || (isDeparture ? timeStr : 'N/A'),
-    arrivalTime: enrichedData?.arrival.scheduledTime || (!isDeparture ? timeStr : 'N/A'),
-    airline: enrichedData?.airline || "Live Flight",
-    flightNumber: enrichedData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
-    aircraft: enrichedData?.aircraftType || aircraftType, // Use OpenSky's type as fallback
-    status: enrichedData?.status || (isDeparture ? "Departing (Live)" : "Arriving (Live)"),
-    gate: enrichedData?.departure.gate || enrichedData?.arrival.gate || "Not Available",
-    terminal: enrichedData?.departure.terminal || enrichedData?.arrival.terminal || "Live Flight - No Gate Info",
+    boardingTime: flightData?.departure.scheduledTime || (isDeparture ? timeStr : 'N/A'),
+    arrivalTime: flightData?.arrival.scheduledTime || (!isDeparture ? timeStr : 'N/A'),
+    airline: flightData?.airline || (aircraftData?.owner ? `${aircraftData.owner} (Private)` : "Private Flight"),
+    flightNumber: flightData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
+    aircraft: flightData?.aircraftType || aircraftData?.aircraftType || "Aircraft Type Unknown",
+    status: flightData?.status || (isDeparture ? "Departing (Live)" : "Arriving (Live)"),
+    gate: flightData?.departure.gate || flightData?.arrival.gate || "Not Available",
+    terminal: flightData?.departure.terminal || flightData?.arrival.terminal || "Private Aviation",
     duration: durationStr,
     distance: `${distanceFromBCT} km`,
     departureAirport: isDeparture ? BCT : {
-      code: enrichedData?.departure.iata || "UNK",
-      name: enrichedData?.departure.airport || "Origin Unknown",
+      code: flightData?.departure.iata || "UNK",
+      name: flightData?.departure.airport || "Origin Unknown",
       city: plane.origin_country,
       state: ""
     },
     arrivalAirport: !isDeparture ? BCT : {
-      code: enrichedData?.arrival.iata || "UNK",
-      name: enrichedData?.arrival.airport || "Destination Unknown", 
+      code: flightData?.arrival.iata || "UNK",
+      name: flightData?.arrival.airport || "Destination Unknown", 
       city: plane.origin_country,
       state: ""
     },
@@ -171,6 +173,8 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       vertical_rate: plane.vertical_rate,
       on_ground: plane.on_ground
     },
+    // Add enrichment source for transparency
+    enrichmentSource: flightData ? 'AviationStack' : (aircraftData ? 'AeroDataBox' : 'None'),
     audioRecordings: []
   };
 }
