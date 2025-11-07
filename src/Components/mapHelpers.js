@@ -143,8 +143,12 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     time: timeStr,
     boardingTime: flightData?.departure.scheduledTime || (isDeparture ? timeStr : 'N/A'),
     arrivalTime: flightData?.arrival.scheduledTime || (!isDeparture ? timeStr : 'N/A'),
+    // ✅ For private flights, just show "Private Flight"
     airline: flightData?.airline || (aircraftData?.owner ? `${aircraftData.owner} (Private)` : "Private Flight"),
     flightNumber: flightData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
+    // ✅ Show tail number
+    // flightNumber: flightData?.flightNumber || aircraftData?.registration || plane.callsign?.trim() || plane.icao24.toUpperCase(),
+    // ✅ Show aircraft type from AeroDataBox
     aircraft: flightData?.aircraftType || aircraftData?.aircraftType || "Aircraft Type Unknown",
     status: flightData?.status || (isDeparture ? "Departing (Live)" : "Arriving (Live)"),
     gate: flightData?.departure.gate || flightData?.arrival.gate || "Not Available",

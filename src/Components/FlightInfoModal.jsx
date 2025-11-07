@@ -238,8 +238,24 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
         <button className="modal-close-btn" onClick={onClose}>&times;</button>
         
         <div className="flight-info-container">
+          {/* In FlightInfoModal.jsx, update the header */}
           <div className="flight-header">
-            <h1>{flight.route}</h1>
+            <h1>
+              {flight.route}
+              {flight.enrichmentSource === 'AeroDataBox' && (
+                <span style={{
+                  marginLeft: '10px',
+                  fontSize: '0.8rem',
+                  backgroundColor: '#4285f4',
+                  color: 'white',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
+                  fontWeight: 'normal'
+                }}>
+                  ✈️ Private
+                </span>
+              )}
+            </h1>
             <div className="flight-time">{flight.time}</div>
             <div className="flight-status">Status: <span className={`status ${flight.status.includes('Delayed') ? 'delayed' : 'on-time'}`}>{flight.status}</span></div>
           </div>
