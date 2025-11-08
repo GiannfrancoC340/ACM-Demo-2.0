@@ -149,6 +149,34 @@ app.get('/api/playlist', (req, res) => {
   });
 });
 
+// NEW: Get recording dates for timeline
+app.get('/api/recording-dates', (req, res) => {
+  const audioDir = path.join(__dirname, 'public', 'audio');
+  
+  try {
+    const files = fs.readdirSync(audioDir);
+    const audioFiles = files.filter(file => 
+      file.endsWith('.mp3') || file.endsWith('.wav')
+    );
+    
+    const recordingDates = audioFiles.map(file => {
+      const filePath = path.join(audioDir, file);
+      const stats = fs.statSync(filePath);
+      
+      return {
+        filename: file,
+        date: stats.birthtime, // File creation time
+        size: stats.size
+      };
+    });
+    
+    res.json(recordingDates);
+  } catch (err) {
+    console.error('Error reading recording dates:', err);
+    res.status(500).json({ error: 'Unable to read recording dates' });
+  }
+});
+
 // Flight audio endpoint
 app.get('/api/flight/:flightId', (req, res) => {
   const flightId = req.params.flightId;
