@@ -5,6 +5,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { getFlightDetails } from '../services/aviationStackService';
 import { getAircraftDetails } from '../services/aeroDataBoxService';
+import { getFAARegistration } from '../services/faaRegistryService';
 
 // ============================================================================
 // ICON DEFINITIONS
@@ -132,6 +133,11 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     if (!flightData && plane.icao24) {
       console.log(`🔍 Step 2: Checking AeroDataBox for aircraft ${plane.icao24}`);
       aircraftData = await getAircraftDetails(plane.icao24);
+
+      // ✨ Step 3: NEW - If AeroDataBox failed and it's a US aircraft, try FAA
+      if (!aircraftData && plane.callsign?.startsWith('N')) {
+        aircraftData = await getFAARegistration(plane.callsign);
+      }
     }
   }
   
