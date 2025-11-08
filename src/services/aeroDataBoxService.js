@@ -42,6 +42,10 @@ export async function getAircraftDetails(icao24) {
     apiCallCount++;
     console.log(`📊 AeroDataBox API calls this session: ${apiCallCount}`);
 
+    // ✨ ADD THIS - Log the actual response
+    console.log(`📡 AeroDataBox response status: ${response.status}`);
+    console.log(`📡 AeroDataBox content-type: ${response.headers.get('content-type')}`);
+
     // ✨ NEW: Check response status before parsing JSON
     if (!response.ok) {
       if (response.status === 404) {
