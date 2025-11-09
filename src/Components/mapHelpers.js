@@ -41,6 +41,25 @@ export const redIcon = L.icon({
 // HELPER FUNCTIONS
 // ============================================================================
 
+
+/**
+ * Format ISO timestamp to readable time (e.g., "2:30 PM")
+ */
+function formatTime(isoString) {
+  if (!isoString) return null;
+  
+  try {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return isoString; // Return original if parsing fails
+  }
+}
 /**
  * Calculate distance between two points using Haversine formula
  */
@@ -147,8 +166,8 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       ? `${flightData.departure.iata || 'UNK'} to ${flightData.arrival.iata || 'UNK'}`
       : (isDeparture ? `BCT to ${plane.origin_country}` : `${plane.origin_country} to BCT`),
     time: timeStr,
-    boardingTime: flightData?.departure.scheduledTime || (isDeparture ? timeStr : 'N/A'),
-    arrivalTime: flightData?.arrival.scheduledTime || (!isDeparture ? timeStr : 'N/A'),
+    boardingTime: formatTime(flightData?.departure.scheduledTime) || (isDeparture ? timeStr : 'N/A'),
+    arrivalTime: formatTime(flightData?.arrival.scheduledTime) || (!isDeparture ? timeStr : 'N/A'),
     // ✅ For private flights, just show "Private Flight"
     airline: flightData?.airline || (aircraftData?.owner ? `${aircraftData.owner} (Private)` : "Private Flight"),
     flightNumber: flightData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
