@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './AudioPlayer.css'
 
 export default function AudioPlayer() {
+  const navigate = useNavigate();
   const [playlist, setPlaylist] = useState([]);
   const [filteredPlaylist, setFilteredPlaylist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -215,15 +216,23 @@ export default function AudioPlayer() {
   if (backendError) {
     return (
       <div className="audio-player-page">
-        <div className="audio-player-container">
-          {/* Back to Map Button */}
-          <Link 
-            to="/map" 
-            className="back-to-map-btn"
-          >
-            ← Back to Map
-          </Link>
+        {/* Fixed Navbar */}
+        <nav className="audio-navbar">
+          <div className="navbar-content">
+            <div className="navbar-left">
+              <h1 className="navbar-title">ACM 2.0</h1>
+              <div className="navbar-divider"></div>
+              <Link to="/map" className="navbar-btn">
+                ← Back to Map
+              </Link>
+              <button className="navbar-btn" onClick={() => navigate('/settings')}>
+                ⚙️ Settings
+              </button>
+            </div>
+          </div>
+        </nav>
 
+        <div className="audio-player-container">
           <h1 className="audio-player-title">Audio Player</h1>
           
           <div className="error-state">
@@ -250,15 +259,23 @@ export default function AudioPlayer() {
   if (loading) {
     return (
       <div className="audio-player-page">
-        <div className="audio-player-container">
-          {/* Back to Map Button */}
-          <Link 
-            to="/map" 
-            className="back-to-map-btn"
-          >
-            ← Back to Map
-          </Link>
+        {/* Fixed Navbar */}
+        <nav className="audio-navbar">
+          <div className="navbar-content">
+            <div className="navbar-left">
+              <h1 className="navbar-title">ACM 2.0</h1>
+              <div className="navbar-divider"></div>
+              <Link to="/map" className="navbar-btn">
+                ← Back to Map
+              </Link>
+              <button className="navbar-btn" onClick={() => navigate('/settings')}>
+                ⚙️ Settings
+              </button>
+            </div>
+          </div>
+        </nav>
 
+        <div className="audio-player-container">
           <h1 className="audio-player-title">Audio Player</h1>
           
           <div className="loading-state">
@@ -274,15 +291,23 @@ export default function AudioPlayer() {
   if (playlist.length === 0) {
     return (
       <div className="audio-player-page">
-        <div className="audio-player-container">
-          {/* Back to Map Button */}
-          <Link 
-            to="/map" 
-            className="back-to-map-btn"
-          >
-            ← Back to Map
-          </Link>
+        {/* Fixed Navbar */}
+        <nav className="audio-navbar">
+          <div className="navbar-content">
+            <div className="navbar-left">
+              <h1 className="navbar-title">ACM 2.0</h1>
+              <div className="navbar-divider"></div>
+              <Link to="/map" className="navbar-btn">
+                ← Back to Map
+              </Link>
+              <button className="navbar-btn" onClick={() => navigate('/settings')}>
+                ⚙️ Settings
+              </button>
+            </div>
+          </div>
+        </nav>
 
+        <div className="audio-player-container">
           <h1 className="audio-player-title">Audio Player</h1>
           
           <div className="empty-state">
@@ -292,7 +317,7 @@ export default function AudioPlayer() {
             <div className="empty-instructions">
               <p><strong>To add audio files:</strong></p>
               <ol>
-                <li>Place .mp3 files in the <code>public/audio</code> folder</li>
+                <li>Place .mp3 or .WAV files in the <code>public/audio</code> folder</li>
                 <li>Optionally add .txt transcripts with matching filenames</li>
                 <li>Refresh this page</li>
               </ol>
@@ -305,15 +330,23 @@ export default function AudioPlayer() {
 
   return (
     <div className="audio-player-page">
-      <div className="audio-player-container">
-        {/* Back to Map Button */}
-        <Link 
-          to="/map" 
-          className="back-to-map-btn"
-        >
-          ← Back to Map
-        </Link>
+      {/* Fixed Navbar */}
+      <nav className="audio-navbar">
+        <div className="navbar-content">
+          <div className="navbar-left">
+            <h1 className="navbar-title">ACM 2.0</h1>
+            <div className="navbar-divider"></div>
+            <Link to="/map" className="navbar-btn">
+              ← Back to Map
+            </Link>
+            <button className="navbar-btn" onClick={() => navigate('/settings')}>
+              ⚙️ Settings
+            </button>
+          </div>
+        </div>
+      </nav>
 
+      <div className="audio-player-container">
         <h1 className="audio-player-title">Audio Player</h1>
         
         {/* Timeline Filter */}
