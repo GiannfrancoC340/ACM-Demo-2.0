@@ -188,12 +188,86 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: white;
-  padding: 2rem;
+  padding-top: 70px; /* Add padding for fixed navbar */
 }
+
+/* Fixed Navbar */
+.audio-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border-bottom: 2px solid #374151;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  height: 70px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-content {
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+  background: linear-gradient(135deg, #4285f4, #34a853);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.navbar-divider {
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(180deg, transparent, #4285f4, transparent);
+  opacity: 0.5;
+}
+
+.navbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(66, 133, 244, 0.1);
+  color: white;
+  text-decoration: none;
+  border: 1px solid rgba(66, 133, 244, 0.3);
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.navbar-btn:hover {
+  background-color: rgba(66, 133, 244, 0.2);
+  border-color: rgba(66, 133, 244, 0.5);
+  transform: translateY(-1px);
+}
+
 
 .audio-player-container {
   max-width: 64rem;
   margin: 0 auto;
+  padding: 0 2rem 2rem 2rem;
+  
 }
 
 .audio-player-title {
