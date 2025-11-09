@@ -101,7 +101,7 @@ export async function getFlightDetails(callsign) {
             airlineIATA: flight.airline?.iata || null,
             flightNumber: flight.flight?.iata || callsign,
             aircraft: flight.aircraft?.registration || null,
-            aircraftType: flight.aircraft?.iata || null,
+            aircraftType: flight.aircraft?.iata || flight.aircraft?.registration || null,
             departure: {
               airport: flight.departure?.airport || null,
               iata: flight.departure?.iata || null,
