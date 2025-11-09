@@ -242,6 +242,19 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
           <div className="flight-header">
             <h1>
               {flight.route}
+              {flight.enrichmentSource === 'AviationStack' && (
+                <span style={{
+                  marginLeft: '10px',
+                  fontSize: '0.8rem',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
+                  fontWeight: 'normal'
+                }}>
+                  🛫 Commercial
+                </span>
+              )}
               {flight.enrichmentSource === 'AeroDataBox' && (
                 <span style={{
                   marginLeft: '10px',
