@@ -1,12 +1,10 @@
 .map-page {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
-    padding: 0;
+    width: 100vw;
     margin: 0;
-    z-index: 1;
+    padding: 0;
   }
 
 /* Leaflet container styling */
@@ -43,10 +41,10 @@
 }
 
 /* Map container */
-.map-container {
+/* .map-container {
   height: 100vh;
   width: 100%;
-}
+} */
 
 /* Flight link styles */
 .flight-link {
@@ -338,4 +336,14 @@
 /* Optional: Add slight shadow for depth */
 .leaflet-overlay-pane svg path {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Keep zoom controls below the sticky navbar */
+.leaflet-top.leaflet-left {
+  z-index: 999 !important; /* Lower than navbar's 1000 */
+  top: 90px !important; /* Push down below navbar */
+}
+
+.leaflet-control-zoom {
+  margin-top: 10px !important;
 }

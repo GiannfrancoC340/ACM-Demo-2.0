@@ -5,12 +5,12 @@ import { useEffect, useState, useRef } from 'react';
 import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import './MapView.css';
-import { Link } from 'react-router-dom';
 import LiveAircraftLayer from './LiveAircraftLayer';
 import SearchRadiusCircle from './SearchRadiusCircle';
 import FlightInfoModal from './FlightInfoModal';
 import { redIcon, getBCTFlights } from './maphelpers';
 import { getAPICallCount } from '../services/aviationStackService';
+import MapNavbar from './MapNavbar';
 
 export default function MapView() {
   const [flights, setFlights] = useState([]);
@@ -96,178 +96,34 @@ export default function MapView() {
 
   return (
     <div className="map-page">
-      {/* Audio Recordings Button - Top Right */}
-      <Link 
-        to="/audio" 
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          zIndex: 1000,
-          padding: '12px 24px',
-          backgroundColor: '#e04141',
-          color: 'white',
-          textDecoration: 'none',
-          borderRadius: '8px',
-          fontWeight: 'bold',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}
-      >
-        🎧 Audio Recordings
-      </Link>
+      <div className="map-page" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      width: '100vw',
+      position: 'relative'
+    }}>
+      {/* Top Navbar - Full Width */}
+      <MapNavbar
+        showLiveAircraft={showLiveAircraft}
+        setShowLiveAircraft={setShowLiveAircraft}
+        showRadius={showRadius}
+        setShowRadius={setShowRadius}
+        demoMode={demoMode}
+        setDemoMode={setDemoMode}
+        searchRadius={searchRadius}
+        setSearchRadius={setSearchRadius}
+        apiCallCount={apiCallCount}
+      />
 
-      {/* Settings Button - Bottom Left */}
-      <Link 
-        to="/settings" 
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '20px',
-          zIndex: 1000,
-          padding: '12px 24px',
-          backgroundColor: '#4285f4',
-          color: 'white',
-          textDecoration: 'none',
-          borderRadius: '8px',
-          fontWeight: 'bold',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}
-      >
-        ⚙️ Settings
-      </Link>
-
-      {/* Live Aircraft Controls - Top Right Below Audio */}
-      <div style={{
-        position: 'absolute',
-        top: '130px',
-        right: '20px',
-        zIndex: 1000,
-        background: 'white',
-        padding: '15px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-        minWidth: '250px'
+      {/* Map Container - Takes remaining space */}
+      <div style={{ 
+        flex: 1, 
+        position: 'relative',
+        width: '100%'
       }}>
-        <div style={{ marginBottom: '12px' }}>
-          <button
-            onClick={() => setShowLiveAircraft(!showLiveAircraft)}
-            style={{
-              width: '100%',
-              padding: '10px',
-              backgroundColor: showLiveAircraft ? '#10b981' : '#6b7280',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-            }}
-          >
-            ✈️ Live Aircraft: {showLiveAircraft ? 'ON' : 'OFF'}
-          </button>
-        </div>
 
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px',
-            fontSize: '0.9rem',
-            color: '#374151'
-          }}>
-            <input
-              type="checkbox"
-              checked={showRadius}
-              onChange={(e) => setShowRadius(e.target.checked)}
-            />
-            Show search radius
-          </label>
-        </div>
-
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px',
-            fontSize: '0.9rem',
-            color: '#374151',
-            cursor: 'pointer'
-          }}>
-            <input
-              type="checkbox"
-              checked={demoMode}
-              onChange={(e) => setDemoMode(e.target.checked)}
-            />
-            <span>
-              🎬 Demo Mode 
-              <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: '4px' }}>
-                (faster updates)
-              </span>
-            </span>
-          </label>
-          
-          {demoMode && (
-            <div style={{
-              fontSize: '0.7rem',
-              color: '#ef4444',
-              marginTop: '4px',
-              marginLeft: '24px'
-            }}>
-              ⚠️ Uses more API calls
-            </div>
-          )}
-        </div>
-
-        <div>
-          <label style={{ 
-            display: 'block',
-            fontSize: '0.9rem',
-            color: '#374151',
-            marginBottom: '8px'
-          }}>
-            Search Radius: <strong>{searchRadius} km</strong>
-          </label>
-          <input
-            type="range"
-            min="10"
-            max="150"
-            step="10"
-            value={searchRadius}
-            onChange={(e) => setSearchRadius(Number(e.target.value))}
-            style={{ width: '100%' }}
-          />
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: '#9ca3af',
-            marginTop: '4px'
-          }}>
-            <span>10 km</span>
-            <span>150 km</span>
-          </div>
-        </div>
-
-        {/* ADD THIS - API Counter Display */}
-          <div style={{ 
-            marginTop: '15px',
-            padding: '10px', 
-            backgroundColor: apiCallCount >= 95 ? '#fee2e2' : apiCallCount >= 80 ? '#fff3cd' : '#f0f9ff',
-            borderRadius: '4px',
-            fontSize: '0.9rem',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            border: `2px solid ${apiCallCount >= 95 ? '#ef4444' : apiCallCount >= 80 ? '#f59e0b' : '#3b82f6'}`
-          }}>
-            {apiCallCount >= 95 ? '🚨' : apiCallCount >= 80 ? '⚠️' : '📊'} Session API Calls: {apiCallCount}/100
-          </div>
-      </div>
-
+      {/* The Map */}
       <MapContainer 
         center={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
         zoom={13} 
@@ -438,6 +294,8 @@ export default function MapView() {
           onClose={closeModal}
         />
       )}
+    </div>
+    </div>
     </div>
   );
 }
