@@ -95,13 +95,13 @@ export default function MapView() {
   }
 
   return (
-    <div className="map-page">
-      <div className="map-page" style={{
+    <div className="map-page" style={{
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
       width: '100vw',
-      position: 'relative'
+      position: 'relative',
+      overflow: 'hidden'
     }}>
       {/* Top Navbar - Full Width */}
       <MapNavbar
@@ -120,7 +120,8 @@ export default function MapView() {
       <div style={{ 
         flex: 1, 
         position: 'relative',
-        width: '100%'
+        width: '100%',
+        overflow: 'hidden'
       }}>
 
       {/* The Map */}
@@ -294,7 +295,6 @@ export default function MapView() {
           onClose={closeModal}
         />
       )}
-    </div>
     </div>
     </div>
   );
