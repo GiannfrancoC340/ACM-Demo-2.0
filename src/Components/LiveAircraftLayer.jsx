@@ -316,7 +316,7 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
       {lastUpdate && (
         <div style={{
           position: 'absolute',
-          top: '70px',
+          top: '10px',
           right: '10px',
           zIndex: 1000,
           background: 'white',

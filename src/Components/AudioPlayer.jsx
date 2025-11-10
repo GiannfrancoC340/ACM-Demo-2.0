@@ -220,7 +220,7 @@ export default function AudioPlayer() {
         <nav className="audio-navbar">
           <div className="navbar-content">
             <div className="navbar-left">
-              <h1 className="navbar-title">ACM 2.0</h1>
+              <h1 className="navbar-title">ACM</h1>
               <div className="navbar-divider"></div>
               <Link to="/map" className="navbar-btn">
                 ← Back to Map
@@ -263,7 +263,7 @@ export default function AudioPlayer() {
         <nav className="audio-navbar">
           <div className="navbar-content">
             <div className="navbar-left">
-              <h1 className="navbar-title">ACM 2.0</h1>
+              <h1 className="navbar-title">ACM</h1>
               <div className="navbar-divider"></div>
               <Link to="/map" className="navbar-btn">
                 ← Back to Map
@@ -295,7 +295,7 @@ export default function AudioPlayer() {
         <nav className="audio-navbar">
           <div className="navbar-content">
             <div className="navbar-left">
-              <h1 className="navbar-title">ACM 2.0</h1>
+              <h1 className="navbar-title">ACM</h1>
               <div className="navbar-divider"></div>
               <Link to="/map" className="navbar-btn">
                 ← Back to Map
@@ -334,7 +334,7 @@ export default function AudioPlayer() {
       <nav className="audio-navbar">
         <div className="navbar-content">
           <div className="navbar-left">
-            <h1 className="navbar-title">ACM 2.0</h1>
+            <h1 className="navbar-title">ACM</h1>
             <div className="navbar-divider"></div>
             <Link to="/map" className="navbar-btn">
               ← Back to Map
