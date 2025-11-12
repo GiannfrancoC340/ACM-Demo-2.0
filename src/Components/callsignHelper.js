@@ -63,6 +63,45 @@ export function isCommercialCallsign(callsign) {
 }
 
 /**
+ * Check if an aircraft type is exclusively private/general aviation
+ * These aircraft are never used by commercial airlines
+ */
+export function isPrivateAircraftType(aircraftType) {
+  if (!aircraftType) return false;
+  
+  const privateTypes = [
+    // Single-engine trainers (most common GA)
+    'CESSNA 172',
+    'CESSNA 182',
+    'CESSNA 206',
+    'PIPER CHEROKEE',
+    'PIPER ARCHER',
+    'PIPER WARRIOR',
+    'CIRRUS SR20',
+    'CIRRUS SR22',
+    
+    // Light twins
+    'PIPER SENECA',
+    'BEECHCRAFT BARON',
+    'CESSNA 310',
+    
+    // Very light jets (typically private)
+    'CESSNA CITATION MUSTANG',
+    
+    // Helicopters (unless explicitly commercial)
+    'ROBINSON R22',
+    'ROBINSON R44',
+  ];
+  
+  const upperType = aircraftType.toUpperCase();
+  
+  // Check for exact matches or partial matches
+  return privateTypes.some(type => 
+    upperType.includes(type) || type.includes(upperType)
+  );
+}
+
+/**
  * Format callsign for display
  */
 export function formatCallsign(callsign) {
