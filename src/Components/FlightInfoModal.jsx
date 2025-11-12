@@ -242,7 +242,8 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
           <div className="flight-header">
             <h1>
               {flight.route}
-              {flight.enrichmentSource === 'AviationStack' && (
+              {(flight.enrichmentSource === 'AviationStack' || 
+                flight.enrichmentSource === 'AviationStack + AeroDataBox') && (
                 <span style={{
                   marginLeft: '10px',
                   fontSize: '0.8rem',
