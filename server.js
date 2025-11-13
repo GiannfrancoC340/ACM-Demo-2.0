@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 // Enhanced helper function to format filename to better title and metadata
 function parseAudioMetadata(filename) {
@@ -225,7 +226,7 @@ app.get('/api/flight/:flightId', (req, res) => {
   }
 });
 
-// NEW: OpenSky API Proxy (to bypass CORS)
+// OpenSky API Proxy with OAuth2 Bearer Token Support
 app.get('/api/opensky', async (req, res) => {
   try {
     const { lamin, lamax, lomin, lomax } = req.query;
@@ -236,6 +237,9 @@ app.get('/api/opensky', async (req, res) => {
       });
     }
     
+    // Check if OAuth2 token was passed from frontend
+    const token = req.headers['x-opensky-token'];
+    
     console.log(`🛫 Proxying OpenSky request: lat ${lamin}-${lamax}, lon ${lomin}-${lomax}`);
     
     const openSkyUrl = `https://opensky-network.org/api/states/all?` +
@@ -243,9 +247,20 @@ app.get('/api/opensky', async (req, res) => {
     
     console.log('🔗 Fetching from:', openSkyUrl);
     
-    // Use anonymous access (400 requests/day)
-    console.log('⚠️ Using anonymous access (400 requests/day limit)');
-    const response = await fetch(openSkyUrl);
+    // Prepare fetch options
+    const fetchOptions = {};
+    
+    // If OAuth2 token provided, add Bearer token
+    if (token) {
+      fetchOptions.headers = {
+        'Authorization': `Bearer ${token}`
+      };
+      console.log('🔐 Using OAuth2 authenticated request (4,000/day limit)');
+    } else {
+      console.log('🔓 Using anonymous request (400/day limit)');
+    }
+    
+    const response = await fetch(openSkyUrl, fetchOptions);
     
     if (!response.ok) {
       console.error(`❌ OpenSky API error: ${response.status}`);
@@ -264,13 +279,25 @@ app.get('/api/opensky', async (req, res) => {
         });
       }
       
+      if (response.status === 401) {
+        return res.status(401).json({ 
+          error: 'Authentication failed',
+          message: 'Invalid or expired OAuth2 token'
+        });
+      }
+      
       return res.status(response.status).json({ 
         error: `OpenSky API returned status ${response.status}` 
       });
     }
     
     const data = await response.json();
-    console.log(`✅ Retrieved ${data.states?.length || 0} aircraft states (anonymous)`);
+    
+    if (token) {
+      console.log(`✅ Retrieved ${data.states?.length || 0} aircraft states (OAuth2 authenticated)`);
+    } else {
+      console.log(`✅ Retrieved ${data.states?.length || 0} aircraft states (anonymous)`);
+    }
     
     res.json(data);
     
@@ -278,6 +305,57 @@ app.get('/api/opensky', async (req, res) => {
     console.error('💥 Proxy error:', error);
     res.status(500).json({ 
       error: 'Proxy error',
+      message: error.message 
+    });
+  }
+});
+
+// NEW: OAuth2 Token Proxy
+// OAuth2 Token Proxy
+app.post('/api/opensky-token', async (req, res) => {
+  try {
+    const { client_id, client_secret } = req.body;
+    
+    if (!client_id || !client_secret) {
+      return res.status(400).json({ 
+        error: 'Missing client_id or client_secret' 
+      });
+    }
+    
+    console.log('🔑 Requesting OAuth2 token from OpenSky...');
+    
+    // ✅ CORRECT URL (was wrong before!)
+    const response = await fetch('https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: client_id,
+        client_secret: client_secret,
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error(`❌ OAuth2 token request failed: ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ Full error response:', errorText);
+      return res.status(response.status).json({ 
+        error: 'Token request failed',
+        details: errorText 
+      });
+    }
+    
+    const data = await response.json();
+    console.log('✅ OAuth2 token obtained, expires in', data.expires_in, 'seconds');
+    
+    res.json(data);
+    
+  } catch (error) {
+    console.error('💥 OAuth2 token error:', error);
+    res.status(500).json({ 
+      error: 'Token request error',
       message: error.message 
     });
   }
