@@ -6,6 +6,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { getFlightDetails } from '../services/aviationStackService';
 import { getAircraftDetails } from '../services/aeroDataBoxService';
 import { getFAARegistration } from '../services/faaRegistryService';
+import { isCommercialCallsign, getAirlineFromCallsign, isPrivateAircraftType } from './callsignHelper';
 
 // ============================================================================
 // ICON DEFINITIONS
@@ -60,6 +61,43 @@ function formatTime(isoString) {
     return isoString; // Return original if parsing fails
   }
 }
+
+/**
+ * Check if a scheduled time is reasonable for a live flight
+ * For departures: Returns true if more than 30 minutes in the past
+ * For arrivals: Returns true if more than 30 minutes in the past AND no departure data
+ */
+function isScheduledTimeStale(isoString, isArrivalTime = false, hasFlightData = false) {
+  if (!isoString) return false;
+  
+  try {
+    const scheduledTime = new Date(isoString);
+    const now = new Date();
+    const diffMinutes = (now - scheduledTime) / (1000 * 60);
+    
+    // For arrival times on flights with full flight data, be more lenient
+    // The flight might have departed hours ago but is still in progress
+    if (isArrivalTime && hasFlightData) {
+      // Only mark as stale if arrival was scheduled MORE than 4 hours ago
+      // This handles delayed flights and long-haul flights still in progress
+      return diffMinutes > 240; // 4 hours
+    }
+    
+    // For departure times, if we have flight data and it's in the past,
+    // that's expected for an arriving/in-flight aircraft
+    if (!isArrivalTime && hasFlightData) {
+      // Only mark as stale if departure was MORE than 12 hours ago
+      return diffMinutes > 720; // 12 hours
+    }
+    
+    // Default: If scheduled time is more than 30 minutes ago, it's stale
+    // This applies to flights without AviationStack data
+    return diffMinutes > 30;
+  } catch (error) {
+    return false;
+  }
+}
+
 /**
  * Calculate distance between two points using Haversine formula
  */
@@ -148,17 +186,24 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     console.log(`🔍 Step 1: Checking AviationStack for ${plane.callsign}`);
     flightData = await getFlightDetails(plane.callsign);
     
-    // Step 2: If no flight data, try aircraft registration lookup
-    if (!flightData && plane.icao24) {
-      console.log(`🔍 Step 2: Checking AeroDataBox for aircraft ${plane.icao24}`);
+    // Step 2: Check AeroDataBox if:
+    // - No commercial flight data found (private flight), OR
+    // - Commercial flight found but missing aircraft type
+    if (plane.icao24 && (!flightData || !flightData.aircraftType)) {
+      console.log(`🔍 Step 2: Checking AeroDataBox for aircraft details ${plane.icao24}`);
       aircraftData = await getAircraftDetails(plane.icao24);
 
       // ✨ Step 3: NEW - If AeroDataBox failed and it's a US aircraft, try FAA
       if (!aircraftData && plane.callsign?.startsWith('N')) {
+        console.log(`🔍 Step 3: Checking FAA Registry for ${plane.callsign}`);
         aircraftData = await getFAARegistration(plane.callsign);
       }
     }
   }
+  
+  console.log(`🏷️ enrichmentSource set to: ${flightData 
+  ? (aircraftData ? 'AviationStack + AeroDataBox' : 'AviationStack')
+  : (isCommercialCallsign(plane.callsign) ? 'AviationStack' : (aircraftData ? 'AeroDataBox' : 'None'))}`);
   
   return {
     flightId: `live-${plane.icao24}`,
@@ -166,10 +211,26 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       ? `${flightData.departure.iata || 'UNK'} to ${flightData.arrival.iata || 'UNK'}`
       : (isDeparture ? `BCT to ${plane.origin_country}` : `${plane.origin_country} to BCT`),
     time: timeStr,
-    boardingTime: formatTime(flightData?.departure.scheduledTime) || (isDeparture ? timeStr : 'N/A'),
-    arrivalTime: formatTime(flightData?.arrival.scheduledTime) || (!isDeparture ? timeStr : 'N/A'),
+    boardingTime: (flightData?.departure.scheduledTime && 
+              !isScheduledTimeStale(flightData.departure.scheduledTime, false, !!flightData))
+          ? formatTime(flightData.departure.scheduledTime)
+          : (isDeparture ? timeStr : 'N/A'),
+    arrivalTime: (flightData?.arrival.scheduledTime && 
+              !isScheduledTimeStale(flightData.arrival.scheduledTime, true, !!flightData))
+          ? formatTime(flightData.arrival.scheduledTime)
+          : (!isDeparture ? timeStr : 'N/A'),
     // ✅ For private flights, just show "Private Flight"
-    airline: flightData?.airline || (aircraftData?.owner ? `${aircraftData.owner} (Private)` : "Private Flight"),
+    // Smart airline detection with aircraft type intelligence:
+    // 1. Use AviationStack airline if available
+    // 2. Check if aircraft type is definitely private (overrides callsign)
+    // 3. If callsign looks commercial AND aircraft isn't private-only, treat as commercial
+    // 4. If aircraft owner exists, show as private
+    // 5. Default to "Private Flight"
+    airline: flightData?.airline 
+      || (aircraftData?.aircraftType && isPrivateAircraftType(aircraftData.aircraftType) 
+          ? null  // Skip commercial check, it's definitely private
+          : (isCommercialCallsign(plane.callsign) ? (getAirlineFromCallsign(plane.callsign) || "Commercial Flight") : null))
+      || (aircraftData?.owner ? `${aircraftData.owner} (Private)` : "Private Flight"),
     flightNumber: flightData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
     // ✅ Show tail number
     // flightNumber: flightData?.flightNumber || aircraftData?.registration || plane.callsign?.trim() || plane.icao24.toUpperCase(),
@@ -202,8 +263,12 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       vertical_rate: plane.vertical_rate,
       on_ground: plane.on_ground
     },
-    // Add enrichment source for transparency
-    enrichmentSource: flightData ? 'AviationStack' : (aircraftData ? 'AeroDataBox' : 'None'),
+    // Enrichment source - check aircraft type to avoid misclassifying private as commercial
+    enrichmentSource: flightData 
+      ? (aircraftData ? 'AviationStack + AeroDataBox' : 'AviationStack')
+      : (aircraftData?.aircraftType && isPrivateAircraftType(aircraftData.aircraftType)
+          ? (aircraftData ? 'AeroDataBox' : 'None')  // Private aircraft, use AeroDataBox badge
+          : (isCommercialCallsign(plane.callsign) ? 'AviationStack' : (aircraftData ? 'AeroDataBox' : 'None'))),
     audioRecordings: []
   };
 }
