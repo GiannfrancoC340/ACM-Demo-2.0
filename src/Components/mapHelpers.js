@@ -74,13 +74,19 @@ function formatTime(isoString, timezone = 'America/New_York') {
  * For departures: Returns true if more than 30 minutes in the past
  * For arrivals: Returns true if more than 30 minutes in the past AND no departure data
  */
-function isScheduledTimeStale(isoString, isArrivalTime = false, hasFlightData = false) {
+function isScheduledTimeStale(isoString, isArrivalTime = false, hasFlightData = false, isLiveAircraft = false) {
   if (!isoString) return false;
   
   try {
     const scheduledTime = new Date(isoString);
     const now = new Date();
     const diffMinutes = (now - scheduledTime) / (1000 * 60);
+    
+    // For live aircraft (currently tracked), never mark times as stale
+    // These are real flights in progress, even if departed yesterday
+    if (isLiveAircraft && hasFlightData) {
+      return false; // Never mark as stale for live tracked aircraft
+    }
     
     // For arrival times on flights with full flight data, be more lenient
     // The flight might have departed hours ago but is still in progress
@@ -93,8 +99,8 @@ function isScheduledTimeStale(isoString, isArrivalTime = false, hasFlightData = 
     // For departure times, if we have flight data and it's in the past,
     // that's expected for an arriving/in-flight aircraft
     if (!isArrivalTime && hasFlightData) {
-      // Only mark as stale if departure was MORE than 12 hours ago
-      return diffMinutes > 720; // 12 hours
+      // Only mark as stale if departure was MORE than 24 hours ago
+      return diffMinutes > 1440; // 24 hours (was 12, now 24 for long-haul)
     }
     
     // Default: If scheduled time is more than 30 minutes ago, it's stale
@@ -179,10 +185,6 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
   const estimatedDuration = plane.velocity > 0 
     ? Math.round((parseFloat(distanceFromBCT) / plane.velocity) * 60)
     : null;
-  
-  const durationStr = estimatedDuration 
-    ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)`
-    : "Unknown";
 
   // Try to enrich with external APIs
   let flightData = null;
@@ -193,6 +195,15 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     console.log(`🔍 Step 1: Checking AviationStack for ${plane.callsign}`);
     flightData = await getFlightDetails(plane.callsign);
     
+    // ← ADD THE DEBUG CODE RIGHT HERE (after the line above)
+    if (flightData) {
+      console.log('📊 FlightData for', plane.callsign, ':', {
+        departureScheduled: flightData.departure?.scheduledTime,
+        arrivalScheduled: flightData.arrival?.scheduledTime,
+        duration: flightData.duration
+      });
+    }
+
     // Step 2: Check AeroDataBox if:
     // - No commercial flight data found (private flight), OR
     // - Commercial flight found but missing aircraft type
@@ -218,14 +229,22 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       ? `${flightData.departure.iata || 'UNK'} to ${flightData.arrival.iata || 'UNK'}`
       : (isDeparture ? `BCT to ${plane.origin_country}` : `${plane.origin_country} to BCT`),
     time: timeStr,
-    boardingTime: (flightData?.departure.scheduledTime && 
-                  !isScheduledTimeStale(flightData.departure.scheduledTime, false, !!flightData))
-      ? formatTime(flightData.departure.scheduledTime)
-      : (isDeparture ? timeStr : 'N/A'),
+    boardingTime: (() => {
+      const hasScheduled = !!flightData?.departure.scheduledTime;
+      const isStale = hasScheduled && isScheduledTimeStale(flightData.departure.scheduledTime, false, !!flightData, true);
+      
+      if (hasScheduled && !isStale) {
+        return formatTime(flightData.departure.scheduledTime);
+      } else if (isDeparture) {
+        return timeStr;
+      } else {
+        return 'N/A';
+      }
+    })(),
     arrivalTime: (flightData?.arrival.scheduledTime && 
-                 !isScheduledTimeStale(flightData.arrival.scheduledTime, true, !!flightData))
-      ? formatTime(flightData.arrival.scheduledTime)
-      : (!isDeparture ? timeStr : 'N/A'),
+             !isScheduledTimeStale(flightData.arrival.scheduledTime, true, !!flightData, true))
+  ? formatTime(flightData.arrival.scheduledTime)
+  : (!isDeparture ? timeStr : 'N/A'),
     // ✅ For private flights, just show "Private Flight"
     // Smart airline detection with aircraft type intelligence:
     // 1. Use AviationStack airline if available
