@@ -96,12 +96,22 @@ export async function getFlightDetails(callsign) {
 
         if (data.data && data.data.length > 0) {
           const flight = data.data[0];
+
+          // Calculate duration from scheduled times if not provided
+          let duration = null;
+          if (flight.departure?.scheduled && flight.arrival?.scheduled) {
+            const depTime = new Date(flight.departure.scheduled);
+            const arrTime = new Date(flight.arrival.scheduled);
+            duration = Math.round((arrTime - depTime) / (1000 * 60)); // Duration in minutes
+          }
+
           result = {
             airline: flight.airline?.name || null,
             airlineIATA: flight.airline?.iata || null,
             flightNumber: flight.flight?.iata || callsign,
             aircraft: flight.aircraft?.registration || null,
             aircraftType: flight.aircraft?.iata || flight.aircraft?.registration || null,
+            duration: duration,  // ✅ Calculated from departure/arrival times
             departure: {
               airport: flight.departure?.airport || null,
               iata: flight.departure?.iata || null,
