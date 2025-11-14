@@ -301,6 +301,21 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
                   </tr>
                 </tbody>
               </table>
+
+              {/* ✨ ADD THIS HERE - Data freshness disclaimer */}
+              {flight.enrichmentSource && flight.enrichmentSource.includes('AviationStack') && (
+                <div style={{ 
+                  fontSize: '0.85em', 
+                  color: '#666', 
+                  marginTop: '12px',
+                  padding: '8px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '4px',
+                  borderLeft: '3px solid #ffc107'
+                }}>
+                  ℹ️ Schedule data from AviationStack free tier - times may reflect past flights
+                </div>
+              )}
             </div>
             
             <div className="flight-card">

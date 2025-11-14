@@ -24,11 +24,13 @@ export function isCommercialCallsign(callsign) {
     'HAL',  // Hawaiian Airlines
     'SKW',  // SkyWest
     'ENY',  // Envoy Air
+    'ENV',  // Envoy Air (alternative code) ← ADD THIS
     'CPZ',  // Compass Airlines
     'FDX',  // FedEx
     'UPS',  // UPS
     'ABX',  // ABX Air
     'GTI',  // Atlas Air
+    'AJT',  // Amerijet International ← ADD THIS
     'BAW',  // British Airways
     'DLH',  // Lufthansa
     'AFR',  // Air France
@@ -38,6 +40,21 @@ export function isCommercialCallsign(callsign) {
     'VIV',  // VivaAerobus
     'AMX',  // Aeromexico
     'JNY',  // JetNetherlands
+    'SVA',  // Riyadh Air ← NEW
+    'UAE',  // Emirates ← NEW
+    'AVA',  // Avianca ← NEW
+    'CMP',  // Copa Airlines ← NEW
+    'THY',  // Turkish Airlines ← NEW
+    'BHS',  // Bahamasair ← NEW
+    'LAN',  // LATAM Airlines ← NEW
+    'TAM',  // LATAM Airlines (Brazil) ← NEW
+    'JTA',  // LATAM Airlines (alternate) ← NEW
+    'ETD',  // Etihad Airways
+    'AAY',  // Allegiant Air
+    'TVI',  // Tropic Ocean Airways (scheduled seaplane service)
+    'CKS',  // Kalitta Air (cargo)
+    'ATN',  // Air Transport International (cargo)
+    'WWI',  // Western Global Airlines (cargo)
   ];
   
   // Check if callsign starts with a known commercial prefix
@@ -139,8 +156,12 @@ export function getAirlineFromCallsign(callsign) {
     'HAL': 'Hawaiian Airlines',
     'SKW': 'SkyWest Airlines',
     'ENY': 'Envoy Air',
+    'ENV': 'Envoy Air',
     'FDX': 'FedEx',
     'UPS': 'UPS Airlines',
+    'ABX': 'ABX Air',
+    'GTI': 'Atlas Air',
+    'AJT': 'Amerijet International',  // ← ADD THIS
     'BAW': 'British Airways',
     'DLH': 'Lufthansa',
     'AFR': 'Air France',
@@ -150,6 +171,28 @@ export function getAirlineFromCallsign(callsign) {
     'VIV': 'VivaAerobus',
     'AMX': 'Aeromexico',
     'JNY': 'JetNetherlands',
+    'SVA': 'Riyadh Air',              // ← NEW
+    'UAE': 'Emirates',                 // ← NEW
+    'AVA': 'Avianca',                  // ← NEW
+    'CMP': 'Copa Airlines',            // ← NEW
+    'THY': 'Turkish Airlines',         // ← NEW
+    'BHS': 'Bahamasair',              // ← NEW
+    'LAN': 'LATAM Airlines',          // ← NEW
+    'TAM': 'LATAM Airlines',          // ← NEW
+    'JTA': 'LATAM Airlines',          // ← NEW
+    'ETD': 'Etihad Airways',
+    'AAY': 'Allegiant Air',
+    'TVI': 'Tropic Ocean Airways',
+    'WUP': 'Wheels Up',               // ← NEW (Private)
+    'VJA': 'VistaJet',                // ← NEW (Private)
+    'EJA': 'NetJets',                 // (Private)
+    'SHR': 'Shoreline Aviation',
+    'HPJ': 'Hop-A-Jet',
+    'JTL': 'Jet Linx',
+    'WUP': 'Wheels Up',
+    'CKS': 'Kalitta Air',
+    'ATN': 'Air Transport International',
+    'WWI': 'Western Global Airlines',
   };
   
   // Extract airline code (first 3 letters)
