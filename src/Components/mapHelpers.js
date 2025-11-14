@@ -44,17 +44,24 @@ export const redIcon = L.icon({
 
 
 /**
- * Format ISO timestamp to readable time (e.g., "2:30 PM")
+ * Format ISO timestamp to readable time in local timezone
+ * AviationStack returns times in UTC, so we convert to local display
+ * @param {string} isoString - ISO 8601 timestamp (usually in UTC)
+ * @param {string} timezone - Optional timezone (e.g., 'America/New_York')
+ * @returns {string} Formatted time like "2:30 PM"
  */
-function formatTime(isoString) {
+function formatTime(isoString, timezone = 'America/New_York') {
   if (!isoString) return null;
   
   try {
     const date = new Date(isoString);
+    
+    // Convert to specified timezone (default: Eastern Time for MIA/BCT)
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
+      timeZone: timezone  // This converts UTC to local time
     });
   } catch (error) {
     console.error('Error formatting time:', error);
@@ -212,13 +219,13 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       : (isDeparture ? `BCT to ${plane.origin_country}` : `${plane.origin_country} to BCT`),
     time: timeStr,
     boardingTime: (flightData?.departure.scheduledTime && 
-              !isScheduledTimeStale(flightData.departure.scheduledTime, false, !!flightData))
-          ? formatTime(flightData.departure.scheduledTime)
-          : (isDeparture ? timeStr : 'N/A'),
+                  !isScheduledTimeStale(flightData.departure.scheduledTime, false, !!flightData))
+      ? formatTime(flightData.departure.scheduledTime)
+      : (isDeparture ? timeStr : 'N/A'),
     arrivalTime: (flightData?.arrival.scheduledTime && 
-              !isScheduledTimeStale(flightData.arrival.scheduledTime, true, !!flightData))
-          ? formatTime(flightData.arrival.scheduledTime)
-          : (!isDeparture ? timeStr : 'N/A'),
+                 !isScheduledTimeStale(flightData.arrival.scheduledTime, true, !!flightData))
+      ? formatTime(flightData.arrival.scheduledTime)
+      : (!isDeparture ? timeStr : 'N/A'),
     // ✅ For private flights, just show "Private Flight"
     // Smart airline detection with aircraft type intelligence:
     // 1. Use AviationStack airline if available
@@ -236,10 +243,46 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     // flightNumber: flightData?.flightNumber || aircraftData?.registration || plane.callsign?.trim() || plane.icao24.toUpperCase(),
     // ✅ Show aircraft type from AeroDataBox
     aircraft: flightData?.aircraftType || aircraftData?.aircraftType || "Aircraft Type Unknown",
-    status: flightData?.status || (isDeparture ? "Departing (Live)" : "Arriving (Live)"),
+    // ← NEW SMART STATUS GOES HERE (PASTE THE WHOLE BLOCK ABOVE)
+    status: (() => {
+      // Use live data to determine actual status
+      const isOnGround = plane.on_ground === true;
+      const hasVerticalRate = plane.vertical_rate !== null && Math.abs(plane.vertical_rate) > 0.5;
+      
+      // If we have AviationStack status, check if it makes sense
+      if (flightData?.status) {
+        const apiStatus = flightData.status.toLowerCase();
+        
+        // If API says "landed" but aircraft is airborne, override it
+        if (apiStatus.includes('landed') && !isOnGround && plane.altitude > 1000) {
+          return "En Route (Live)";
+        }
+        
+        // If API says "scheduled" but aircraft is airborne, override it
+        if ((apiStatus.includes('scheduled') || apiStatus.includes('active')) && !isOnGround) {
+          return hasVerticalRate && plane.vertical_rate < -1 ? "Arriving (Live)" : "En Route (Live)";
+        }
+        
+        // Otherwise use API status (with better formatting)
+        return flightData.status;
+      }
+      
+      // Fallback to live data analysis
+      if (isOnGround) {
+        return "On Ground (Live)";
+      } else if (hasVerticalRate && plane.vertical_rate < -1) {
+        return "Arriving (Live)";
+      } else if (hasVerticalRate && plane.vertical_rate > 1) {
+        return "Departing (Live)";
+      } else {
+        return "En Route (Live)";
+      }
+    })(),
     gate: flightData?.departure.gate || flightData?.arrival.gate || "Not Available",
     terminal: flightData?.departure.terminal || flightData?.arrival.terminal || "Private Aviation",
-    duration: durationStr,
+    duration: flightData?.duration 
+      ? `${Math.floor(flightData.duration / 60)}h ${flightData.duration % 60}m`
+      : (estimatedDuration ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)` : "Unknown"),
     distance: `${distanceFromBCT} km`,
     departureAirport: isDeparture ? BCT : {
       code: flightData?.departure.iata || "UNK",
