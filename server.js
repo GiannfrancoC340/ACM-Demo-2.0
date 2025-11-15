@@ -424,12 +424,17 @@ app.post('/api/log-detections', async (req, res) => {
     const logsDir = path.join(__dirname, 'logs', 'detections');
     await fs.mkdir(logsDir, { recursive: true });
 
-    // ✅ One file per day (YYYY-MM-DD format)
-    const today = new Date().toISOString().split('T')[0];
+    // ✅ Calculate both from the same 'now' variable
+    const now = new Date();
+
+    // Get daily filename
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const today = `${year}-${month}-${day}`;
     const logFile = path.join(logsDir, `detections_${today}.txt`);
 
-    // ✅ Calculate 10-minute time window
-    const now = new Date();
+    // Get 10-minute time window (using same 'now')
     const hour = now.getHours();
     const minute = now.getMinutes();
     const startMinute = Math.floor(minute / 10) * 10;
@@ -497,11 +502,17 @@ app.post('/api/log-detection', async (req, res) => {
     await fs.mkdir(logsDir, { recursive: true });
 
     // ✅ One file per day
-    const today = new Date().toISOString().split('T')[0];
+    // ✅ Calculate both from the same 'now' variable
+    const now = new Date();
+
+    // Get daily filename
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const today = `${year}-${month}-${day}`;
     const logFile = path.join(logsDir, `detections_${today}.txt`);
 
-    // ✅ Calculate 10-minute time window
-    const now = new Date();
+    // Get 10-minute time window (using same 'now')
     const hour = now.getHours();
     const minute = now.getMinutes();
     const startMinute = Math.floor(minute / 10) * 10;
