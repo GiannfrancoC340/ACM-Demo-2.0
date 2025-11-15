@@ -8,6 +8,7 @@ import {
   formatSpeed,
   calculateDistance 
 } from '../services/openSkyService';
+import { logFlightDetections } from '../services/flightLogger';
 
 // Helper function to convert heading to cardinal direction
 function getCardinalDirection(heading) {
@@ -61,6 +62,11 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
         if (onAircraftUpdate) {
           onAircraftUpdate(data.aircraft);
         }
+
+        // In updateAircraft function (replace the old enrichAndLogFlights line)
+        logFlightDetections(data.aircraft).catch(err => 
+          console.error('Error logging detections:', err)
+        );
 
         // Update flight trails
         setFlightTrails(prevTrails => {
