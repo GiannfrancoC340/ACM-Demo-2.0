@@ -362,6 +362,56 @@ app.post('/api/opensky-token', async (req, res) => {
   }
 });
 
+// ✅ Automatic log cleanup - keeps last 3 days, deletes older files
+async function cleanupOldLogs() {
+  try {
+    const logsDir = path.join(__dirname, 'logs', 'detections');
+    
+    // Check if directory exists
+    try {
+      await fs.access(logsDir);
+    } catch {
+      // Directory doesn't exist yet, nothing to clean
+      return;
+    }
+
+    const files = await fs.readdir(logsDir);
+    const now = Date.now();
+    const threeDaysInMs = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
+
+    let deletedCount = 0;
+
+    for (const file of files) {
+      if (!file.startsWith('detections_') || !file.endsWith('.txt')) {
+        continue; // Skip non-detection files
+      }
+
+      const filePath = path.join(logsDir, file);
+      const stats = await fs.stat(filePath);
+      const fileAge = now - stats.mtime.getTime(); // Time since last modified
+
+      // Delete if older than 3 days
+      if (fileAge > threeDaysInMs) {
+        await fs.unlink(filePath);
+        deletedCount++;
+        console.log(`🗑️ Deleted old log file: ${file}`);
+      }
+    }
+
+    if (deletedCount > 0) {
+      console.log(`✅ Cleanup complete: Deleted ${deletedCount} old log file(s)`);
+    }
+  } catch (error) {
+    console.error('❌ Error during log cleanup:', error);
+  }
+}
+
+// Run cleanup every 24 hours (86400000 ms)
+setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
+
+// Run cleanup immediately on server start
+cleanupOldLogs();
+
 // Simple flight detection logging endpoint
 app.post('/api/log-detections', async (req, res) => {
   try {
@@ -371,22 +421,33 @@ app.post('/api/log-detections', async (req, res) => {
       return res.status(400).json({ error: 'Invalid detections data' });
     }
 
-    // Create logs directory if it doesn't exist
     const logsDir = path.join(__dirname, 'logs', 'detections');
     await fs.mkdir(logsDir, { recursive: true });
 
-    // Create daily log file
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    // ✅ One file per day (YYYY-MM-DD format)
+    const today = new Date().toISOString().split('T')[0];
     const logFile = path.join(logsDir, `detections_${today}.txt`);
+
+    // ✅ Calculate 10-minute time window
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const startMinute = Math.floor(minute / 10) * 10;
+    const endMinute = startMinute + 10;
+    
+    const startTime = `${String(hour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+    const endTime = endMinute === 60 
+      ? `${String(hour + 1).padStart(2, '0')}:00`
+      : `${String(hour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+
+    // ✅ Format section header
+    const sectionHeader = `\n========== TIME: ${startTime} - ${endTime} ==========\n`;
 
     // Format log entries
     const logEntries = detections.map(d => {
       const time = new Date(d.detectedAt).toLocaleString('en-US', {
         timeZone: 'America/New_York',
         hour12: true,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
@@ -394,8 +455,21 @@ app.post('/api/log-detections', async (req, res) => {
       return `[${time}] ${d.callsign}`;
     });
 
-    // Append to log file
-    await fs.appendFile(logFile, logEntries.join('\n') + '\n', 'utf8');
+    // ✅ Check if this section already exists in the file
+    let fileContent = '';
+    try {
+      fileContent = await fs.readFile(logFile, 'utf8');
+    } catch (err) {
+      // File doesn't exist yet, that's okay
+    }
+
+    // Only add section header if this time window isn't already in the file
+    const sectionExists = fileContent.includes(`TIME: ${startTime} - ${endTime}`);
+    const contentToAppend = sectionExists 
+      ? logEntries.join('\n') + '\n'
+      : sectionHeader + logEntries.join('\n') + '\n';
+
+    await fs.appendFile(logFile, contentToAppend, 'utf8');
 
     console.log(`📝 Logged ${detections.length} flight detections to ${logFile}`);
     res.json({ 
@@ -422,21 +496,46 @@ app.post('/api/log-detection', async (req, res) => {
     const logsDir = path.join(__dirname, 'logs', 'detections');
     await fs.mkdir(logsDir, { recursive: true });
 
+    // ✅ One file per day
     const today = new Date().toISOString().split('T')[0];
     const logFile = path.join(logsDir, `detections_${today}.txt`);
+
+    // ✅ Calculate 10-minute time window
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const startMinute = Math.floor(minute / 10) * 10;
+    const endMinute = startMinute + 10;
+    
+    const startTime = `${String(hour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+    const endTime = endMinute === 60 
+      ? `${String(hour + 1).padStart(2, '0')}:00`
+      : `${String(hour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+
+    const sectionHeader = `\n========== TIME: ${startTime} - ${endTime} ==========\n`;
 
     const time = new Date(detectedAt).toLocaleString('en-US', {
       timeZone: 'America/New_York',
       hour12: true,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
     });
 
-    await fs.appendFile(logFile, `[${time}] ${callsign}\n`, 'utf8');
+    // Check if section exists
+    let fileContent = '';
+    try {
+      fileContent = await fs.readFile(logFile, 'utf8');
+    } catch (err) {
+      // File doesn't exist yet
+    }
+
+    const sectionExists = fileContent.includes(`TIME: ${startTime} - ${endTime}`);
+    const contentToAppend = sectionExists 
+      ? `[${time}] ${callsign}\n`
+      : sectionHeader + `[${time}] ${callsign}\n`;
+
+    await fs.appendFile(logFile, contentToAppend, 'utf8');
 
     res.json({ success: true, file: logFile });
 
