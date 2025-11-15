@@ -1,57 +1,93 @@
-// // src/services/flightLogger.js
+// src/services/simpleFlightLogger.js
 
-// // Track which flights we've already logged (in-memory)
-// const loggedFlights = new Set();
+const loggedFlights = new Set(); // Track which flights we've already logged
 
-// /**
-//  * Log a flight to the backend
-//  * Only logs each unique flight once per session
-//  */
-// export async function logFlight(flight) {
-//   try {
-//     // Create unique key for this flight (callsign + date)
-//     const today = new Date().toDateString();
-//     const flightKey = `${flight.icao24}-${today}`;
-    
-//     // Check if we've already logged this flight today
-//     if (loggedFlights.has(flightKey)) {
-//       return; // Already logged, skip
-//     }
-    
-//     // Log to backend
-//     const response = await fetch('http://localhost:3001/api/log-flight', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ flight }),
-//     });
-    
-//     if (response.ok) {
-//       // Mark as logged
-//       loggedFlights.add(flightKey);
-//       console.log('📝 Logged flight to file:', flight.callsign || flight.icao24);
-//     }
-    
-//   } catch (error) {
-//     console.error('Error logging flight:', error);
-//     // Fail silently - don't break app if logging fails
-//   }
-// }
+/**
+ * Log a single flight detection (callsign + timestamp only)
+ */
+export async function logFlightDetection(callsign, timestamp = new Date()) {
+  try {
+    // Skip if already logged this session
+    if (loggedFlights.has(callsign)) {
+      return;
+    }
 
-// /**
-//  * Log multiple flights at once
-//  */
-// export async function logFlights(flights) {
-//   for (const flight of flights) {
-//     await logFlight(flight);
-//   }
-// }
+    const response = await fetch('http://localhost:3001/api/log-detection', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        callsign: callsign.trim(),
+        detectedAt: timestamp.toISOString()
+      }),
+    });
 
-// /**
-//  * Clear the logged flights set (useful for testing)
-//  */
-// export function clearLoggedFlights() {
-//   loggedFlights.clear();
-//   console.log('🗑️ Cleared logged flights cache');
-// }
+    if (response.ok) {
+      loggedFlights.add(callsign);
+      console.log(`📝 Logged detection: ${callsign} at ${timestamp.toLocaleTimeString()}`);
+    } else {
+      console.error('Failed to log flight detection:', response.status);
+    }
+  } catch (error) {
+    console.error('Error logging flight detection:', error);
+  }
+}
+
+/**
+ * Log multiple flight detections at once
+ */
+export async function logFlightDetections(aircraftList) {
+  try {
+    // Filter out already-logged flights
+    const newFlights = aircraftList.filter(plane => {
+      const callsign = plane.callsign?.trim() || plane.icao24;
+      return !loggedFlights.has(callsign);
+    });
+
+    if (newFlights.length === 0) {
+      return; // All flights already logged
+    }
+
+    const detections = newFlights.map(plane => ({
+      callsign: plane.callsign?.trim() || plane.icao24,
+      detectedAt: new Date().toISOString()
+    }));
+
+    const response = await fetch('http://localhost:3001/api/log-detections', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ detections }),
+    });
+
+    if (response.ok) {
+      // Mark all as logged
+      newFlights.forEach(plane => {
+        const callsign = plane.callsign?.trim() || plane.icao24;
+        loggedFlights.add(callsign);
+      });
+      console.log(`📝 Logged ${newFlights.length} new flight detections`);
+    } else {
+      console.error('Failed to log flight detections:', response.status);
+    }
+  } catch (error) {
+    console.error('Error logging flight detections:', error);
+  }
+}
+
+/**
+ * Reset logged flights (useful for testing or daily reset)
+ */
+export function resetLoggedFlights() {
+  loggedFlights.clear();
+  console.log('🔄 Reset logged flights tracker');
+}
+
+/**
+ * Get count of logged flights this session
+ */
+export function getLoggedFlightsCount() {
+  return loggedFlights.size;
+}

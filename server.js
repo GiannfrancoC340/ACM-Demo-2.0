@@ -1,5 +1,6 @@
 import express from 'express';
-import fs from 'fs';
+import fs from 'fs/promises';        // ← For async (mkdir, appendFile)
+import fsSync from 'fs';              // ← For sync (readdirSync)
 import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
@@ -155,7 +156,7 @@ app.get('/api/recording-dates', (req, res) => {
   const audioDir = path.join(__dirname, 'public', 'audio');
   
   try {
-    const files = fs.readdirSync(audioDir);
+    const files = fsSync.readdirSync(audioDir);
     const audioFiles = files.filter(file => 
       file.endsWith('.mp3') || file.endsWith('.wav')
     );
@@ -190,7 +191,7 @@ app.get('/api/flight/:flightId', (req, res) => {
     console.log(`Looking for files starting with: ${normalizedFlightId}`);
     
     // Find all audio files matching this flight
-    const files = fs.readdirSync(audioDir);
+    const files = fsSync.readdirSync(audioDir);
     const flightAudios = files
       .filter(file => 
         (file.endsWith('.mp3') || file.endsWith('.wav')) && 
@@ -358,6 +359,90 @@ app.post('/api/opensky-token', async (req, res) => {
       error: 'Token request error',
       message: error.message 
     });
+  }
+});
+
+// Simple flight detection logging endpoint
+app.post('/api/log-detections', async (req, res) => {
+  try {
+    const { detections } = req.body;
+
+    if (!detections || !Array.isArray(detections)) {
+      return res.status(400).json({ error: 'Invalid detections data' });
+    }
+
+    // Create logs directory if it doesn't exist
+    const logsDir = path.join(__dirname, 'logs', 'detections');
+    await fs.mkdir(logsDir, { recursive: true });
+
+    // Create daily log file
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const logFile = path.join(logsDir, `detections_${today}.txt`);
+
+    // Format log entries
+    const logEntries = detections.map(d => {
+      const time = new Date(d.detectedAt).toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        hour12: true,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      return `[${time}] ${d.callsign}`;
+    });
+
+    // Append to log file
+    await fs.appendFile(logFile, logEntries.join('\n') + '\n', 'utf8');
+
+    console.log(`📝 Logged ${detections.length} flight detections to ${logFile}`);
+    res.json({ 
+      success: true, 
+      logged: detections.length,
+      file: logFile 
+    });
+
+  } catch (error) {
+    console.error('Error logging flight detections:', error);
+    res.status(500).json({ error: 'Failed to log detections' });
+  }
+});
+
+// Alternative: Single detection endpoint (if you prefer logging one at a time)
+app.post('/api/log-detection', async (req, res) => {
+  try {
+    const { callsign, detectedAt } = req.body;
+
+    if (!callsign || !detectedAt) {
+      return res.status(400).json({ error: 'Missing callsign or timestamp' });
+    }
+
+    const logsDir = path.join(__dirname, 'logs', 'detections');
+    await fs.mkdir(logsDir, { recursive: true });
+
+    const today = new Date().toISOString().split('T')[0];
+    const logFile = path.join(logsDir, `detections_${today}.txt`);
+
+    const time = new Date(detectedAt).toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      hour12: true,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    await fs.appendFile(logFile, `[${time}] ${callsign}\n`, 'utf8');
+
+    res.json({ success: true, file: logFile });
+
+  } catch (error) {
+    console.error('Error logging flight detection:', error);
+    res.status(500).json({ error: 'Failed to log detection' });
   }
 });
 
