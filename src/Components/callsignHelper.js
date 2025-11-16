@@ -11,6 +11,25 @@ export function isCommercialCallsign(callsign) {
   
   const clean = callsign.trim().toUpperCase();
   
+  // ✅ NEW: Known private operators - check FIRST before anything else
+  const privateOperators = [
+    'EJA',  // NetJets
+    'VJA',  // VistaJet  
+    'WUP',  // Wheels Up
+    'HPJ',  // Hop-A-Jet
+    'JTL',  // Jet Linx
+    'SHR',  // Shoreline Aviation
+    'XOJ',  // XOJET
+    'TWY',  // Jet Aviation
+    'FLX',  // Flexjet
+  ];
+  
+  // ✅ Check if it's a known private operator FIRST
+  const prefix3 = clean.substring(0, 3);
+  if (privateOperators.includes(prefix3)) {
+    return false;  // Definitely private, not commercial
+  }
+  
   // Common commercial airline ICAO codes
   const commercialPrefixes = [
     'AAL',  // American Airlines
@@ -24,13 +43,13 @@ export function isCommercialCallsign(callsign) {
     'HAL',  // Hawaiian Airlines
     'SKW',  // SkyWest
     'ENY',  // Envoy Air
-    'ENV',  // Envoy Air (alternative code) ← ADD THIS
+    'ENV',  // Envoy Air (alternative code)
     'CPZ',  // Compass Airlines
     'FDX',  // FedEx
     'UPS',  // UPS
     'ABX',  // ABX Air
     'GTI',  // Atlas Air
-    'AJT',  // Amerijet International ← ADD THIS
+    'AJT',  // Amerijet International
     'BAW',  // British Airways
     'DLH',  // Lufthansa
     'AFR',  // Air France
@@ -40,15 +59,15 @@ export function isCommercialCallsign(callsign) {
     'VIV',  // VivaAerobus
     'AMX',  // Aeromexico
     'JNY',  // JetNetherlands
-    'SVA',  // Riyadh Air ← NEW
-    'UAE',  // Emirates ← NEW
-    'AVA',  // Avianca ← NEW
-    'CMP',  // Copa Airlines ← NEW
-    'THY',  // Turkish Airlines ← NEW
-    'BHS',  // Bahamasair ← NEW
-    'LAN',  // LATAM Airlines ← NEW
-    'TAM',  // LATAM Airlines (Brazil) ← NEW
-    'JTA',  // LATAM Airlines (alternate) ← NEW
+    'SVA',  // Riyadh Air
+    'UAE',  // Emirates
+    'AVA',  // Avianca
+    'CMP',  // Copa Airlines
+    'THY',  // Turkish Airlines
+    'BHS',  // Bahamasair
+    'LAN',  // LATAM Airlines
+    'TAM',  // LATAM Airlines (Brazil)
+    'JTA',  // LATAM Airlines (alternate)
     'ETD',  // Etihad Airways
     'AAY',  // Allegiant Air
     'TVI',  // Tropic Ocean Airways (scheduled seaplane service)
@@ -189,7 +208,9 @@ export function getAirlineFromCallsign(callsign) {
     'SHR': 'Shoreline Aviation',
     'HPJ': 'Hop-A-Jet',
     'JTL': 'Jet Linx',
-    'WUP': 'Wheels Up',
+    'XOJ': 'XOJet',
+    'TWY': 'Jet Aviation',
+    'FLX': 'FlexJet',
     'CKS': 'Kalitta Air',
     'ATN': 'Air Transport International',
     'WWI': 'Western Global Airlines',
