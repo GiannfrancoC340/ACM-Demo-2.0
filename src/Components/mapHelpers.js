@@ -210,9 +210,12 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     }
   }
   
-  console.log(`🏷️ enrichmentSource set to: ${flightData 
-  ? (aircraftData ? 'AviationStack + AeroDataBox' : 'AviationStack')
-  : (isCommercialCallsign(plane.callsign) ? 'AviationStack' : (aircraftData ? 'AeroDataBox' : 'None'))}`);
+  // Calculate enrichment source once
+  const source = flightData 
+    ? (aircraftData ? 'AviationStack + AeroDataBox' : 'AviationStack')
+    : (aircraftData ? 'AeroDataBox' : (isCommercialCallsign(plane.callsign) ? 'AviationStack' : 'None'));
+
+  console.log(`🏷️ enrichmentSource set to: ${source}`);
   
   return {
     flightId: `live-${plane.icao24}`,
@@ -317,11 +320,8 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       on_ground: plane.on_ground
     },
     // Enrichment source - check aircraft type to avoid misclassifying private as commercial
-    enrichmentSource: flightData 
-      ? (aircraftData ? 'AviationStack + AeroDataBox' : 'AviationStack')
-      : (aircraftData?.aircraftType && isPrivateAircraftType(aircraftData.aircraftType)
-          ? (aircraftData ? 'AeroDataBox' : 'None')  // Private aircraft, use AeroDataBox badge
-          : (isCommercialCallsign(plane.callsign) ? 'AviationStack' : (aircraftData ? 'AeroDataBox' : 'None'))),
+    // Enrichment source for badge display
+    enrichmentSource: source,  // ← Use the variable
     audioRecordings: []
   };
 }
