@@ -106,7 +106,7 @@ function parseAudioMetadata(filename) {
 function estimateTimestamp(filename, audioDir) {
   try {
     const filePath = path.join(audioDir, filename);
-    const stats = fs.statSync(filePath);
+    const stats = fsSync.statSync(filePath);
     const time = new Date(stats.birthtime);
     
     // Format as "H:MM AM/PM"
@@ -126,7 +126,7 @@ function estimateTimestamp(filename, audioDir) {
 app.get('/api/playlist', (req, res) => {
   const audioDir = path.join(__dirname, 'public/audio');
   
-  fs.readdir(audioDir, (err, files) => {
+  fsSync.readdir(audioDir, (err, files) => {
     if (err) {
       return res.status(500).json({ error: 'Unable to read directory' });
     }
@@ -137,7 +137,7 @@ app.get('/api/playlist', (req, res) => {
     
     const playlist = audioFiles.map((file, index) => {
       const baseName = file.replace(/\.(mp3|wav)$/, '');
-      const transcriptExists = fs.existsSync(path.join(audioDir, `${baseName}.txt`));
+      const transcriptExists = fsSync.existsSync(path.join(audioDir, `${baseName}.txt`));
       
       return {
         id: index + 1,
@@ -163,7 +163,7 @@ app.get('/api/recording-dates', (req, res) => {
     
     const recordingDates = audioFiles.map(file => {
       const filePath = path.join(audioDir, file);
-      const stats = fs.statSync(filePath);
+      const stats = fsSync.statSync(filePath);
       
       return {
         filename: file,
