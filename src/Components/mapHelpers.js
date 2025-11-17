@@ -192,6 +192,13 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     // Step 1: Try AviationStack (commercial flights)
     console.log(`🔍 Step 1: Checking AviationStack for ${plane.callsign}`);
     flightData = await getFlightDetails(plane.callsign);
+
+    // ✅ ALWAYS log the result (whether null or not)
+    console.log('📊 FlightData for', plane.callsign, ':', flightData ? {
+      departureScheduled: flightData.departure?.scheduledTime,
+      arrivalScheduled: flightData.arrival?.scheduledTime,
+      duration: flightData.duration
+    } : 'No data found');
     
     // Step 2: Check AeroDataBox if:
     // - No commercial flight data found (private flight), OR
