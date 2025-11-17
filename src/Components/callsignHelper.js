@@ -11,25 +11,6 @@ export function isCommercialCallsign(callsign) {
   
   const clean = callsign.trim().toUpperCase();
   
-  // ✅ NEW: Known private operators - check FIRST before anything else
-  const privateOperators = [
-    'EJA',  // NetJets
-    'VJA',  // VistaJet  
-    'WUP',  // Wheels Up
-    'HPJ',  // Hop-A-Jet
-    'JTL',  // Jet Linx
-    'SHR',  // Shoreline Aviation
-    'XOJ',  // XOJET
-    'TWY',  // Jet Aviation
-    'FLX',  // Flexjet
-  ];
-  
-  // ✅ Check if it's a known private operator FIRST
-  const prefix3 = clean.substring(0, 3);
-  if (privateOperators.includes(prefix3)) {
-    return false;  // Definitely private, not commercial
-  }
-  
   // Common commercial airline ICAO codes
   const commercialPrefixes = [
     'AAL',  // American Airlines
