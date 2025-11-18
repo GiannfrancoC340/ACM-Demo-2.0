@@ -1,0 +1,80 @@
+============================================================
+DETECTED FLIGHT NUMBERS/CALLSIGNS:
+============================================================
+  • Palm 7
+  • Palm 356
+  • Signature 4
+  • Signature 73
+  • Signature 5
+  • Global 36
+  • Global 6
+  • Global 5
+  • N738WC
+============================================================
+TRANSCRIPT:
+============================================================
+[00:00:00.000 – 00:00:02.680] We're still got 356. Ready to run with us.
+[00:00:02.680 – 00:00:06.880] STLJFIR, Crescent 356, Bucatara is waiting on your
+                              release for traffic in the area.
+[00:00:06.880 – 00:00:11.920] STLJFIR 356, thanks for your patience. You're
+                              still running on your release with the Palm Beach
+                              approach control.
+[00:00:11.920 – 00:00:18.940] Bucatara, November 7, 38, Whiskey, Charlie,
+                              Skyhawk, 12 miles out to the northwest here.
+[00:00:18.940 – 00:00:22.440] I have Quebec, I'm looking for a full stop to run
+                              a Signature.
+[00:00:22.440 – 00:00:26.220] SCAC 73, Whiskey, Charlie, Bucatara on the left
+                              base, runway 5, report 4 miles.
+[00:00:26.220 – 00:00:28.840] Left base, runway 5, report 4 miles, Bucatara.
+[00:00:28.840 – 00:00:31.480] Bokeh Tower, Global 36, Mike Mike, visual 5.
+[00:00:31.480 – 00:00:36.300] Global 36, Mike Mike, Bokeh Tower, runway 5,
+                              cleared to land. When 34011 gets 1-7.
+[00:00:36.300 – 00:00:39.960] Golan, runway 5, cleared to land. Global 6, Mike
+                              Mike, say parking.
+[00:00:39.960 – 00:00:40.720] Signature.
+[00:00:40.720 – 00:00:44.080] Bokeh Tower, 4 mile left base, runway 5, cleared
+                              to land.
+[00:00:44.080 – 00:00:51.180] Bethany, Whiskey, Charlie, runway 5, cleared to
+                              land. Caution, let turbulence Global mile final
+                              and traffic will be departing ahead of you as a
+                              phenom.
+[00:00:51.180 – 00:00:55.600] Global on site, number 5, clear to land. Caution,
+                              make sure you pay Whiskey, Charlie.
+[00:00:55.600 – 00:00:58.240] Alright, Whiskey, Charlie, runway number 5,
+                              cleared to land.
+[00:00:58.240 – 00:01:01.000] Caution, runway 5, cleared to land. Caution,
+                              Whiskey, Charlie.
+[00:01:01.000 – 00:01:03.280] SteelJet 356, Bokeh Tower, are you ready?
+[00:01:03.280 – 00:01:04.580] Caution, runway 356.
+[00:01:04.580 – 00:01:07.040] Global 6, Mike Mike, tell out to Bravo 2.
+[00:01:07.040 – 00:01:08.860] Any chance to Bravo 1 for 6, Mike Mike?
+[00:01:08.860 – 00:01:13.400] Global 6, Mike Mike, approved as requested. Left
+                              to Bravo 1, left to Bravo to the ramp with this
+                              frequency.
+[00:01:13.400 – 00:01:15.760] Bravo 1, Bravo 1, use 6, Mike Mike today.
+[00:01:15.760 – 00:01:22.920] SteelJet 356, traffic 2 miles out say Chesna,
+                              runway 5. Clever takeoff, Miastner 3, maintain
+                              2,000.
+[00:01:22.920 – 00:01:27.520] Alright, Miastner 3, 2,000, runway 5, cleared to
+                              takeoff. SteelJet 356.
+[00:01:27.520 – 00:01:32.880] SteelJet 356, contact Palm Beach Departure, we'll
+                              charlie ya.
+[00:01:32.880 – 00:01:35.040] Holder departure, subject 356, charlie ya.
+[00:01:35.040 – 00:01:37.360] Bokeh Tower, 4.1, visual 5.
+[00:01:37.360 – 00:01:40.440] 4th flight, 1131, Bokeh Tower, runway 5, cleared
+                              to land.
+[00:01:40.440 – 00:01:42.240] 5, cleared to land, 4.1, visual 3.1.
+[00:01:42.240 – 00:01:48.000] Sesting Whiskey, Charlie, turn left to Bravo 5,
+                              left to Bravo 2, Signature this frequency.
+[00:01:48.000 – 00:01:53.760] Left on Bravo 5, Bravo over to Signature and stay
+                              in the view on this frequency. 7-3, Whiskey,
+                              Charlie, thank you, sir.
+
+============================================================
+SUMMARY:
+  Total segments: 31
+  Unique callsigns: 9
+  Total callsign mentions: 9
+  Average confidence: 0.90
+  Most mentioned: Palm 7 (1 times)
+============================================================
