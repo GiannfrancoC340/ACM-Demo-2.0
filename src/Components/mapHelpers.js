@@ -50,22 +50,47 @@ export const redIcon = L.icon({
  * @param {string} timezone - Optional timezone (e.g., 'America/New_York')
  * @returns {string} Formatted time like "2:30 PM"
  */
-function formatTime(isoString, timezone = 'America/New_York') {
+function formatTime(isoString, timezone = 'America/New_York', treatAsLocalTime = false) {
   if (!isoString) return null;
   
   try {
-    const date = new Date(isoString);
+    // ✨ Normalize malformed timestamps (missing seconds)
+    let normalizedString = isoString;
+    if (/T\d{2}:\d{2}(?!:)([+-Z])/.test(normalizedString)) {
+      console.log(`⚠️ Malformed timestamp detected: ${normalizedString}`);
+      normalizedString = normalizedString.replace(/T(\d{2}:\d{2})([+-Z])/, 'T$1:00$2');
+      console.log(`✅ Normalized to: ${normalizedString}`);
+    }
+    
+    let date;
+    
+    if (treatAsLocalTime) {
+      // ✨ FIX: AviationStack returns local times marked as UTC
+      // Strip timezone info and parse as local time
+      const dateTimeOnly = normalizedString.replace(/[+-]\d{2}:\d{2}$|Z$/, '');
+      date = new Date(dateTimeOnly);
+      console.log(`🔧 Treating as local time: ${normalizedString} → ${dateTimeOnly}`);
+    } else {
+      // Normal parsing (for times from live calculations)
+      date = new Date(normalizedString);
+    }
 
-    // Convert to specified timezone (default: Eastern Time for MIA/BCT)
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.error(`❌ Invalid date after parsing: ${isoString}`);
+      return isoString;
+    }
+
+    // Format to display timezone
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
       hour12: true,
-      timeZone: timezone  // This converts UTC to local time
+      timeZone: treatAsLocalTime ? undefined : timezone
     });
   } catch (error) {
     console.error('Error formatting time:', error);
-    return isoString; // Return original if parsing fails
+    return isoString;
   }
 }
 
@@ -74,13 +99,19 @@ function formatTime(isoString, timezone = 'America/New_York') {
  * For departures: Returns true if more than 30 minutes in the past
  * For arrivals: Returns true if more than 30 minutes in the past AND no departure data
  */
-function isScheduledTimeStale(isoString, isArrivalTime = false, hasFlightData = false) {
+function isScheduledTimeStale(isoString, isArrivalTime = false, hasFlightData = false, isLiveAircraft = false) {
   if (!isoString) return false;
   
   try {
     const scheduledTime = new Date(isoString);
     const now = new Date();
     const diffMinutes = (now - scheduledTime) / (1000 * 60);
+
+    // For live aircraft (currently tracked), never mark times as stale
+    // These are real flights in progress, even if departed yesterday
+    if (isLiveAircraft && hasFlightData) {
+      return false; // Never mark as stale for live tracked aircraft
+    }
     
     // For arrival times on flights with full flight data, be more lenient
     // The flight might have departed hours ago but is still in progress
@@ -93,8 +124,8 @@ function isScheduledTimeStale(isoString, isArrivalTime = false, hasFlightData = 
     // For departure times, if we have flight data and it's in the past,
     // that's expected for an arriving/in-flight aircraft
     if (!isArrivalTime && hasFlightData) {
-      // Only mark as stale if departure was MORE than 12 hours ago
-      return diffMinutes > 720; // 12 hours
+      // Only mark as stale if departure was MORE than 24 hours ago
+      return diffMinutes > 1440; // 24 hours (was 12, now 24 for long-haul)
     }
     
     // Default: If scheduled time is more than 30 minutes ago, it's stale
@@ -179,10 +210,6 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
   const estimatedDuration = plane.velocity > 0 
     ? Math.round((parseFloat(distanceFromMIA) / plane.velocity) * 60)
     : null;
-  
-  const durationStr = estimatedDuration 
-    ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)`
-    : "Unknown";
 
   // Try to enrich with external APIs
   let flightData = null;
@@ -225,14 +252,22 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       ? `${flightData.departure.iata || 'UNK'} to ${flightData.arrival.iata || 'UNK'}`
       : (isDeparture ? `MIA to ${plane.origin_country}` : `${plane.origin_country} to MIA`),
     time: timeStr,
-    boardingTime: (flightData?.departure.scheduledTime && 
-              !isScheduledTimeStale(flightData.departure.scheduledTime, false, !!flightData))
-      ? formatTime(flightData.departure.scheduledTime)
-      : (isDeparture ? timeStr : 'N/A'),
+    boardingTime: (() => {
+      const hasScheduled = !!flightData?.departure.scheduledTime;
+      const isStale = hasScheduled && isScheduledTimeStale(flightData.departure.scheduledTime, false, !!flightData, true);
+      
+      if (hasScheduled && !isStale) {
+        return formatTime(flightData.departure.scheduledTime, 'America/New_York', true);  // ✅ FIXED
+      } else if (isDeparture) {
+        return timeStr;
+      } else {
+        return 'N/A';
+      }
+    })(),
     arrivalTime: (flightData?.arrival.scheduledTime && 
-              !isScheduledTimeStale(flightData.arrival.scheduledTime, true, !!flightData))
-      ? formatTime(flightData.arrival.scheduledTime)
-      : (!isDeparture ? timeStr : 'N/A'),
+          !isScheduledTimeStale(flightData.arrival.scheduledTime, true, !!flightData, true))
+  ? formatTime(flightData.arrival.scheduledTime, 'America/New_York', true)  // ✅ FIXED
+  : (!isDeparture ? timeStr : 'N/A'),
     // ✅ For private flights, just show "Private Flight"
     // Smart airline detection with aircraft type intelligence:
     // 1. Use AviationStack airline if available
