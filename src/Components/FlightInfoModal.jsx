@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { flightData, convertLiveAircraftToFlight, getBCTFlights } from './maphelpers';
+import { saveFlightToFirestore } from '../services/firestoreFlightService'; // ← ADD THIS
 // import './FlightInfo.css';
 
 export default function FlightInfoModal({ flightId, flights, liveAircraft = [], onClose }) {
@@ -66,6 +67,25 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
   
   loadFlightDetails();
 }, [flightId, flights, liveAircraft]);
+
+// 6. Auto-save to Firestore 2 seconds after modal opens
+useEffect(() => {
+  if (!flightDetails) return;
+
+  const timer = setTimeout(async () => {
+    try {
+      console.log('💾 Auto-saving flight to Firestore in 2 seconds...');
+      const docId = await saveFlightToFirestore(flightDetails);
+      console.log('✅ Flight saved to Firestore! Document ID:', docId);
+    } catch (error) {
+      console.error('❌ Failed to save flight to Firestore:', error);
+      // Don't block the UI, just log the error
+    }
+  }, 2000); // 2 second delay
+
+  // Cleanup timer if modal closes before 2 seconds
+  return () => clearTimeout(timer);
+}, [flightDetails]); // Run when flightDetails loads
 
   // 2. Fetch audio recordings from backend
   useEffect(() => {
