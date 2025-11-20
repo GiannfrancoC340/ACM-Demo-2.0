@@ -46,6 +46,7 @@ const AIRPORT_DATABASE = {
   'TPA': { city: 'Tampa', state: 'Florida' },
   'PDX': { city: 'Portland', state: 'Oregon' },
   'STL': { city: 'St. Louis', state: 'Missouri' },
+  'NAS': { city: 'Nassau', state: 'Bahamas' },
 };
 
 /**

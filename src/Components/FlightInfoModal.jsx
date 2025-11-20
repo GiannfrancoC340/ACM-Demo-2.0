@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { flightData, convertLiveAircraftToFlight, getBCTFlights } from './maphelpers';
-import { saveFlightToFirestore } from '../services/firestoreFlightService'; // ← ADD THIS
+import { saveFlightToFirestore, saveAirportLocation } from '../services/firestoreFlightService';
 // import './FlightInfo.css';
 
 export default function FlightInfoModal({ flightId, flights, liveAircraft = [], onClose }) {
@@ -69,14 +69,14 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
 }, [flightId, flights, liveAircraft]);
 
   // 6. Auto-save to Firestore 2 seconds after modal opens (ONCE only)
+  // Replace your current Firestore useEffect with this:
   const hasSavedRef = useRef(new Set());
 
   useEffect(() => {
     if (!flightDetails?.flightId) return;
     
-    // Check if we've already saved this specific flight
     if (hasSavedRef.current.has(flightDetails.flightId)) {
-      return; // Already saved, skip
+      return;
     }
 
     const timer = setTimeout(async () => {
@@ -84,7 +84,16 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
         console.log('💾 Auto-saving flight to Firestore...');
         const docId = await saveFlightToFirestore(flightDetails);
         console.log('✅ Flight saved! Doc ID:', docId);
-        hasSavedRef.current.add(flightDetails.flightId); // Mark as saved
+        
+        // ✨ NEW: Also save airports to locations
+        if (flightDetails.departureAirport) {
+          await saveAirportLocation(flightDetails.departureAirport);
+        }
+        if (flightDetails.arrivalAirport) {
+          await saveAirportLocation(flightDetails.arrivalAirport);
+        }
+        
+        hasSavedRef.current.add(flightDetails.flightId);
       } catch (error) {
         console.error('❌ Failed to save:', error);
       }
