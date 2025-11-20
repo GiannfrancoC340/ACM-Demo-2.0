@@ -68,24 +68,30 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
   loadFlightDetails();
 }, [flightId, flights, liveAircraft]);
 
-// 6. Auto-save to Firestore 2 seconds after modal opens
-useEffect(() => {
-  if (!flightDetails) return;
+  // 6. Auto-save to Firestore 2 seconds after modal opens (ONCE only)
+  const hasSavedRef = useRef(new Set());
 
-  const timer = setTimeout(async () => {
-    try {
-      console.log('💾 Auto-saving flight to Firestore in 2 seconds...');
-      const docId = await saveFlightToFirestore(flightDetails);
-      console.log('✅ Flight saved to Firestore! Document ID:', docId);
-    } catch (error) {
-      console.error('❌ Failed to save flight to Firestore:', error);
-      // Don't block the UI, just log the error
+  useEffect(() => {
+    if (!flightDetails?.flightId) return;
+    
+    // Check if we've already saved this specific flight
+    if (hasSavedRef.current.has(flightDetails.flightId)) {
+      return; // Already saved, skip
     }
-  }, 2000); // 2 second delay
 
-  // Cleanup timer if modal closes before 2 seconds
-  return () => clearTimeout(timer);
-}, [flightDetails]); // Run when flightDetails loads
+    const timer = setTimeout(async () => {
+      try {
+        console.log('💾 Auto-saving flight to Firestore...');
+        const docId = await saveFlightToFirestore(flightDetails);
+        console.log('✅ Flight saved! Doc ID:', docId);
+        hasSavedRef.current.add(flightDetails.flightId); // Mark as saved
+      } catch (error) {
+        console.error('❌ Failed to save:', error);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [flightDetails?.flightId]);
 
   // 2. Fetch audio recordings from backend
   useEffect(() => {
