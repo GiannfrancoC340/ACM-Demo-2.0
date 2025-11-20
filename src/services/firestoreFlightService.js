@@ -16,6 +16,64 @@ import {
 } from 'firebase/firestore';
 
 /**
+ * Airport database for missing state/city info
+ * Add more airports as needed
+ */
+const AIRPORT_DATABASE = {
+  'MIA': { city: 'Miami', state: 'Florida' },
+  'IAH': { city: 'Houston', state: 'Texas' },
+  'LAX': { city: 'Los Angeles', state: 'California' },
+  'SFO': { city: 'San Francisco', state: 'California' },
+  'JFK': { city: 'New York', state: 'New York' },
+  'ORD': { city: 'Chicago', state: 'Illinois' },
+  'ATL': { city: 'Atlanta', state: 'Georgia' },
+  'DFW': { city: 'Dallas', state: 'Texas' },
+  'DEN': { city: 'Denver', state: 'Colorado' },
+  'SEA': { city: 'Seattle', state: 'Washington' },
+  'BOS': { city: 'Boston', state: 'Massachusetts' },
+  'EWR': { city: 'Newark', state: 'New Jersey' },
+  'LAS': { city: 'Las Vegas', state: 'Nevada' },
+  'PHX': { city: 'Phoenix', state: 'Arizona' },
+  'MCO': { city: 'Orlando', state: 'Florida' },
+  'CLT': { city: 'Charlotte', state: 'North Carolina' },
+  'MSP': { city: 'Minneapolis', state: 'Minnesota' },
+  'DTW': { city: 'Detroit', state: 'Michigan' },
+  'PHL': { city: 'Philadelphia', state: 'Pennsylvania' },
+  'LGA': { city: 'New York', state: 'New York' },
+  'BWI': { city: 'Baltimore', state: 'Maryland' },
+  'SLC': { city: 'Salt Lake City', state: 'Utah' },
+  'SAN': { city: 'San Diego', state: 'California' },
+  'TPA': { city: 'Tampa', state: 'Florida' },
+  'PDX': { city: 'Portland', state: 'Oregon' },
+  'STL': { city: 'St. Louis', state: 'Missouri' },
+};
+
+/**
+ * Enhance airport data with missing city/state info
+ */
+function enhanceAirportData(airport) {
+  const code = airport.code?.toUpperCase();
+  const knownAirport = AIRPORT_DATABASE[code];
+  
+  if (knownAirport) {
+    return {
+      code: airport.code,
+      name: airport.name,
+      city: knownAirport.city,  // Use our database
+      state: knownAirport.state  // Use our database
+    };
+  }
+  
+  // Return as-is if not in database
+  return {
+    code: airport.code,
+    name: airport.name,
+    city: airport.city || "Unknown",
+    state: airport.state || ""
+  };
+}
+
+/**
  * Main function: Save or update flight data to Firestore
  * Called automatically 2 seconds after modal opens
  * @param {Object} flightData - Complete flight object from convertLiveAircraftToFlight
@@ -106,21 +164,11 @@ async function createNewFlight(flightIdentifier, flightData) {
     distance: flightData.distance,
     
     // Departure card fields
-    departureAirport: {
-      code: flightData.departureAirport.code,
-      name: flightData.departureAirport.name,
-      city: flightData.departureAirport.city,
-      state: flightData.departureAirport.state || ""
-    },
+    departureAirport: enhanceAirportData(flightData.departureAirport),
     boardingTime: flightData.boardingTime,
     
     // Arrival card fields
-    arrivalAirport: {
-      code: flightData.arrivalAirport.code,
-      name: flightData.arrivalAirport.name,
-      city: flightData.arrivalAirport.city,
-      state: flightData.arrivalAirport.state || ""
-    },
+    arrivalAirport: enhanceAirportData(flightData.arrivalAirport),
     arrivalTime: flightData.arrivalTime,
     
     // Audio recordings (initially empty for live flights)
