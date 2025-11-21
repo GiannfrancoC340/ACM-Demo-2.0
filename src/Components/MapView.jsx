@@ -23,15 +23,16 @@ export default function MapView() {
   const [showRadius, setShowRadius] = useState(true);
   const [searchRadius, setSearchRadius] = useState(50);
   const [demoMode, setDemoMode] = useState(false);
+  const [positionDelay, setPositionDelay] = useState(3); // NEW: Default 3 minutes
   const popupRef = useRef(null);
   const [apiCallCount, setApiCallCount] = useState(0);
   
   const initialFlightsToShow = flights.slice(0, 3);
 
-  const bocaRatonAirport = {
-    lat: 26.3785,
-    lng: -80.1077,
-    description: "Boca Raton Airport (BCT)"
+  const miamiAirport = {
+    lat: 25.7959,
+    lng: -80.2870,
+    description: "Miami International Airport (MIA)"
   };
 
   // Fetch flights from Firebase
@@ -114,7 +115,52 @@ export default function MapView() {
         searchRadius={searchRadius}
         setSearchRadius={setSearchRadius}
         apiCallCount={apiCallCount}
+        positionDelay={positionDelay}
+        setPositionDelay={setPositionDelay}
       />
+
+      {/* NEW: Delay Status Indicator */}
+      {showLiveAircraft && (
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 999,
+          width: '100%',
+          padding: '10px 30px',
+          backgroundColor: positionDelay > 0 ? '#fff3cd' : '#d1fae5',
+          borderBottom: `2px solid ${positionDelay > 0 ? '#f59e0b' : '#10b981'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '10px',
+          fontSize: '0.95rem',
+          fontWeight: '600',
+          color: positionDelay > 0 ? '#78350f' : '#065f46'
+        }}>
+          {positionDelay === 0 ? (
+            <>
+              <span style={{ fontSize: '1.2rem' }}>🔴</span>
+              <span>LIVE - Showing real-time aircraft positions</span>
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: '1.2rem' }}>🕐</span>
+              <span>
+                DELAYED - Showing positions from {positionDelay} minute{positionDelay !== 1 ? 's' : ''} ago
+              </span>
+              <span style={{ 
+                fontSize: '0.85rem', 
+                padding: '4px 8px', 
+                backgroundColor: 'rgba(0,0,0,0.1)', 
+                borderRadius: '4px',
+                marginLeft: '10px'
+              }}>
+                Audio transcription sync mode
+              </span>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Map Container - Takes remaining space */}
       <div style={{ 
@@ -126,7 +172,7 @@ export default function MapView() {
 
       {/* The Map */}
       <MapContainer 
-        center={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
+        center={[miamiAirport.lat, miamiAirport.lng]} 
         zoom={13} 
         className="map-container"
       >
@@ -136,13 +182,13 @@ export default function MapView() {
         />
         
         <Marker 
-          position={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
+          position={[miamiAirport.lat, miamiAirport.lng]} 
           icon={redIcon}
         >
           <Popup onClose={handlePopupClose}>
             <div className="airport-popup">
-              <h3>{bocaRatonAirport.description}</h3>
-              <p>A public-use airport serving South Florida</p>
+              <h3>{miamiAirport.description}</h3>
+              <p>Major international hub serving South Florida</p>
               
               {/* Show live flight count */}
               {liveAircraft.length > 0 ? (
@@ -268,7 +314,7 @@ export default function MapView() {
               </div>
               
               <div className="coordinates-info">
-                Coordinates: {bocaRatonAirport.lat.toFixed(4)}, {bocaRatonAirport.lng.toFixed(4)}
+                Coordinates: {miamiAirport.lat.toFixed(4)}, {miamiAirport.lng.toFixed(4)}
               </div>
             </div>
           </Popup>
@@ -284,6 +330,7 @@ export default function MapView() {
           radiusKm={searchRadius}
           refreshInterval={demoMode ? 20000 : 90000}
           onAircraftUpdate={setLiveAircraft}
+          positionDelay={positionDelay}
         />
       </MapContainer>
 
