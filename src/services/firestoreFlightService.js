@@ -5,14 +5,14 @@
 import { db } from '../firebaseConfig';
 import { 
   collection, 
-  doc, 
-  addDoc,
+  doc,
+  setDoc,
+  getDoc, 
   serverTimestamp,
   query,
   where,
   getDocs,
-  updateDoc,
-  getDoc
+  updateDoc
 } from 'firebase/firestore';
 
 /**
@@ -146,7 +146,8 @@ async function findExistingFlight(flightIdentifier) {
  * Matches your exact schema from flight-1, flight-2, etc.
  */
 async function createNewFlight(flightIdentifier, flightData) {
-  const flightsRef = collection(db, 'flights');
+  const docId = flightIdentifier.toLowerCase();
+  const flightDocRef = doc(db, 'flights', docId);
   
   const flightDoc = {
     // Core identifiers
@@ -182,15 +183,15 @@ async function createNewFlight(flightIdentifier, flightData) {
     clickCount: 1
   };
   
-  const docRef = await addDoc(flightsRef, flightDoc);
-  console.log('✅ Flight saved with ID:', docRef.id);
+  await setDoc(flightDocRef, flightDoc);
+  console.log('✅ Flight saved with ID:', docId);
   
   // Also save initial position snapshot to aircraft_positions
   if (flightData.liveData) {
-    await savePositionSnapshot(docRef.id, flightData);
+    await savePositionSnapshot(docId, flightData); // ✅ Use docId instead
   }
   
-  return docRef.id;
+  return docId;
 }
 
 /**
@@ -235,7 +236,12 @@ async function updateExistingFlight(docId, flightData) {
  */
 async function savePositionSnapshot(flightDocId, flightData) {
   try {
-    const positionsRef = collection(db, 'aircraft_positions');
+    // Create readable position ID: callsign-timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -1); // Remove trailing Z
+    const callsign = (flightData.flightNumber || flightData.liveData.icao24).toLowerCase();
+    const positionId = `${callsign}-${timestamp}`;
+    
+    const positionDocRef = doc(db, 'aircraft_positions', positionId);
     
     const positionDoc = {
       // Link to parent flight
@@ -261,7 +267,7 @@ async function savePositionSnapshot(flightDocId, flightData) {
       timestamp: serverTimestamp()
     };
     
-    await addDoc(positionsRef, positionDoc);
+    await setDoc(positionDocRef, positionDoc);
     console.log('📍 Position snapshot saved for:', positionDoc.callsign);
   } catch (error) {
     console.error('Error saving position snapshot:', error);
@@ -275,14 +281,12 @@ async function savePositionSnapshot(flightDocId, flightData) {
  */
 export async function saveAirportLocation(airportData) {
   try {
-    const locationsRef = collection(db, 'locations');
     const airportCode = airportData.code.toLowerCase();
+    const locationDocRef = doc(db, 'locations', airportCode); // Use airport code as ID
     
     // Check if airport already exists
-    const q = query(locationsRef, where('airportCode', '==', airportCode.toUpperCase()));
-    const existing = await getDocs(q);
-    
-    if (!existing.empty) {
+    const existingDoc = await getDoc(locationDocRef);
+    if (existingDoc.exists()) {
       console.log('📍 Airport already in database:', airportCode);
       return;
     }
@@ -298,7 +302,7 @@ export async function saveAirportLocation(airportData) {
       createdAt: serverTimestamp()
     };
     
-    await addDoc(locationsRef, locationDoc);
+    await setDoc(locationDocRef, locationDoc);
     console.log('✅ Airport location saved:', airportCode);
   } catch (error) {
     console.error('Error saving airport location:', error);
