@@ -10,12 +10,14 @@ export default function MapNavbar({
   setDemoMode,
   searchRadius,
   setSearchRadius,
-  apiCallCount
+  apiCallCount,
+  positionDelay,
+  setPositionDelay
 }) {
   return (
     <div style={{
-      position: 'sticky',  // ← Add this
-      top: 0,              // ← Add this
+      position: 'sticky',
+      top: 0,
       zIndex: 1000,
       width: '100%',
       background: 'white',
@@ -25,7 +27,7 @@ export default function MapNavbar({
       display: 'flex',
       gap: '20px',
       alignItems: 'center',
-      justifyContent: 'flex-start', // Spread items across
+      justifyContent: 'flex-start',
       flexWrap: 'wrap',
       borderBottom: '1px solid #e0e0e0',
     }}>
@@ -36,7 +38,7 @@ export default function MapNavbar({
         alignItems: 'center',
         flexWrap: 'wrap'
       }}>
-        {/* Add this brand section */}
+        {/* Brand section */}
         <div style={{
             fontSize: '1.2rem',
             fontWeight: 'bold',
@@ -188,7 +190,37 @@ export default function MapNavbar({
           />
         </div>
 
-        {/* API Counter - NOW IN MIDDLE SECTION */}
+        {/* NEW: Position Delay Slider */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '10px',
+          minWidth: '200px',
+          padding: '8px 12px',
+          backgroundColor: positionDelay > 0 ? '#fff3cd' : '#f0f9ff',
+          borderRadius: '6px',
+          border: `2px solid ${positionDelay > 0 ? '#f59e0b' : '#3b82f6'}`
+        }}>
+          <label style={{ 
+            fontSize: '0.9rem', 
+            fontWeight: '600',
+            whiteSpace: 'nowrap'
+          }}>
+            {positionDelay > 0 ? '🕐' : '🔴'} Delay: {positionDelay} min
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="6"
+            step="0.5"
+            value={positionDelay}
+            onChange={(e) => setPositionDelay(Number(e.target.value))}
+            style={{ width: '120px' }}
+            disabled={!showLiveAircraft}
+          />
+        </div>
+
+        {/* API Counter */}
         <div style={{ 
             padding: '8px 16px', 
             backgroundColor: apiCallCount >= 95 ? '#fee2e2' : apiCallCount >= 80 ? '#fff3cd' : '#f0f9ff',
