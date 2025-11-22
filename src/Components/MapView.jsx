@@ -27,6 +27,19 @@ export default function MapView() {
   const popupRef = useRef(null);
   const [apiCallCount, setApiCallCount] = useState(0);
   
+  // NEW: Log delay changes
+  useEffect(() => {
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`⚙️ POSITION DELAY CHANGED: ${positionDelay} minutes`);
+    console.log(`🎚️ Mode: ${positionDelay === 0 ? 'REAL-TIME (🔴 LIVE)' : `DELAYED (🕐 ${positionDelay} min ago)`}`);
+    console.log(`⏰ Current time: ${new Date().toLocaleTimeString()}`);
+    if (positionDelay > 0) {
+      const targetTime = new Date(Date.now() - (positionDelay * 60 * 1000));
+      console.log(`📍 Showing positions from: ${targetTime.toLocaleTimeString()}`);
+    }
+    console.log(`${'='.repeat(60)}\n`);
+  }, [positionDelay]);
+  
   const initialFlightsToShow = flights.slice(0, 3);
 
   const miamiAirport = {

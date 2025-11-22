@@ -40,9 +40,13 @@ function createAirplaneIcon(heading) {
   });
 }
 
-export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30000, radiusKm = 50, onAircraftUpdate = null,
+export default function LiveAircraftLayer({ 
+  enabled = true, 
+  refreshInterval = 30000, 
+  radiusKm = 50, 
+  onAircraftUpdate = null,
   positionDelay = 0 // NEW: delay in minutes (0 = real-time)
- }) {
+}) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -63,9 +67,12 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
         setPositionBuffer(prevBuffer => {
           const newBuffer = { ...prevBuffer };
           
+          console.log(`📥 Storing ${data.aircraft.length} aircraft positions in buffer...`);
+          
           data.aircraft.forEach(plane => {
             if (!newBuffer[plane.icao24]) {
               newBuffer[plane.icao24] = [];
+              console.log(`  🆕 New aircraft tracked: ${plane.icao24} (${plane.callsign})`);
             }
             
             // Add current position with timestamp
@@ -76,21 +83,36 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
             
             // Keep 10 minutes of history (600 seconds)
             const cutoffTime = currentTime - (10 * 60 * 1000);
+            const beforeCleanup = newBuffer[plane.icao24].length;
             newBuffer[plane.icao24] = newBuffer[plane.icao24].filter(
               pos => pos.timestamp > cutoffTime
             );
+            const afterCleanup = newBuffer[plane.icao24].length;
+            
+            if (beforeCleanup !== afterCleanup) {
+              console.log(`  🧹 Cleaned ${beforeCleanup - afterCleanup} old positions for ${plane.icao24}`);
+            }
           });
           
           // Clean up old aircraft not seen in 10 minutes
           const currentIcao24s = new Set(data.aircraft.map(a => a.icao24));
+          const removedAircraft = [];
           Object.keys(newBuffer).forEach(icao24 => {
             if (!currentIcao24s.has(icao24)) {
               const lastSeen = newBuffer[icao24][newBuffer[icao24].length - 1]?.timestamp;
               if (currentTime - lastSeen > 10 * 60 * 1000) {
+                removedAircraft.push(icao24);
                 delete newBuffer[icao24];
               }
             }
           });
+          
+          if (removedAircraft.length > 0) {
+            console.log(`🗑️ Removed ${removedAircraft.length} aircraft from buffer (not seen in 10 min)`);
+          }
+          
+          const totalPositions = Object.values(newBuffer).reduce((sum, positions) => sum + positions.length, 0);
+          console.log(`💾 Buffer status: ${Object.keys(newBuffer).length} aircraft, ${totalPositions} total positions stored`);
           
           return newBuffer;
         });
@@ -156,13 +178,18 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
 
   // NEW: Calculate delayed positions when delay changes
   useEffect(() => {
+    const now = Date.now();
+    
     if (positionDelay === 0) {
       // Real-time mode - use most recent positions from buffer
+      console.log('🔴 REAL-TIME MODE - Showing current positions');
+      
       const realtimeAircraft = Object.keys(positionBuffer).map(icao24 => {
         const positions = positionBuffer[icao24];
         return positions[positions.length - 1]; // Most recent
       }).filter(Boolean);
       
+      console.log(`✅ Displaying ${realtimeAircraft.length} aircraft at real-time positions`);
       setAircraft(realtimeAircraft);
       
       if (onAircraftUpdate) {
@@ -170,7 +197,13 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
       }
     } else {
       // Delayed mode - find positions from X minutes ago
-      const targetTime = Date.now() - (positionDelay * 60 * 1000);
+      const targetTime = now - (positionDelay * 60 * 1000);
+      const targetDate = new Date(targetTime);
+      
+      console.log(`🕐 DELAYED MODE - Delay: ${positionDelay} minutes`);
+      console.log(`⏰ Current time: ${new Date(now).toLocaleTimeString()}`);
+      console.log(`📍 Target time: ${targetDate.toLocaleTimeString()} (${positionDelay} min ago)`);
+      console.log(`🗂️ Buffer size: ${Object.keys(positionBuffer).length} aircraft`);
       
       const delayedAircraft = Object.keys(positionBuffer).map(icao24 => {
         const positions = positionBuffer[icao24];
@@ -187,8 +220,16 @@ export default function LiveAircraftLayer({ enabled = true, refreshInterval = 30
           }
         });
         
+        if (closestPosition) {
+          const posAge = (now - closestPosition.timestamp) / 1000 / 60; // minutes
+          console.log(`  ✈️ ${icao24}: Position from ${posAge.toFixed(1)} min ago (${new Date(closestPosition.timestamp).toLocaleTimeString()})`);
+        }
+        
         return closestPosition;
       }).filter(Boolean);
+      
+      console.log(`✅ Displaying ${delayedAircraft.length} aircraft at delayed positions`);
+      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       
       setAircraft(delayedAircraft);
       
