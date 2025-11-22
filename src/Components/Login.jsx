@@ -4,6 +4,8 @@ import { auth } from '../firebaseConfig'
 import { useNavigate, Link } from 'react-router-dom'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import './Auth.css'
+import { onAuthStateChanged } from 'firebase/auth'
+import { useEffect } from 'react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -18,6 +20,15 @@ export default function Login() {
     lng: -80.1077
   };
 
+    useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate('/map', { replace: true })
+      }
+    })
+    return () => unsubscribe()
+  }, [navigate])
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setError(null)
@@ -26,7 +37,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password)
       console.log('Login successful')
-      navigate('/map')
+      navigate('/map', { replace: true})
     } catch (err) {
       console.error('Login error:', err)
       setError(err.message)
