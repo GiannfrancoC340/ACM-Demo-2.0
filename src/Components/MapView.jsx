@@ -23,11 +23,11 @@ export default function MapView() {
   const [showRadius, setShowRadius] = useState(true);
   const [searchRadius, setSearchRadius] = useState(50);
   const [demoMode, setDemoMode] = useState(false);
-  const [positionDelay, setPositionDelay] = useState(3); // NEW: Default 3 minutes
+  const [positionDelay, setPositionDelay] = useState(3);
   const popupRef = useRef(null);
   const [apiCallCount, setApiCallCount] = useState(0);
   
-  // NEW: Log delay changes
+  // Log delay changes
   useEffect(() => {
     console.log(`\n${'='.repeat(60)}`);
     console.log(`⚙️ POSITION DELAY CHANGED: ${positionDelay} minutes`);
@@ -48,39 +48,64 @@ export default function MapView() {
     description: "Miami International Airport (MIA)"
   };
 
-  // Fetch flights from Firebase
+  // Helper: Get today's date in YYYY-MM-DD format (LOCAL timezone)
+  function getTodayDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // NEW: Fetch ONLY today's flights from Firebase
   useEffect(() => {
-    const fetchFlights = async () => {
+    const fetchTodaysFlights = async () => {
       try {
+        const today = getTodayDate();
+        console.log('📅 Fetching flights for today:', today);
+        
         const flightsCollection = collection(db, 'flights');
         const flightsSnapshot = await getDocs(flightsCollection);
-        const flightsList = flightsSnapshot.docs.map(doc => ({
+        
+        // Filter client-side for today's flights
+        const allFlights = flightsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-        setFlights(flightsList);
+        
+        const todaysFlights = allFlights.filter(flight => 
+          flight.flightId && flight.flightId.includes(today)
+        );
+        
+        console.log(`✅ Found ${todaysFlights.length} flights for today (out of ${allFlights.length} total)`);
+        setFlights(todaysFlights);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching flights:", error);
+        console.error("Error fetching today's flights:", error);
         setLoading(false);
       }
     };
 
-    fetchFlights();
+    fetchTodaysFlights();
 
-    // Optional: Real-time listener
+    // Real-time listener for TODAY's flights only
     const unsubscribe = onSnapshot(collection(db, 'flights'), (snapshot) => {
-      const flightsList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const today = getTodayDate();
+      const flightsList = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(flight => flight.flightId && flight.flightId.includes(today));
+      
+      console.log(`🔄 Real-time update: ${flightsList.length} flights for today`);
       setFlights(flightsList);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Add this useEffect to update the counter display
+  // Update API counter display
   useEffect(() => {
     const interval = setInterval(() => {
       setApiCallCount(getAPICallCount());
@@ -284,47 +309,63 @@ export default function MapView() {
                 </p>
               )}
               
-              {/* Keep hardcoded flights as backup/historical data */}
-              <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '2px solid #ddd' }}>
-                <h4>📅 Today's Scheduled Flights ({flights.length})</h4>
-                <ul className="flights-list">
-                  {(showAllFlights ? flights : initialFlightsToShow).map((flight) => (
-                    <li key={flight.flightId}>
-                      <div 
-                        className={`flight-link ${hoveredFlight === flight.flightId ? 'hover' : ''}`}
-                        onClick={() => handleFlightClick(flight.flightId)}
-                        onMouseEnter={() => setHoveredFlight(flight.flightId)}
-                        onMouseLeave={() => setHoveredFlight(null)}
-                      >
-                        <div className="flight-item">
-                          <span className="flight-icon">✈️</span>
-                          <div>
-                            <span className="flight-route">{flight.route}</span> - {flight.time}
+              {/* FIXED: Only show clicked flights for TODAY */}
+              {flights.length > 0 && (
+                <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '2px solid #ddd' }}>
+                  <h4>📅 Today's Clicked Flights ({flights.length})</h4>
+                  <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '10px' }}>
+                    Flights you've clicked on today
+                  </p>
+                  <ul className="flights-list">
+                    {(showAllFlights ? flights : initialFlightsToShow).map((flight) => (
+                      <li key={flight.flightId || flight.id}>
+                        <div 
+                          className={`flight-link ${hoveredFlight === (flight.flightId || flight.id) ? 'hover' : ''}`}
+                          onClick={() => handleFlightClick(flight.flightId || flight.id)}
+                          onMouseEnter={() => setHoveredFlight(flight.flightId || flight.id)}
+                          onMouseLeave={() => setHoveredFlight(null)}
+                        >
+                          <div className="flight-item">
+                            <span className="flight-icon">✈️</span>
+                            <div>
+                              <span className="flight-route">{flight.route}</span> - {flight.time}
+                              {flight.clickCount > 1 && (
+                                <span style={{ 
+                                  marginLeft: '8px', 
+                                  fontSize: '0.75rem', 
+                                  backgroundColor: '#e0e0e0', 
+                                  padding: '2px 6px', 
+                                  borderRadius: '10px' 
+                                }}>
+                                  {flight.clickCount}x
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                
-                {!showAllFlights && flights.length > initialFlightsToShow.length && (
-                  <button 
-                    className="see-more-button" 
-                    onClick={() => setShowAllFlights(true)}
-                  >
-                    See All Flights ({flights.length})
-                  </button>
-                )}
-                
-                {showAllFlights && (
-                  <button 
-                    className="see-less-button" 
-                    onClick={() => setShowAllFlights(false)}
-                  >
-                    Show Less
-                  </button>
-                )}
-              </div>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  {!showAllFlights && flights.length > initialFlightsToShow.length && (
+                    <button 
+                      className="see-more-button" 
+                      onClick={() => setShowAllFlights(true)}
+                    >
+                      See All Flights ({flights.length})
+                    </button>
+                  )}
+                  
+                  {showAllFlights && (
+                    <button 
+                      className="see-less-button" 
+                      onClick={() => setShowAllFlights(false)}
+                    >
+                      Show Less
+                    </button>
+                  )}
+                </div>
+              )}
               
               <div className="coordinates-info">
                 Coordinates: {miamiAirport.lat.toFixed(4)}, {miamiAirport.lng.toFixed(4)}

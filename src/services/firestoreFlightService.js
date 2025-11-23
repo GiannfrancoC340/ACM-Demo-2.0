@@ -112,7 +112,13 @@ export async function saveFlightToFirestore(flightData) {
  * Format: CALLSIGN-DATE-ROUTE (e.g., "AAL1234-2024-11-20-MIA-SFO")
  */
 function generateFlightIdentifier(flightData) {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  // Get today's date in LOCAL timezone (not UTC!)
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const today = `${year}-${month}-${day}`; // YYYY-MM-DD in local time
+  
   const callsign = (flightData.flightNumber || flightData.liveData.icao24).toUpperCase();
   const route = flightData.route.replace(/\s+/g, '-');
   
