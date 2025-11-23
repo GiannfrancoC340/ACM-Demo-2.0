@@ -8,7 +8,7 @@ import './MapView.css';
 import LiveAircraftLayer from './LiveAircraftLayer';
 import SearchRadiusCircle from './SearchRadiusCircle';
 import FlightInfoModal from './FlightInfoModal';
-import { redIcon, getBCTFlights } from './maphelpers';
+import { redIcon, getBCTFlights, flightData } from './maphelpers';
 import { getAPICallCount } from '../services/aviationStackService';
 import MapNavbar from './MapNavbar';
 
@@ -17,6 +17,7 @@ export default function MapView() {
   const [loading, setLoading] = useState(true);
   const [selectedFlightId, setSelectedFlightId] = useState(null);
   const [showAllFlights, setShowAllFlights] = useState(false);
+  const [showAllSampleFlights, setShowAllSampleFlights] = useState(false);
   const [hoveredFlight, setHoveredFlight] = useState(null);
   const [showLiveAircraft, setShowLiveAircraft] = useState(true);
   const [liveAircraft, setLiveAircraft] = useState([]);
@@ -123,6 +124,7 @@ export default function MapView() {
 
   const handlePopupClose = () => {
     setShowAllFlights(false);
+    setShowAllSampleFlights(false);
   };
 
   if (loading) {
@@ -366,6 +368,65 @@ export default function MapView() {
                   )}
                 </div>
               )}
+
+              {/* Hardcoded Scheduled Flights */}
+              <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '2px solid #ddd' }}>
+                <h4>🧪 Sample Flights (Demo)</h4>
+                <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '10px' }}>
+                  Pre-configured flights with audio recordings
+                </p>
+                <ul className="flights-list">
+                  {Object.entries(flightData)
+                    .slice(0, showAllSampleFlights ? undefined : 2)
+                    .map(([flightId, flight]) => (
+                    <li key={flightId}>
+                      <div 
+                        className={`flight-link ${hoveredFlight === flightId ? 'hover' : ''}`}
+                        onClick={() => handleFlightClick(flightId)}
+                        onMouseEnter={() => setHoveredFlight(flightId)}
+                        onMouseLeave={() => setHoveredFlight(null)}
+                      >
+                        <div className="flight-item">
+                          <span className="flight-icon">✈️</span>
+                          <div>
+                            <span className="flight-route">{flight.route}</span> - {flight.time}
+                            {flight.audioRecordings && flight.audioRecordings.length > 0 && (
+                              <span style={{ 
+                                marginLeft: '8px', 
+                                fontSize: '0.75rem', 
+                                backgroundColor: '#10b981', 
+                                color: 'white',
+                                padding: '2px 6px', 
+                                borderRadius: '10px' 
+                              }}>
+                                🎧 {flight.audioRecordings.length}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                
+                {!showAllSampleFlights && Object.keys(flightData).length > 2 && (
+                  <button 
+                    className="see-more-button" 
+                    onClick={() => setShowAllSampleFlights(true)}
+                  >
+                    See All Sample Flights ({Object.keys(flightData).length})
+                  </button>
+                )}
+                
+                {showAllSampleFlights && (
+                  <button 
+                    className="see-less-button" 
+                    onClick={() => setShowAllSampleFlights(false)}
+                  >
+                    Show Less
+                  </button>
+                )}
+              </div>
               
               <div className="coordinates-info">
                 Coordinates: {miamiAirport.lat.toFixed(4)}, {miamiAirport.lng.toFixed(4)}
