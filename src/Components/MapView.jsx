@@ -28,6 +28,22 @@ export default function MapView() {
   const popupRef = useRef(null);
   const [apiCallCount, setApiCallCount] = useState(0);
   
+  // Load position delay from localStorage on mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('appSettings');
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.positionDelay !== undefined) {
+          setPositionDelay(parsed.positionDelay);
+          console.log('📥 Loaded position delay from settings:', parsed.positionDelay);
+        }
+      } catch (error) {
+        console.error('Error loading position delay:', error);
+      }
+    }
+  }, []);
+  
   // Log delay changes
   useEffect(() => {
     console.log(`\n${'='.repeat(60)}`);
@@ -158,49 +174,6 @@ export default function MapView() {
         positionDelay={positionDelay}
         setPositionDelay={setPositionDelay}
       />
-
-      {/* NEW: Delay Status Indicator */}
-      {showLiveAircraft && (
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 999,
-          width: '100%',
-          padding: '10px 30px',
-          backgroundColor: positionDelay > 0 ? '#fff3cd' : '#d1fae5',
-          borderBottom: `2px solid ${positionDelay > 0 ? '#f59e0b' : '#10b981'}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '10px',
-          fontSize: '0.95rem',
-          fontWeight: '600',
-          color: positionDelay > 0 ? '#78350f' : '#065f46'
-        }}>
-          {positionDelay === 0 ? (
-            <>
-              <span style={{ fontSize: '1.2rem' }}>🔴</span>
-              <span>LIVE - Showing real-time aircraft positions</span>
-            </>
-          ) : (
-            <>
-              <span style={{ fontSize: '1.2rem' }}>🕐</span>
-              <span>
-                DELAYED - Showing positions from {positionDelay} minute{positionDelay !== 1 ? 's' : ''} ago
-              </span>
-              <span style={{ 
-                fontSize: '0.85rem', 
-                padding: '4px 8px', 
-                backgroundColor: 'rgba(0,0,0,0.1)', 
-                borderRadius: '4px',
-                marginLeft: '10px'
-              }}>
-                Audio transcription sync mode
-              </span>
-            </>
-          )}
-        </div>
-      )}
 
       {/* Map Container - Takes remaining space */}
       <div style={{ 

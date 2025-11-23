@@ -11,8 +11,8 @@ export default function MapNavbar({
   searchRadius,
   setSearchRadius,
   apiCallCount,
-  positionDelay,
-  setPositionDelay
+  positionDelay,  // Still receive it, but don't show slider
+  setPositionDelay  // Keep for future if needed
 }) {
   return (
     <div style={{
@@ -21,22 +21,24 @@ export default function MapNavbar({
       zIndex: 1000,
       width: '100%',
       background: 'white',
-      padding: '15px 30px',
+      padding: '12px 20px',
       borderRadius: '12px',
       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       display: 'flex',
-      gap: '20px',
+      gap: '15px',
       alignItems: 'center',
-      justifyContent: 'flex-start',
-      flexWrap: 'wrap',
+      justifyContent: 'flex-start',  // Changed from flex-start to space-between
+      flexWrap: 'nowrap',
       borderBottom: '1px solid #e0e0e0',
+      overflowX: 'auto',  // Allow horizontal scroll if needed (rare)
     }}>
-    {/* Left section - Controls */}
+      {/* Left section - Brand + Links */}
       <div style={{
         display: 'flex',
-        gap: '20px',
+        gap: '15px',  // Reduced from 20px
         alignItems: 'center',
-        flexWrap: 'wrap'
+        flexWrap: 'nowrap',
+        flexShrink: 0
       }}>
         {/* Brand section */}
         <div style={{
@@ -45,7 +47,7 @@ export default function MapNavbar({
             color: '#e04141',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '6px'
         }}>
             ✈️ ACM
         </div>
@@ -101,18 +103,20 @@ export default function MapNavbar({
         </Link>
       </div>
 
-        <div style={{
+      <div style={{
         height: '30px',
         width: '1px',
-        backgroundColor: '#e0e0e0'
-        }}></div>
+        backgroundColor: '#e0e0e0',
+        flexShrink: 0
+      }}></div>
 
       {/* Middle section - Controls */}
       <div style={{
         display: 'flex',
-        gap: '20px',
+        gap: '15px',
         alignItems: 'center',
-        flexWrap: 'wrap'
+        flexWrap: 'nowrap',
+        minWidth: 0
       }}>
         {/* Live Aircraft Toggle */}
         <button
@@ -135,10 +139,11 @@ export default function MapNavbar({
         <label style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '8px',
+          gap: '6px',
           fontSize: '0.9rem',
           cursor: 'pointer',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          flexShrink: 0
         }}>
           <input
             type="checkbox"
@@ -152,10 +157,11 @@ export default function MapNavbar({
         <label style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '8px',
+          gap: '6px',
           fontSize: '0.9rem',
           cursor: 'pointer',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          flexShrink: 0
         }}>
           <input
             type="checkbox"
@@ -169,8 +175,9 @@ export default function MapNavbar({
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '10px',
-          minWidth: '200px'
+          gap: '8px',
+          minWidth: '160px',
+          flexShrink: 1
         }}>
           <label style={{ 
             fontSize: '0.9rem', 
@@ -189,36 +196,42 @@ export default function MapNavbar({
             style={{ width: '120px' }}
           />
         </div>
+      </div>
 
-        {/* NEW: Position Delay Slider */}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '10px',
-          minWidth: '200px',
-          padding: '8px 12px',
-          backgroundColor: positionDelay > 0 ? '#fff3cd' : '#f0f9ff',
-          borderRadius: '6px',
-          border: `2px solid ${positionDelay > 0 ? '#f59e0b' : '#3b82f6'}`
-        }}>
-          <label style={{ 
-            fontSize: '0.9rem', 
-            fontWeight: '600',
-            whiteSpace: 'nowrap'
+      {/* Right section - Status indicators */}
+      <div style={{
+        display: 'flex',
+        gap: '15px',
+        alignItems: 'center',
+        flexWrap: 'nowrap',
+        flexShrink: 0
+      }}>
+        {/* Delay Status Indicator - Now on the right! */}
+        {showLiveAircraft && (
+          <div style={{ 
+            padding: '8px 16px',
+            backgroundColor: positionDelay > 0 ? '#fff3cd' : '#d1fae5',
+            borderRadius: '6px',
+            fontSize: '0.85rem',
+            fontWeight: 'bold',
+            border: `2px solid ${positionDelay > 0 ? '#f59e0b' : '#10b981'}`,
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            justifyContent: 'flex-start'
           }}>
-            {positionDelay > 0 ? '🕐' : '🔴'} Delay: {positionDelay} min
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="6"
-            step="0.5"
-            value={positionDelay}
-            onChange={(e) => setPositionDelay(Number(e.target.value))}
-            style={{ width: '120px' }}
-            disabled={!showLiveAircraft}
-          />
-        </div>
+            <span style={{ fontSize: '1rem' }}>
+              {positionDelay > 0 ? '🕐' : '🔴'}
+            </span>
+            <span>
+              {positionDelay > 0 
+                ? `DELAYED (${positionDelay} min)` 
+                : 'LIVE'
+              }
+            </span>
+          </div>
+        )}
 
         {/* API Counter */}
         <div style={{ 
@@ -228,7 +241,8 @@ export default function MapNavbar({
             fontSize: '0.9rem',
             fontWeight: 'bold',
             border: `2px solid ${apiCallCount >= 95 ? '#ef4444' : apiCallCount >= 80 ? '#f59e0b' : '#3b82f6'}`,
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            flexShrink: 0
         }}>
             {apiCallCount >= 95 ? '🚨' : apiCallCount >= 80 ? '⚠️' : '📊'} API: {apiCallCount}/100
         </div>
