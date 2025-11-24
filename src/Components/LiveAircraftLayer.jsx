@@ -82,8 +82,8 @@ export default function LiveAircraftLayer({
               timestamp: currentTime
             });
             
-            // Keep 10 minutes of history (600 seconds)
-            const cutoffTime = currentTime - (10 * 60 * 1000);
+            // Keep 15 minutes of history (900 seconds)
+            const cutoffTime = currentTime - (15 * 60 * 1000);
             const beforeCleanup = newBuffer[plane.icao24].length;
             newBuffer[plane.icao24] = newBuffer[plane.icao24].filter(
               pos => pos.timestamp > cutoffTime

@@ -6,7 +6,7 @@ const BASE_URL = 'http://api.aviationstack.com/v1';
 // Add at the top of the file
 const cache = new Map();
 const pendingRequests = new Map(); // ← ADD THIS
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
 // Track API usage
 let apiCallCount = 0;

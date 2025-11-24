@@ -200,7 +200,7 @@ export default function Settings() {
                 <input
                   type="range"
                   min="0"
-                  max="6"
+                  max="10"
                   step="0.5"
                   value={settings.positionDelay}
                   onChange={(e) => handleSettingChange('positionDelay', parseFloat(e.target.value))}

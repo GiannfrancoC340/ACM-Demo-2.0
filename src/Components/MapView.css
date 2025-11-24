@@ -52,11 +52,15 @@
   text-decoration: none;
   font-weight: bold;
   display: block;
-  padding: 8px;
+  padding: 6px;  /* Reduced from 8px */
   border-radius: 4px;
   transition: all 0.3s ease;
   background-color: transparent;
   cursor: pointer;
+  font-size: 0.85rem;  /* Smaller */
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
 }
 
 .flight-link:hover {
@@ -68,72 +72,90 @@
 /* Popup styles */
 .airport-popup {
   font-family: Arial, sans-serif;
-  padding: 5px;
-  min-width: 220px;
+  padding: 8px;  /* Reduced from default */
+  min-width: 200px;  /* Reduced from 220px */
+  max-width: 280px;  /* Add max width */
   position: relative;
+  font-size: 0.9rem;  /* Slightly smaller text */
 }
 
 .airport-popup h3 {
-  margin-top: 0;
+  margin: 0 0 8px 0;  /* Tighter margins */
+  font-size: 1.1rem;  /* Smaller heading */
   color: #e04141;
+  line-height: 1.2;
+}
+
+.airport-popup p {
+  margin: 4px 0;  /* Reduced from default */
+  font-size: 0.85rem;  /* Smaller text */
+  line-height: 1.3;
 }
 
 .airport-popup h4 {
-  margin-bottom: 5px;
+  margin: 10px 0 6px 0;  /* Tighter margins */
+  font-size: 0.95rem;  /* Smaller */
   border-bottom: 1px solid #ccc;
-  padding-bottom: 5px;
+  padding-bottom: 4px;  /* Less padding */
 }
 
 .flights-list {
   padding-left: 0;
-  margin: 5px 0;
+  margin: 6px 0;  /* Reduced from 10px */
   list-style: none;
+  max-height: 180px;  /* ✅ LIMIT HEIGHT! */
+  overflow-y: auto;  /* ✅ SCROLL IF TOO MANY */
 }
 
 .flights-list li {
-  margin-bottom: 5px;
+  margin-bottom: 4px;  /* Reduced from 8px */
 }
 
 .flight-item {
   display: flex;
   align-items: center;
+  font-size: 0.85rem;  /* Smaller text */
 }
 
 .flight-icon {
-  margin-right: 5px;
+  margin-right: 4px;  /* Reduced */
+  font-size: 0.9rem;
 }
 
 .flight-info-hint {
   display: block;
-  font-size: 0.8em;
+  font-size: 0.75em;  /* Smaller hint text */
   color: #666;
-  margin-top: 2px;
+  margin-top: 1px;
+  line-height: 1.2;
 }
 
 .coordinates-info {
-  font-size: 0.8em;
-  margin-top: 10px;
+  font-size: 0.75em;  /* Smaller */
+  margin-top: 8px;  /* Reduced */
   color: #666;
+  line-height: 1.2;
 }
 
 /* Route text styling */
 .flight-route {
   color: #e04141;
   font-weight: bold;
-  font-size: 1.05em;
+  font-size: 0.95em;  /* Smaller */
   letter-spacing: 0.02em;
 }
 
 .see-more-button, .see-less-button {
   display: block;
   width: 100%;
-  margin-top: 15px;
-  padding: 8px 12px;
+  margin-top: 10px;  /* Reduced from 15px */
+  padding: 6px 10px;  /* Reduced from 8px 12px */
   background-color: #f0f0f0;
   border: 1px solid #ddd;
   border-radius: 4px;
   color: #444;
   font-weight: bold;
+  font-size: 0.8rem;  /* Smaller */
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -143,6 +165,18 @@
   background-color: #e04141;
   color: white;
   border-color: #e04141;
+}
+
+/* Make LIVE indicator more compact */
+.airport-popup p[style*="font-weight: bold"] {
+  font-size: 0.9rem;
+  margin: 6px 0;
+}
+
+/* Compact the section headers (Departing/Arriving) */
+.airport-popup div h4 {
+  font-size: 0.9rem;
+  margin: 8px 0 4px 0;
 }
 
 /* Modal Styles - Add these to your existing MapView.css */
@@ -264,7 +298,7 @@
 }
 
 /* Ensure flight links in popup work as clickable divs with proper hover */
-.flight-link {
+/* .flight-link {
   cursor: pointer;
   width: 100%;
   text-align: left;
@@ -276,7 +310,7 @@
   border-radius: 4px;
   transition: all 0.3s ease;
   background-color: transparent;
-}
+} */
 
 .flight-link:hover,
 .flight-link.hover {
@@ -316,10 +350,39 @@
 /* Live aircraft popup customization */
 .leaflet-popup-content-wrapper {
   border-radius: 8px;
+  max-height: 60vh;  /* ✅ Never exceed 60% of viewport height! */
+  overflow: hidden;
 }
 
 .leaflet-popup-content {
-  margin: 12px;
+  margin: 10px;  /* Reduced from 12px */
+  max-height: 55vh;  /* ✅ Inner content max height */
+  overflow-y: auto;  /* ✅ Scroll if needed */
+}
+
+/* Compact scrollbar for popup */
+.leaflet-popup-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaflet-popup-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.leaflet-popup-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Reduce popup tip size for more compact look */
+.leaflet-popup-tip {
+  width: 15px;  /* Smaller tip */
+  height: 15px;
 }
 
 /* Smooth transitions for aircraft markers */
