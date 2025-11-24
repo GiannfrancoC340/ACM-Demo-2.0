@@ -4,7 +4,7 @@ const API_KEY = import.meta.env.VITE_AERODATABOX_API_KEY;
 const BASE_URL = 'https://aerodatabox.p.rapidapi.com/aircrafts';
 
 const cache = new Map();
-const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days (registration rarely changes)
+const CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 let apiCallCount = 0;
 
