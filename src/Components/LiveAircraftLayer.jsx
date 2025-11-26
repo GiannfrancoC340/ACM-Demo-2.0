@@ -183,7 +183,12 @@ export default function LiveAircraftLayer({
       const realtimeAircraft = Object.keys(positionBuffer).map(icao24 => {
         const positions = positionBuffer[icao24];
         return positions[positions.length - 1]; // Most recent
-      }).filter(Boolean);
+      })
+      .filter(Boolean)
+      .filter(plane => {  // ✅ Filter by radius
+        const distance = calculateDistance(plane.latitude, plane.longitude);
+        return distance <= radiusKm;
+      });
       
       console.log(`✅ Displaying ${realtimeAircraft.length} aircraft at real-time positions`);
       setAircraft(realtimeAircraft);
@@ -222,11 +227,15 @@ export default function LiveAircraftLayer({
         });
         
         if (closestPosition) {
-          const posAge = (now - closestPosition.timestamp) / 1000 / 60; // minutes
-          totalAgeDiff += posAge;
-          minAge = Math.min(minAge, posAge);
-          maxAge = Math.max(maxAge, posAge);
-          delayedAircraft.push(closestPosition);
+          // ✅ ADD DISTANCE CHECK HERE
+          const distance = calculateDistance(closestPosition.latitude, closestPosition.longitude);
+          if (distance <= radiusKm) {  // ✅ Only add if within radius
+            const posAge = (now - closestPosition.timestamp) / 1000 / 60; // minutes
+            totalAgeDiff += posAge;
+            minAge = Math.min(minAge, posAge);
+            maxAge = Math.max(maxAge, posAge);
+            delayedAircraft.push(closestPosition);
+          }
         }
       });
       
@@ -242,7 +251,7 @@ export default function LiveAircraftLayer({
         onAircraftUpdate(delayedAircraft);
       }
     }
-  }, [positionBuffer, positionDelay, onAircraftUpdate]);
+  }, [positionBuffer, positionDelay, radiusKm, onAircraftUpdate]);  // ✅ Add radiusKm dependency
 
   if (!enabled) return null;
 
