@@ -23,18 +23,24 @@ export default function MapView() {
   const [liveAircraft, setLiveAircraft] = useState([]);
   const [showRadius, setShowRadius] = useState(true);
   const [searchRadius, setSearchRadius] = useState(50);
-  const [demoMode, setDemoMode] = useState(false);
   const [positionDelay, setPositionDelay] = useState(3);
   const [showTrails, setShowTrails] = useState(true);
   const popupRef = useRef(null);
   const [apiCallCount, setApiCallCount] = useState(0);
   
-  // Load position delay from localStorage on mount
+  // Load settings from localStorage
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('appSettings');
+    return saved ? JSON.parse(saved) : { refreshInterval: 30 };
+  });
+  
+  // Load position delay and other settings from localStorage on mount
   useEffect(() => {
     const savedSettings = localStorage.getItem('appSettings');
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
+        setSettings(parsed);  // Update settings state
         if (parsed.positionDelay !== undefined) {
           setPositionDelay(parsed.positionDelay);
           console.log('📥 Loaded position delay from settings:', parsed.positionDelay);
@@ -43,7 +49,7 @@ export default function MapView() {
           setShowTrails(parsed.showTrails);
         }
       } catch (error) {
-        console.error('Error loading position delay:', error);
+        console.error('Error loading settings:', error);
       }
     }
   }, []);
@@ -170,8 +176,6 @@ export default function MapView() {
         setShowLiveAircraft={setShowLiveAircraft}
         showRadius={showRadius}
         setShowRadius={setShowRadius}
-        demoMode={demoMode}
-        setDemoMode={setDemoMode}
         searchRadius={searchRadius}
         setSearchRadius={setSearchRadius}
         apiCallCount={apiCallCount}
@@ -420,7 +424,7 @@ export default function MapView() {
         <LiveAircraftLayer 
           enabled={showLiveAircraft}
           radiusKm={searchRadius}
-          refreshInterval={demoMode ? 20000 : 90000}
+          refreshInterval={settings.refreshInterval * 1000}
           onAircraftUpdate={setLiveAircraft}
           positionDelay={positionDelay}
           showTrails={showTrails}

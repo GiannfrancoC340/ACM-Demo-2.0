@@ -150,15 +150,19 @@ export default function Settings() {
                 <label>Refresh Interval</label>
                 <p className="setting-description">Time between automatic updates (seconds)</p>
               </div>
-              <input
-                type="number"
-                className="setting-input"
+              <select
+                className="setting-select"
                 value={settings.refreshInterval}
                 onChange={(e) => handleSettingChange('refreshInterval', parseInt(e.target.value))}
-                min="10"
-                max="300"
                 disabled={!settings.autoRefresh}
-              />
+              >
+                <option value="10">10 seconds</option>
+                <option value="20">20 seconds</option>
+                <option value="30">30 seconds</option>
+                <option value="60">1 minute</option>
+                <option value="90">1.5 minutes</option>
+                <option value="120">2 minutes</option>
+              </select>
             </div>
 
             <div className="setting-item">

@@ -6,13 +6,11 @@ export default function MapNavbar({
   setShowLiveAircraft,
   showRadius,
   setShowRadius,
-  demoMode,
-  setDemoMode,
   searchRadius,
   setSearchRadius,
   apiCallCount,
-  positionDelay,  // Still receive it, but don't show slider
-  setPositionDelay  // Keep for future if needed
+  positionDelay,
+  setPositionDelay
 }) {
   return (
     <div style={{
@@ -151,24 +149,6 @@ export default function MapNavbar({
             onChange={(e) => setShowRadius(e.target.checked)}
           />
           Show Radius
-        </label>
-
-        {/* Demo Mode Checkbox */}
-        <label style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '6px',
-          fontSize: '0.9rem',
-          cursor: 'pointer',
-          whiteSpace: 'nowrap',
-          flexShrink: 0
-        }}>
-          <input
-            type="checkbox"
-            checked={demoMode}
-            onChange={(e) => setDemoMode(e.target.checked)}
-          />
-          🎬 Demo Mode
         </label>
 
         {/* Search Radius Slider */}
