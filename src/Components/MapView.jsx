@@ -25,6 +25,7 @@ export default function MapView() {
   const [searchRadius, setSearchRadius] = useState(50);
   const [demoMode, setDemoMode] = useState(false);
   const [positionDelay, setPositionDelay] = useState(3);
+  const [showTrails, setShowTrails] = useState(true);
   const popupRef = useRef(null);
   const [apiCallCount, setApiCallCount] = useState(0);
   
@@ -37,6 +38,9 @@ export default function MapView() {
         if (parsed.positionDelay !== undefined) {
           setPositionDelay(parsed.positionDelay);
           console.log('📥 Loaded position delay from settings:', parsed.positionDelay);
+        }
+        if (parsed.showTrails !== undefined) {  // ✅ ADD THIS
+          setShowTrails(parsed.showTrails);
         }
       } catch (error) {
         console.error('Error loading position delay:', error);
@@ -419,6 +423,7 @@ export default function MapView() {
           refreshInterval={demoMode ? 20000 : 90000}
           onAircraftUpdate={setLiveAircraft}
           positionDelay={positionDelay}
+          showTrails={showTrails}
         />
       </MapContainer>
 

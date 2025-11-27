@@ -45,7 +45,8 @@ export default function LiveAircraftLayer({
   refreshInterval = 30000, 
   radiusKm = 50, 
   onAircraftUpdate = null,
-  positionDelay = 0 // NEW: delay in minutes (0 = real-time)
+  positionDelay = 0, // NEW: delay in minutes (0 = real-time)
+  showTrails = true
 }) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -260,7 +261,7 @@ export default function LiveAircraftLayer({
       {aircraft.map(plane => (
         <Fragment key={plane.icao24}>
           {/* Draw flight trail */}
-          {flightTrails[plane.icao24] && flightTrails[plane.icao24].length > 1 && (
+          {showTrails && flightTrails[plane.icao24] && flightTrails[plane.icao24].length > 1 && (
             <Polyline
               positions={flightTrails[plane.icao24].map(pos => [pos.lat, pos.lng])}
               pathOptions={{

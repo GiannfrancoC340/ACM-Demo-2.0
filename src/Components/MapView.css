@@ -350,13 +350,13 @@
 /* Live aircraft popup customization */
 .leaflet-popup-content-wrapper {
   border-radius: 8px;
-  max-height: 60vh;  /* ✅ Never exceed 60% of viewport height! */
+  max-height: 70vh;  /* ✅ Never exceed 60% of viewport height! */
   overflow: hidden;
 }
 
 .leaflet-popup-content {
   margin: 10px;  /* Reduced from 12px */
-  max-height: 55vh;  /* ✅ Inner content max height */
+  max-height: 60vh;  /* ✅ Inner content max height */
   overflow-y: auto;  /* ✅ Scroll if needed */
 }
 

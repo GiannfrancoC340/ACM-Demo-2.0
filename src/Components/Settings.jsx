@@ -13,7 +13,8 @@ export default function Settings() {
     refreshInterval: 30,
     showFlightDetails: true,
     mapStyle: 'standard',
-    positionDelay: 3  // NEW: Add position delay setting (default 3 minutes)
+    positionDelay: 3,  // NEW: Add position delay setting (default 3 minutes)
+    showTrails: true
   });
   const [username, setUsername] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -258,6 +259,21 @@ export default function Settings() {
                 <span className="toggle-slider"></span>
               </label>
             </div>
+
+            <div className="setting-item">
+              <div className="setting-info">
+                <label>Show Aircraft Trails</label>
+                <p className="setting-description">Display flight path history on the map</p>
+              </div>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.showTrails}
+                  onChange={(e) => handleSettingChange('showTrails', e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
           </div>
 
           {/* Account Section - Only shows if user is logged in */}
@@ -309,7 +325,8 @@ export default function Settings() {
                 refreshInterval: 30,
                 showFlightDetails: true,
                 mapStyle: 'standard',
-                positionDelay: 3  // Reset to default 3 minutes
+                positionDelay: 3,  // Reset to default 3 minutes
+                showTrails: true
               });
             }}>
               🔄 Reset to Defaults
