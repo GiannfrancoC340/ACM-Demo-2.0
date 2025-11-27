@@ -15,6 +15,10 @@ export default function Settings() {
     positionDelay: 3,  // NEW: Add position delay setting (default 3 minutes)
     showTrails: true
   });
+  const [savedSettings, setSavedSettings] = useState(null); // Track last saved state
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
   const [username, setUsername] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
@@ -36,11 +40,57 @@ export default function Settings() {
           ...prev,
           ...parsed
         }));
+        setSavedSettings(parsed); // Store the saved baseline
       } catch (error) {
         console.error('Error loading settings:', error);
       }
+    } else {
+      // No saved settings, use defaults as baseline
+      setSavedSettings(settings);
     }
   }, []);
+
+  // Detect unsaved changes
+  useEffect(() => {
+    if (savedSettings) {
+      const hasChanges = JSON.stringify(settings) !== JSON.stringify(savedSettings);
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [settings, savedSettings]);
+
+  // Protect against browser back button and mouse navigation buttons
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = ''; // Required for Chrome
+        return '';
+      }
+    };
+
+    const handlePopState = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        // Push state back to keep user on settings page
+        window.history.pushState(null, '', window.location.pathname);
+        setShowUnsavedWarning(true);
+        setPendingNavigation(-1); // Special value to indicate browser back
+      }
+    };
+
+    // Add extra history entry to intercept back navigation
+    if (hasUnsavedChanges) {
+      window.history.pushState(null, '', window.location.pathname);
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [hasUnsavedChanges]);
 
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({
@@ -51,6 +101,8 @@ export default function Settings() {
 
   const handleSave = () => {
     localStorage.setItem('appSettings', JSON.stringify(settings));
+    setSavedSettings(settings); // Update the baseline
+    setHasUnsavedChanges(false);
     alert('Settings saved successfully!');
   };
 
@@ -65,12 +117,46 @@ export default function Settings() {
       showTrails: true
     };
     setSettings(defaultSettings);
+    setSavedSettings(defaultSettings); // Update baseline
     localStorage.setItem('appSettings', JSON.stringify(defaultSettings));
+    setHasUnsavedChanges(false);
     alert('Settings reset to defaults!');
   };
 
   const handleBack = () => {
-    navigate('/map');
+    if (hasUnsavedChanges) {
+      setShowUnsavedWarning(true);
+      setPendingNavigation('/map');
+    } else {
+      navigate('/map');
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedWarning(false);
+    setHasUnsavedChanges(false); // Clear the flag to allow navigation
+    if (pendingNavigation === -1) {
+      // Browser back button was used
+      window.history.back();
+    } else if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
+  const handleSaveAndNavigate = () => {
+    handleSave();
+    setShowUnsavedWarning(false);
+    if (pendingNavigation === -1) {
+      // Browser back button was used
+      window.history.back();
+    } else if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
+  const handleCancelNavigation = () => {
+    setShowUnsavedWarning(false);
+    setPendingNavigation(null);
   };
 
   const handleLogout = async () => {
@@ -316,8 +402,11 @@ export default function Settings() {
           </div>
 
           <div className="settings-actions">
-            <button className="save-button" onClick={handleSave}>
-              💾 Save Settings
+            <button 
+              className={`save-button ${hasUnsavedChanges ? 'has-changes' : ''}`}
+              onClick={handleSave}
+            >
+              💾 Save Settings {hasUnsavedChanges && '•'}
             </button>
             <button className="reset-button" onClick={handleReset}>
               🔄 Reset to Defaults
@@ -325,6 +414,27 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Unsaved Changes Warning Modal */}
+      {showUnsavedWarning && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>⚠️ Unsaved Changes</h2>
+            <p>You have unsaved changes. What would you like to do?</p>
+            <div className="modal-buttons">
+              <button className="modal-save-button" onClick={handleSaveAndNavigate}>
+                💾 Save & Leave
+              </button>
+              <button className="modal-discard-button" onClick={handleDiscardChanges}>
+                🗑️ Discard Changes
+              </button>
+              <button className="modal-cancel-button" onClick={handleCancelNavigation}>
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
