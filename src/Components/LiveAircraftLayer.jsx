@@ -46,7 +46,8 @@ export default function LiveAircraftLayer({
   radiusKm = 50, 
   onAircraftUpdate = null,
   positionDelay = 0, // NEW: delay in minutes (0 = real-time)
-  showTrails = true
+  showTrails = true,
+  trailLength = 50  // NEW: number of trail points to keep
 }) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -140,8 +141,8 @@ export default function LiveAircraftLayer({
               altitude: plane.altitude
             });
             
-            // Keep only last 20 positions (~30 minutes at 90sec intervals)
-            if (newTrails[plane.icao24].length > 20) {
+            // Keep only last N positions based on trailLength setting
+            if (newTrails[plane.icao24].length > trailLength) {
               newTrails[plane.icao24].shift();
             }
           });

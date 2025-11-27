@@ -31,7 +31,7 @@ export default function MapView() {
   // Load settings from localStorage
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('appSettings');
-    return saved ? JSON.parse(saved) : { refreshInterval: 30 };
+    return saved ? JSON.parse(saved) : { refreshInterval: 30, trailLength: 50 };
   });
   
   // Load position delay and other settings from localStorage on mount
@@ -454,6 +454,7 @@ export default function MapView() {
           onAircraftUpdate={setLiveAircraft}
           positionDelay={positionDelay}
           showTrails={showTrails}
+          trailLength={settings.trailLength || 50}
         />
       </MapContainer>
 

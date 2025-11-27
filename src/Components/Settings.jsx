@@ -10,6 +10,7 @@ export default function Settings() {
     notifications: true,
     refreshInterval: 30,
     mapStyle: 'standard',
+    trailLength: 50,  // Default 50 points
     positionDelay: 3,  // NEW: Add position delay setting (default 3 minutes)
     showTrails: true
   });
@@ -109,6 +110,7 @@ export default function Settings() {
       notifications: true,
       refreshInterval: 30,
       mapStyle: 'standard',
+      trailLength: 50,
       positionDelay: 3,
       showTrails: true
     };
@@ -166,9 +168,66 @@ export default function Settings() {
     }
   };
 
-  const handleConnectWhatsApp = () => {
-    // TODO: Implement WhatsApp connection flow
-    alert('WhatsApp notifications coming soon! This will allow you to receive flight alerts via WhatsApp.');
+  const handleConnectWhatsApp = async () => {
+    // Show instructions first
+    const instructions = 
+      '📱 To receive audio notifications via WhatsApp:\n\n' +
+      '1. Open WhatsApp on your phone\n' +
+      '2. Send this message to: +1 415 523 8886\n' +
+      '   Message: "join <your-sandbox-code>"\n' +
+      '   (Replace <your-sandbox-code> with your actual Twilio code)\n' +
+      '3. Wait for confirmation message\n' +
+      '4. Then enter your phone number below\n\n' +
+      'Note: This is a one-time setup!';
+    
+    alert(instructions);
+    
+    // Get phone number
+    const phoneNumber = prompt(
+      'Enter your WhatsApp number:\n' +
+      'Format: +1234567890 (include country code)'
+    );
+    
+    if (!phoneNumber) return;
+    
+    // Validate format
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      alert('Invalid phone number format.\nExample: +12345678900');
+      return;
+    }
+    
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Please log in first');
+        return;
+      }
+      
+      // Save to Firestore
+      await setDoc(
+        doc(db, 'users', user.uid),
+        {
+          whatsappNumber: phoneNumber,
+          whatsappNotificationsEnabled: true,
+          whatsappConnectedAt: new Date().toISOString(),
+          notificationPreferences: {
+            audioRecordings: true  // Only notification type: new audio recordings
+          }
+        },
+        { merge: true }
+      );
+      
+      alert(
+        '✅ WhatsApp Connected!\n\n' +
+        `Number: ${phoneNumber}\n\n` +
+        'You\'ll receive notifications when new ATC recordings are available.'
+      );
+      
+    } catch (error) {
+      console.error('Error saving WhatsApp:', error);
+      alert('Error connecting WhatsApp. Please try again.');
+    }
   };
 
   return (
@@ -246,6 +305,43 @@ export default function Settings() {
                 <option value="dark">Dark</option>
                 <option value="terrain">Terrain</option>
               </select>
+            </div>
+
+            <div className="setting-item">
+              <div className="setting-info">
+                <label>Trail Length: {settings.trailLength} points</label>
+                <p className="setting-description">Number of position points shown in aircraft trails</p>
+              </div>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '15px',
+                minWidth: '250px'
+              }}>
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  step="10"
+                  value={settings.trailLength}
+                  onChange={(e) => handleSettingChange('trailLength', parseInt(e.target.value))}
+                  style={{ 
+                    flex: 1,
+                    minWidth: '150px'
+                  }}
+                />
+                <span style={{
+                  minWidth: '60px',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  padding: '4px 8px',
+                  backgroundColor: '#f0f9ff',
+                  borderRadius: '4px',
+                  fontSize: '0.9rem'
+                }}>
+                  {settings.trailLength}
+                </span>
+              </div>
             </div>
           </div>
 
