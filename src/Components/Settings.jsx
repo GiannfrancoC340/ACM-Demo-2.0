@@ -8,9 +8,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState({
     notifications: true,
-    darkMode: false,
     refreshInterval: 30,
-    showFlightDetails: true,
     mapStyle: 'standard',
     positionDelay: 3,  // NEW: Add position delay setting (default 3 minutes)
     showTrails: true
@@ -109,9 +107,7 @@ export default function Settings() {
   const handleReset = () => {
     const defaultSettings = {
       notifications: true,
-      darkMode: false,
       refreshInterval: 30,
-      showFlightDetails: true,
       mapStyle: 'standard',
       positionDelay: 3,
       showTrails: true
@@ -206,21 +202,6 @@ export default function Settings() {
                   type="checkbox"
                   checked={settings.notifications}
                   onChange={(e) => handleSettingChange('notifications', e.target.checked)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="setting-item">
-              <div className="setting-info">
-                <label>Dark Mode</label>
-                <p className="setting-description">Use dark theme for the app</p>
-              </div>
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={settings.darkMode}
-                  onChange={(e) => handleSettingChange('darkMode', e.target.checked)}
                 />
                 <span className="toggle-slider"></span>
               </label>
@@ -333,21 +314,6 @@ export default function Settings() {
           <div className="settings-section">
             <h2>Display</h2>
             
-            <div className="setting-item">
-              <div className="setting-info">
-                <label>Show Flight Details</label>
-                <p className="setting-description">Display detailed flight information in popups</p>
-              </div>
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={settings.showFlightDetails}
-                  onChange={(e) => handleSettingChange('showFlightDetails', e.target.checked)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
             <div className="setting-item">
               <div className="setting-info">
                 <label>Show Aircraft Trails</label>
