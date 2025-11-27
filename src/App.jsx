@@ -10,7 +10,7 @@ import AudioPlayer from './Components/AudioPlayer'
 import acmLogo from './assets/ACM Logo.png'
 import Settings from './Components/Settings'
 import { useState } from 'react'
-import DiscordLinked from './pages/DiscordLinked'
+import WhatsAppLinked from './pages/WhatsAppLinked'
 
 // Route info component to show current route
 function RouteInfo() {
@@ -149,8 +149,8 @@ function App() {
         <Route path="/audio" element={<AudioPlayer />} />
         <Route path="/settings" element={<Settings />} />
 
-        {/* ✅ NEW DISCORD CALLBACK ROUTE */}
-        <Route path="/settings/discord-linked" element={<DiscordLinked />} />
+        {/* ✅ WHATSAPP CALLBACK ROUTE */}
+        <Route path="/settings/whatsapp-linked" element={<WhatsAppLinked />} />
 
         <Route 
           path="/map" 

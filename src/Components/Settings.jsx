@@ -166,8 +166,9 @@ export default function Settings() {
     }
   };
 
-  const handleConnectDiscord = () => {
-    window.location.href = 'https://acmappings.com/discord';
+  const handleConnectWhatsApp = () => {
+    // TODO: Implement WhatsApp connection flow
+    alert('WhatsApp notifications coming soon! This will allow you to receive flight alerts via WhatsApp.');
   };
 
   return (
@@ -337,10 +338,10 @@ export default function Settings() {
               <h2>Account</h2>
               <div className="account-actions">
                 <button
-                  className="discord-connect-button"
-                  onClick={handleConnectDiscord}
+                  className="whatsapp-connect-button"
+                  onClick={handleConnectWhatsApp}
                 >
-                  💬 Connect Discord
+                  💬 Connect WhatsApp
                 </button>
 
                 <button className="logout-button" onClick={handleLogout}>

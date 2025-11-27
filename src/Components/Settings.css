@@ -308,12 +308,12 @@
   background: #c63030;
   box-shadow: 0 4px 12px rgba(224, 65, 65, 0.3);
 }
-/* Discord connect button */
-.discord-connect-button {
+/* WhatsApp connect button */
+.whatsapp-connect-button {
   width: 100%;
   padding: 12px 24px;
   margin-bottom: 10px;
-  background: #5865f2;
+  background: #25d366;
   color: white;
   border: none;
   border-radius: 8px;
@@ -323,9 +323,9 @@
   transition: all 0.3s ease;
 }
 
-.discord-connect-button:hover {
-  background: #4752c4;
-  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+.whatsapp-connect-button:hover {
+  background: #20ba5a;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
 }
 /* Unsaved Changes Modal */
 .modal-overlay {
