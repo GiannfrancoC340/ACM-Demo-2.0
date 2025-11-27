@@ -9,7 +9,6 @@ export default function Settings() {
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: false,
-    autoRefresh: true,
     refreshInterval: 30,
     showFlightDetails: true,
     mapStyle: 'standard',
@@ -59,7 +58,6 @@ export default function Settings() {
     const defaultSettings = {
       notifications: true,
       darkMode: false,
-      autoRefresh: true,
       refreshInterval: 30,
       showFlightDetails: true,
       mapStyle: 'standard',
@@ -148,21 +146,6 @@ export default function Settings() {
             
             <div className="setting-item">
               <div className="setting-info">
-                <label>Auto Refresh</label>
-                <p className="setting-description">Automatically refresh flight data</p>
-              </div>
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={settings.autoRefresh}
-                  onChange={(e) => handleSettingChange('autoRefresh', e.target.checked)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="setting-item">
-              <div className="setting-info">
                 <label>Refresh Interval</label>
                 <p className="setting-description">Time between automatic updates (seconds)</p>
               </div>
@@ -170,7 +153,6 @@ export default function Settings() {
                 className="setting-select"
                 value={settings.refreshInterval}
                 onChange={(e) => handleSettingChange('refreshInterval', parseInt(e.target.value))}
-                disabled={!settings.autoRefresh}
               >
                 <option value="10">10 seconds</option>
                 <option value="20">20 seconds</option>
