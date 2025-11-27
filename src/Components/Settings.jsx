@@ -55,6 +55,22 @@ export default function Settings() {
     alert('Settings saved successfully!');
   };
 
+  const handleReset = () => {
+    const defaultSettings = {
+      notifications: true,
+      darkMode: false,
+      autoRefresh: true,
+      refreshInterval: 30,
+      showFlightDetails: true,
+      mapStyle: 'standard',
+      positionDelay: 3,
+      showTrails: true
+    };
+    setSettings(defaultSettings);
+    localStorage.setItem('appSettings', JSON.stringify(defaultSettings));
+    alert('Settings reset to defaults!');
+  };
+
   const handleBack = () => {
     navigate('/map');
   };
@@ -321,18 +337,7 @@ export default function Settings() {
             <button className="save-button" onClick={handleSave}>
               💾 Save Settings
             </button>
-            <button className="reset-button" onClick={() => {
-              setSettings({
-                notifications: true,
-                darkMode: false,
-                autoRefresh: true,
-                refreshInterval: 30,
-                showFlightDetails: true,
-                mapStyle: 'standard',
-                positionDelay: 3,  // Reset to default 3 minutes
-                showTrails: true
-              });
-            }}>
+            <button className="reset-button" onClick={handleReset}>
               🔄 Reset to Defaults
             </button>
           </div>
