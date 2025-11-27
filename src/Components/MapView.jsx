@@ -140,6 +140,32 @@ export default function MapView() {
     return () => clearInterval(interval);
   }, []);
 
+  // Get tile layer configuration based on map style setting
+  const getTileLayerConfig = () => {
+    const mapStyle = settings.mapStyle || 'standard';
+    
+    const configs = {
+      standard: {
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      },
+      satellite: {
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics'
+      },
+      dark: {
+        url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      },
+      terrain: {
+        url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+      }
+    };
+    
+    return configs[mapStyle] || configs.standard;
+  };
+
   const handleFlightClick = (flightId) => {
     setSelectedFlightId(flightId);
   };
@@ -198,8 +224,8 @@ export default function MapView() {
         className="map-container"
       >
         <TileLayer 
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url={getTileLayerConfig().url}
+          attribution={getTileLayerConfig().attribution}
         />
         
         <Marker 

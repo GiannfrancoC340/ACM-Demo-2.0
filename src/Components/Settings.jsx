@@ -242,6 +242,7 @@ export default function Settings() {
               >
                 <option value="standard">Standard</option>
                 <option value="satellite">Satellite</option>
+                <option value="dark">Dark</option>
                 <option value="terrain">Terrain</option>
               </select>
             </div>
