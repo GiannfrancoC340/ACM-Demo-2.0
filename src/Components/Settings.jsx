@@ -14,6 +14,8 @@ export default function Settings() {
     refreshInterval: 30,
     mapStyle: 'standard',
     trailLength: 50,  // Default 50 points
+    trailStyle: 'solid',
+    iconSize: 24, // Add this - default 24px
     positionDelay: 3,  // NEW: Add position delay setting (default 3 minutes)
     showTrails: true
   });
@@ -484,6 +486,52 @@ export default function Settings() {
                 />
                 <span className="toggle-slider"></span>
               </label>
+            </div>
+
+            <div className="setting-item">
+              <div className="setting-info">
+                <label htmlFor="iconSize">Aircraft Icon Size</label>
+                <p className="setting-description">
+                  Size of aircraft icons on the map (16-48px)
+                </p>
+              </div>
+              <input
+                id="iconSize"
+                type="number"
+                className="setting-input"
+                value={settings.iconSize}
+                onChange={(e) => setSettings({
+                  ...settings,
+                  iconSize: Math.min(48, Math.max(16, parseInt(e.target.value) || 24))
+                })}
+                min="16"
+                max="48"
+                step="2"
+              />
+            </div>
+
+            <div className="setting-item">
+              <div className="setting-info">
+                <label htmlFor="trailStyle">Flight Trail Style</label>
+                <p className="setting-description">
+                  Visual style of aircraft flight trails
+                </p>
+              </div>
+              <select
+                id="trailStyle"
+                className="setting-select"
+                value={settings.trailStyle}
+                onChange={(e) => setSettings({
+                  ...settings,
+                  trailStyle: e.target.value
+                })}
+                disabled={!settings.showTrails}
+              >
+                <option value="solid">Solid Line</option>
+                <option value="dashed">Dashed Line</option>
+                <option value="dotted">Dotted Line</option>
+                <option value="long-dash">Long Dash</option>
+              </select>
             </div>
           </div>
 

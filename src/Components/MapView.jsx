@@ -455,6 +455,8 @@ export default function MapView() {
           positionDelay={positionDelay}
           showTrails={showTrails}
           trailLength={settings.trailLength || 50}
+          iconSize={settings.iconSize}
+          trailStyle={settings.trailStyle}
         />
       </MapContainer>
 

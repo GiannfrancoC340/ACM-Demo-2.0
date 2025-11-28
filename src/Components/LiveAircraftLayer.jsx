@@ -18,22 +18,39 @@ function getCardinalDirection(heading) {
   return directions[index];
 }
 
+// Helper function to get dashArray pattern based on trail style
+function getTrailDashArray(style) {
+  switch (style) {
+    case 'solid':
+      return null; // No dash array = solid line
+    case 'dashed':
+      return '5, 5'; // 5px dash, 5px gap
+    case 'dotted':
+      return '1, 4'; // 1px dot, 4px gap
+    case 'long-dash':
+      return '10, 5'; // 10px dash, 5px gap
+    default:
+      return '5, 5';
+  }
+}
+
 // Create airplane icon that rotates based on heading
-function createAirplaneIcon(heading) {
+// UPDATED: Now accepts size parameter
+function createAirplaneIcon(heading, size = 24) {
   const rotation = (heading) || 0;
   
   return L.divIcon({
     html: `
       <div style="
-        width: 24px;
-        height: 24px;
+        width: ${size}px;
+        height: ${size}px;
         transform: rotate(${rotation}deg);
         transform-origin: center;
         display: flex;
         align-items: center;
         justify-content: center;
       ">
-        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.3))">
             <path 
               d="M10.5 3.5 L10.5 9 L4 15 L5 17 L10.5 13.5 L10.5 20 L9 21.5 L10 23 L12 22 L14 23 L15 21.5 L13.5 20 L13.5 13.5 L19 17 L20 15 L13.5 9 L13.5 3.5 Q13.5 2 12 2 Q10.5 2 10.5 3.5 Z" 
@@ -45,9 +62,9 @@ function createAirplaneIcon(heading) {
         </svg>
       </div>
     `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    popupAnchor: [0, -size/2],
     className: 'aircraft-icon'
   });
 }
@@ -59,7 +76,9 @@ export default function LiveAircraftLayer({
   onAircraftUpdate = null,
   positionDelay = 0, // NEW: delay in minutes (0 = real-time)
   showTrails = true,
-  trailLength = 50  // NEW: number of trail points to keep
+  trailLength = 50,  // NEW: number of trail points to keep
+  iconSize = 24,     // NEW: size of aircraft icons in pixels
+  trailStyle = 'dashed' // NEW: style of flight trails (solid, dashed, dotted, long-dash)
 }) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -215,81 +234,71 @@ export default function LiveAircraftLayer({
       const targetTime = now - (positionDelay * 60 * 1000);
       const targetDate = new Date(targetTime);
       
-      console.log(`🕐 DELAYED MODE - Delay: ${positionDelay} minutes`);
-      console.log(`⏰ Current time: ${new Date(now).toLocaleTimeString()}`);
-      console.log(`📍 Target time: ${targetDate.toLocaleTimeString()} (${positionDelay} min ago)`);
-      console.log(`🗂️ Buffer size: ${Object.keys(positionBuffer).length} aircraft`);
+      console.log(`⏱️ DELAYED MODE - Looking for positions from ${positionDelay} minutes ago (${targetDate.toLocaleTimeString()})`);
       
-      const delayedAircraft = [];
-      let totalAgeDiff = 0;
-      let minAge = Infinity;
-      let maxAge = 0;
-      
-      Object.keys(positionBuffer).forEach(icao24 => {
-        const positions = positionBuffer[icao24];
-        
-        // Find position closest to target time
-        let closestPosition = null;
-        let smallestDiff = Infinity;
-        
-        positions.forEach(pos => {
-          const diff = Math.abs(pos.timestamp - targetTime);
-          if (diff < smallestDiff) {
-            smallestDiff = diff;
-            closestPosition = pos;
+      const delayedAircraft = Object.keys(positionBuffer)
+        .map(icao24 => {
+          const positions = positionBuffer[icao24];
+          
+          // Find the closest position to target time
+          let closestPosition = null;
+          let smallestDiff = Infinity;
+          
+          positions.forEach(pos => {
+            const diff = Math.abs(pos.timestamp - targetTime);
+            if (diff < smallestDiff) {
+              smallestDiff = diff;
+              closestPosition = pos;
+            }
+          });
+          
+          // Only use if within 2 minutes of target time
+          if (closestPosition && smallestDiff < 2 * 60 * 1000) {
+            const delaySeconds = Math.round((now - closestPosition.timestamp) / 1000);
+            console.log(`  ✈️ ${closestPosition.callsign?.trim() || closestPosition.icao24}: Found position ${delaySeconds}s ago (diff: ${Math.round(smallestDiff/1000)}s)`);
+            return closestPosition;
           }
+          
+          return null;
+        })
+        .filter(Boolean)
+        .filter(plane => {  // ✅ Filter by radius
+          const distance = calculateDistance(plane.latitude, plane.longitude);
+          return distance <= radiusKm;
         });
-        
-        if (closestPosition) {
-          // ✅ ADD DISTANCE CHECK HERE
-          const distance = calculateDistance(closestPosition.latitude, closestPosition.longitude);
-          if (distance <= radiusKm) {  // ✅ Only add if within radius
-            const posAge = (now - closestPosition.timestamp) / 1000 / 60; // minutes
-            totalAgeDiff += posAge;
-            minAge = Math.min(minAge, posAge);
-            maxAge = Math.max(maxAge, posAge);
-            delayedAircraft.push(closestPosition);
-          }
-        }
-      });
       
-      const avgAge = delayedAircraft.length > 0 ? totalAgeDiff / delayedAircraft.length : 0;
-      
-      console.log(`📊 Position ages: min ${minAge.toFixed(1)}m | avg ${avgAge.toFixed(1)}m | max ${maxAge.toFixed(1)}m`);
-      console.log(`✅ Displaying ${delayedAircraft.length} aircraft at delayed positions`);
-      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-      
+      console.log(`✅ Displaying ${delayedAircraft.length} aircraft at ${positionDelay}-minute delayed positions`);
       setAircraft(delayedAircraft);
       
       if (onAircraftUpdate) {
         onAircraftUpdate(delayedAircraft);
       }
     }
-  }, [positionBuffer, positionDelay, radiusKm, onAircraftUpdate]);  // ✅ Add radiusKm dependency
+  }, [positionBuffer, positionDelay, radiusKm, onAircraftUpdate]);
 
   if (!enabled) return null;
 
   return (
     <>
-      {aircraft.map(plane => (
+      {aircraft.map((plane) => (
         <Fragment key={plane.icao24}>
-          {/* Draw flight trail */}
+          {/* Flight trail */}
           {showTrails && flightTrails[plane.icao24] && flightTrails[plane.icao24].length > 1 && (
             <Polyline
-              positions={flightTrails[plane.icao24].map(pos => [pos.lat, pos.lng])}
+              positions={flightTrails[plane.icao24].map(point => [point.lat, point.lng])}
               pathOptions={{
-                color: '#3b82f6',
+                color: '#2563eb',
                 weight: 2,
                 opacity: 0.6,
-                lineJoin: 'round'
+                dashArray: getTrailDashArray(trailStyle)
               }}
             />
           )}
           
-          {/* Aircraft marker */}
+          {/* Aircraft marker - UPDATED: Now uses iconSize prop */}
           <Marker
             position={[plane.latitude, plane.longitude]}
-            icon={createAirplaneIcon(plane.heading)}
+            icon={createAirplaneIcon(plane.heading, iconSize)}
           >
             <Popup>
               <div style={{ 
