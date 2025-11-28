@@ -1,9 +1,9 @@
 // src/components/SearchRadiusCircle.jsx
 import { Circle } from 'react-leaflet';
 
-const MIA_COORDS = {
-  lat: 25.7959,
-  lng: -80.2870
+const BCT_COORDS = {
+  lat: 26.3785,
+  lng: -80.1077
 };
 
 export default function SearchRadiusCircle({ radiusKm = 50, visible = true }) {
@@ -11,7 +11,7 @@ export default function SearchRadiusCircle({ radiusKm = 50, visible = true }) {
 
   return (
     <Circle
-      center={[MIA_COORDS.lat, MIA_COORDS.lng]}
+      center={[BCT_COORDS.lat, BCT_COORDS.lng]}
       radius={radiusKm * 1000} // Convert km to meters
       pathOptions={{
         color: '#2563eb',

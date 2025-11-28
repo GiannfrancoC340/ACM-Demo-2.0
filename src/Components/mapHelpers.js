@@ -157,13 +157,13 @@ export function calculateDistance(lat1, lng1, lat2, lng2) {
  * Get BCT-related flights from live aircraft data
  */
 export function getBCTFlights(aircraft) {
-  const MIA_LAT = 25.7959;
-  const MIA_LNG = -80.2870;
-  const NEARBY_THRESHOLD = 25; // km
-  const LOW_ALTITUDE_THRESHOLD = 8000; // meters (~10,000 ft)
+  const BCT_LAT = 26.3785;
+  const BCT_LNG = -80.1077;
+  const NEARBY_THRESHOLD = 10; // km
+  const LOW_ALTITUDE_THRESHOLD = 3000; // meters (~10,000 ft)
   
   const nearby = aircraft.filter(plane => {
-    const distance = calculateDistance(MIA_LAT, MIA_LNG, plane.latitude, plane.longitude);
+    const distance = calculateDistance(BCT_LAT, BCT_LNG, plane.latitude, plane.longitude);
     return distance <= NEARBY_THRESHOLD && plane.altitude && plane.altitude < LOW_ALTITUDE_THRESHOLD;
   });
   
@@ -183,13 +183,13 @@ export function getBCTFlights(aircraft) {
  * Now with optional API enrichment
  */
 export async function convertLiveAircraftToFlight(plane, direction, enrichWithAPI = true) {
-  const MIA = {
-    code: "MIA",
-    name: "Miami International Airport",
-    city: "Miami",
+  const BCT = {
+    code: "BCT",
+    name: "Boca Raton Airport",
+    city: "Boca Raton",
     state: "Florida",
-    lat: 25.7959,
-    lng: -80.2870
+    lat: 26.3785,
+    lng: -80.1077
   };
   
   const isDeparture = direction === 'departing';
@@ -200,15 +200,15 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     hour12: true 
   });
   
-  const distanceFromMIA = calculateDistance(
-    MIA.lat, 
-    MIA.lng, 
+  const distanceFromBCT = calculateDistance(
+    BCT.lat, 
+    BCT.lng, 
     plane.latitude, 
     plane.longitude
   ).toFixed(1);
   
   const estimatedDuration = plane.velocity > 0 
-    ? Math.round((parseFloat(distanceFromMIA) / plane.velocity) * 60)
+    ? Math.round((parseFloat(distanceFromBCT) / plane.velocity) * 60)
     : null;
 
   // Try to enrich with external APIs
@@ -250,7 +250,7 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     flightId: `live-${plane.icao24}`,
     route: flightData 
       ? `${flightData.departure.iata || 'UNK'} to ${flightData.arrival.iata || 'UNK'}`
-      : (isDeparture ? `MIA to ${plane.origin_country}` : `${plane.origin_country} to MIA`),
+      : (isDeparture ? `BCT to ${plane.origin_country}` : `${plane.origin_country} to BCT`),
     time: timeStr,
     boardingTime: (() => {
       const hasScheduled = !!flightData?.departure.scheduledTime;
@@ -325,14 +325,14 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     duration: flightData?.duration 
       ? `${Math.floor(flightData.duration / 60)}h ${flightData.duration % 60}m`
       : (estimatedDuration ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)` : "Unknown"),
-    distance: `${distanceFromMIA} km`,
-    departureAirport: isDeparture ? MIA : {
+    distance: `${distanceFromBCT} km`,
+    departureAirport: isDeparture ? BCT : {
       code: flightData?.departure.iata || "UNK",
       name: flightData?.departure.airport || "Origin Unknown",
       city: plane.origin_country,
       state: ""
     },
-    arrivalAirport: !isDeparture ? MIA : {
+    arrivalAirport: !isDeparture ? BCT : {
       code: flightData?.arrival.iata || "UNK",
       name: flightData?.arrival.airport || "Destination Unknown", 
       city: plane.origin_country,

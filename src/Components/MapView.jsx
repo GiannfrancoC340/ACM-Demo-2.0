@@ -69,10 +69,10 @@ export default function MapView() {
   
   const initialFlightsToShow = flights.slice(0, 3);
 
-  const miamiAirport = {
-    lat: 25.7959,
-    lng: -80.2870,
-    description: "Miami International Airport (MIA)"
+  const bocaRatonAirport = {
+    lat: 26.3785,
+    lng: -80.1077,
+    description: "Boca Raton Airport (BCT)"
   };
 
   // Helper: Get today's date in YYYY-MM-DD format (LOCAL timezone)
@@ -219,7 +219,7 @@ export default function MapView() {
 
       {/* The Map */}
       <MapContainer 
-        center={[miamiAirport.lat, miamiAirport.lng]} 
+        center={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
         zoom={13} 
         className="map-container"
       >
@@ -229,13 +229,13 @@ export default function MapView() {
         />
         
         <Marker 
-          position={[miamiAirport.lat, miamiAirport.lng]} 
+          position={[bocaRatonAirport.lat, bocaRatonAirport.lng]} 
           icon={redIcon}
         >
           <Popup onClose={handlePopupClose}>
             <div className="airport-popup">
-              <h3>{miamiAirport.description}</h3>
-              <p>Major international hub serving South Florida</p>
+              <h3>{bocaRatonAirport.description}</h3>
+              <p>A public-use airport serving South Florida</p>
               
               {/* Show live flight count */}
               {liveAircraft.length > 0 ? (
@@ -436,7 +436,7 @@ export default function MapView() {
               </div>
               
               <div className="coordinates-info">
-                Coordinates: {miamiAirport.lat.toFixed(4)}, {miamiAirport.lng.toFixed(4)}
+                Coordinates: {bocaRatonAirport.lat.toFixed(4)}, {bocaRatonAirport.lng.toFixed(4)}
               </div>
             </div>
           </Popup>
