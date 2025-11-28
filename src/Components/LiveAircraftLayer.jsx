@@ -20,17 +20,29 @@ function getCardinalDirection(heading) {
 
 // Create airplane icon that rotates based on heading
 function createAirplaneIcon(heading) {
-  const rotation = (heading -45) || 0;
+  const rotation = (heading) || 0;
   
   return L.divIcon({
     html: `
       <div style="
-        font-size: 24px;
+        width: 24px;
+        height: 24px;
         transform: rotate(${rotation}deg);
         transform-origin: center;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        display: flex;
+        align-items: center;
+        justify-content: center;
       ">
-        ✈️
+        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.3))">
+            <path 
+              d="M10.5 3.5 L10.5 9 L4 15 L5 17 L10.5 13.5 L10.5 20 L9 21.5 L10 23 L12 22 L14 23 L15 21.5 L13.5 20 L13.5 13.5 L19 17 L20 15 L13.5 9 L13.5 3.5 Q13.5 2 12 2 Q10.5 2 10.5 3.5 Z" 
+              fill="#2563eb"
+              stroke="#1e40af"
+              stroke-width="0.5"
+            />
+          </g>
+        </svg>
       </div>
     `,
     iconSize: [24, 24],
