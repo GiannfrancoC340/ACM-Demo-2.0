@@ -1,111 +1,140 @@
-/**
- 
-Import function triggers from their respective submodules:*
-const {onCall} = require("firebase-functions/v2/https");
-const {onDocumentWritten} = require("firebase-functions/v2/firestore");*
-See a full list of supported triggers at https://firebase.google.com/docs/functions*/
-
-const functions = require("firebase-functions");
-const {setGlobalOptions} = functions;
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
-const admin = require("firebase-admin");
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { defineString } = require('firebase-functions/params');
+const admin = require('firebase-admin');
+const twilio = require('twilio');
 
 admin.initializeApp();
-const db = admin.firestore();
 
-const DISCORD_API_BASE = "https://discord.com/api/v10";
-const { defineSecret } = require("firebase-functions/params");
-const DISCORD_BOT_TOKEN = defineSecret("DISCORD_BOT_TOKEN");
+// Define environment parameters
+const twilioSid = defineString('TWILIO_SID');
+const twilioToken = defineString('TWILIO_TOKEN');
+const twilioWhatsappNumber = defineString('TWILIO_WHATSAPP_NUMBER');
 
-setGlobalOptions({ maxInstances: 10 });
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
-async function sendDiscordDM(discordUserId, message) {
-  const dmRes = await fetch(`${DISCORD_API_BASE}/users/@me/channels`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bot ${DISCORD_BOT_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ recipient_id: discordUserId }),
-  });
-
-  if (!dmRes.ok) {
-    const txt = await dmRes.text();
-    logger.error("Failed to create DM channel", dmRes.status, txt);
-    throw new Error("Failed to create DM channel");
-  }
-
-  const dmChannel = await dmRes.json();
-
-  const msgRes = await fetch(
-    `${DISCORD_API_BASE}/channels/${dmChannel.id}/messages`,
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bot ${DISCORD_BOT_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ content: message }),
+/**
+ * Triggered when a new audio recording is added to Firestore
+ * Sends WhatsApp notifications to all subscribed users
+ */
+exports.notifyNewAudioRecording = onDocumentCreated(
+  'audioRecordings/{recordingId}',
+  async (event) => {
+    const recording = event.data.data();
+    const recordingId = event.params.recordingId;
+    
+    console.log('🎧 New audio recording detected:', recordingId);
+    
+    // Initialize Twilio client
+    const client = twilio(twilioSid.value(), twilioToken.value());
+    
+    // Get all users with WhatsApp notifications enabled
+    const usersSnapshot = await admin.firestore()
+      .collection('users')
+      .where('whatsappNotificationsEnabled', '==', true)
+      .get();
+    
+    if (usersSnapshot.empty) {
+      console.log('📭 No users subscribed to audio notifications');
+      return null;
     }
-  );
-
-  if (!msgRes.ok) {
-    const txt = await msgRes.text();
-    logger.error("Failed to send DM", msgRes.status, txt);
-    throw new Error("Failed to send DM");
-  }
-
-  logger.info(`DM sent to Discord user ${discordUserId}`);
-}
-
-exports.sendTestDiscordDM = onRequest(
-  { secrets: [DISCORD_BOT_TOKEN] },
-  async (req, res) => {
-    try {
-      const usersSnap = await db.collection("users").get();
-
-      if (usersSnap.empty) {
-        res.status(200).send("No users found.");
-        return;
-      }
-
-      const tasks = [];
-
-      usersSnap.forEach((userDoc) => {
-        const userData = userDoc.data();
-
-        if (userData.discordNotificationsEnabled === false) return;
-        if (!userData.discordUserId) return;
-
-        const message =
-          "Test message from ACMappings: your Discord notification is working.";
-
-        tasks.push(
-          (async () => {
-            try {
-              await sendDiscordDM(userData.discordUserId, message);
-            } catch (err) {
-              logger.error(err);
-            }
-          })()
+    
+    console.log(`📤 Sending to ${usersSnapshot.size} users`);
+    
+    // Build the notification message
+    const message = buildAudioNotificationMessage(recording, recordingId);
+    
+    // Send to all subscribed users
+    const promises = [];
+    usersSnapshot.forEach(doc => {
+      const user = doc.data();
+      if (user.whatsappNumber) {
+        promises.push(
+          sendWhatsAppMessage(client, user.whatsappNumber, message, twilioWhatsappNumber.value())
+            .catch(error => {
+              console.error(`Failed to send to ${user.whatsappNumber}:`, error.message);
+            })
         );
-      });
-
-      await Promise.all(tasks);
-      res.status(200).send("Test DMs sent.");
-
-    } catch (err) {
-      logger.error(err);
-      res.status(500).send("Error sending test DMs.");
-    }
+      }
+    });
+    
+    await Promise.allSettled(promises);
+    console.log('✅ Notifications sent!');
+    
+    return null;
   }
 );
+
+/**
+ * Build the WhatsApp message content
+ */
+function buildAudioNotificationMessage(recording, recordingId) {
+  const date = recording.date || 'Unknown date';
+  const time = recording.time || 'Unknown time';
+  const frequency = recording.frequency || 'BCT Tower';
+  const duration = recording.duration || 'Unknown';
+  
+  // Build the listening URL
+  const baseUrl = 'https://acmappings.com'; // Update this with your actual domain
+  const audioUrl = `${baseUrl}/audio?id=${recordingId}`;
+  
+  const message = 
+    `🎧 New ATC Recording Available!\n\n` +
+    `${frequency}\n` +
+    `📅 ${date} - ${time}\n` +
+    `⏱️ Duration: ${duration}\n\n` +
+    `Listen now:\n${audioUrl}\n\n` +
+    `Reply STOP to unsubscribe`;
+  
+  return message;
+}
+
+/**
+ * Send WhatsApp message via Twilio
+ */
+async function sendWhatsAppMessage(client, phoneNumber, message, fromNumber) {
+  try {
+    const result = await client.messages.create({
+      from: fromNumber,
+      to: `whatsapp:${phoneNumber}`,
+      body: message
+    });
+    
+    console.log(`✅ Sent to ${phoneNumber}: ${result.sid}`);
+    return result;
+  } catch (error) {
+    console.error(`❌ Failed to send to ${phoneNumber}:`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * Callable function to send test notification
+ * Call from your app to test WhatsApp notifications
+ */
+exports.sendTestWhatsAppNotification = onCall(async (request) => {
+  // Verify user is authenticated
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Must be logged in');
+  }
+  
+  const phoneNumber = request.data.phoneNumber;
+  
+  if (!phoneNumber) {
+    throw new HttpsError('invalid-argument', 'Phone number required');
+  }
+  
+  // Initialize Twilio client
+  const client = twilio(twilioSid.value(), twilioToken.value());
+  
+  const testMessage = 
+    `🎧 Test Notification from ACM Flight Tracking\n\n` +
+    `This is a test message. You'll receive notifications like this when new ATC recordings are available.\n\n` +
+    `✅ Your WhatsApp is connected!\n\n` +
+    `Reply STOP to unsubscribe`;
+  
+  try {
+    await sendWhatsAppMessage(client, phoneNumber, testMessage, twilioWhatsappNumber.value());
+    return { success: true, message: 'Test notification sent!' };
+  } catch (error) {
+    throw new HttpsError('internal', error.message);
+  }
+});

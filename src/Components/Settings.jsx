@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 import './Settings.css';
 
 export default function Settings() {
@@ -169,15 +172,20 @@ export default function Settings() {
   };
 
   const handleConnectWhatsApp = async () => {
-    // Show instructions first
+    // IMPORTANT: Replace with your actual Twilio sandbox join code
+    const TWILIO_JOIN_CODE = 'figure-ship'; // ⬅️ REPLACE THIS
+    const TWILIO_SANDBOX_NUMBER = '+1 415 523 8886';
+    
+    // Build the join message
+    const joinMessage = `join ${TWILIO_JOIN_CODE}`;
+    
+    // Show instructions with actual join code
     const instructions = 
       '📱 To receive audio notifications via WhatsApp:\n\n' +
       '1. Open WhatsApp on your phone\n' +
-      '2. Send this message to: +1 415 523 8886\n' +
-      '   Message: "join <your-sandbox-code>"\n' +
-      '   (Replace <your-sandbox-code> with your actual Twilio code)\n' +
+      `2. Send this message to: ${TWILIO_SANDBOX_NUMBER}\n` +
+      `   Message: "${joinMessage}"\n\n` +
       '3. Wait for confirmation message\n' +
-      '4. Then enter your phone number below\n\n' +
       'Note: This is a one-time setup!';
     
     alert(instructions);
@@ -185,17 +193,44 @@ export default function Settings() {
     // Get phone number
     const phoneNumber = prompt(
       'Enter your WhatsApp number:\n' +
-      'Format: +1234567890 (include country code)'
+      'Examples:\n' +
+      '  +12345678900\n' +
+      '  12345678900\n' +
+      '  2345678900'
     );
     
     if (!phoneNumber) return;
     
-    // Validate format
-    const phoneRegex = /^\+[1-9]\d{1,14}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      alert('Invalid phone number format.\nExample: +12345678900');
+    // Remove all spaces, dashes, parentheses
+    let cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+    
+    // Add country code if missing
+    // If number starts with 1 and is 11 digits, add +
+    // If number is 10 digits, add +1
+    // If already has +, leave it
+    if (cleanNumber.startsWith('+')) {
+      // Already has +, keep it
+    } else if (cleanNumber.startsWith('1') && cleanNumber.length === 11) {
+      // Starts with 1, has 11 digits (e.g., 12345678900)
+      cleanNumber = '+' + cleanNumber;
+    } else if (cleanNumber.length === 10) {
+      // Just 10 digits (e.g., 2345678900), assume US
+      cleanNumber = '+1' + cleanNumber;
+    } else if (cleanNumber.length === 11 && cleanNumber.startsWith('1')) {
+      // 11 digits starting with 1
+      cleanNumber = '+' + cleanNumber;
+    } else {
+      // For other formats, just add + if not present
+      cleanNumber = '+' + cleanNumber;
+    }
+    
+    // Final validation - must start with + and be 10-15 characters
+    if (!cleanNumber.startsWith('+') || cleanNumber.length < 10 || cleanNumber.length > 16) {
+      alert('Invalid phone number format.\n\nPlease try again with:\n+12345678900\nor\n2345678900');
       return;
     }
+    
+    console.log('Formatted phone number:', cleanNumber);
     
     try {
       const user = auth.currentUser;
@@ -208,11 +243,11 @@ export default function Settings() {
       await setDoc(
         doc(db, 'users', user.uid),
         {
-          whatsappNumber: phoneNumber,
+          whatsappNumber: cleanNumber,
           whatsappNotificationsEnabled: true,
           whatsappConnectedAt: new Date().toISOString(),
           notificationPreferences: {
-            audioRecordings: true  // Only notification type: new audio recordings
+            audioRecordings: true
           }
         },
         { merge: true }
@@ -220,13 +255,37 @@ export default function Settings() {
       
       alert(
         '✅ WhatsApp Connected!\n\n' +
-        `Number: ${phoneNumber}\n\n` +
+        `Number: ${cleanNumber}\n\n` +
         'You\'ll receive notifications when new ATC recordings are available.'
       );
       
     } catch (error) {
       console.error('Error saving WhatsApp:', error);
       alert('Error connecting WhatsApp. Please try again.');
+    }
+  };
+
+  const handleTestWhatsApp = async () => {
+    try {
+      const functions = getFunctions();
+      const sendTest = httpsCallable(functions, 'sendTestWhatsAppNotification');
+      
+      const phoneNumber = prompt('Enter your WhatsApp number to test (e.g., +12345678900):');
+      if (!phoneNumber) return;
+      
+      console.log('Sending test to:', phoneNumber);
+      
+      // Show loading state
+      alert('Sending test message (this may take a couple minutes!)');
+      
+      const result = await sendTest({ phoneNumber });
+      
+      console.log('Test result:', result);
+      alert('✅ Test message sent! Check your WhatsApp in a few seconds.');
+      
+    } catch (error) {
+      console.error('Test failed:', error);
+      alert('❌ Test failed: ' + error.message);
     }
   };
 
@@ -347,7 +406,7 @@ export default function Settings() {
 
           {/* NEW: Audio Sync Settings Section */}
           <div className="settings-section">
-            <h2>🎧 Audio Synchronization</h2>
+            <h2>Audio Synchronization</h2>
             
             <div className="setting-item">
               <div className="setting-info">
@@ -438,6 +497,19 @@ export default function Settings() {
                   onClick={handleConnectWhatsApp}
                 >
                   💬 Connect WhatsApp
+                </button>
+
+                {/* Test Button - temporary for testing */}
+                <button
+                  className="reset-button"
+                  onClick={handleTestWhatsApp}
+                  style={{ 
+                    marginTop: '10px',
+                    backgroundColor: '#f59e0b',
+                    color: 'white'
+                  }}
+                >
+                  🧪 Test WhatsApp Notification
                 </button>
 
                 <button className="logout-button" onClick={handleLogout}>
