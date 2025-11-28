@@ -35,10 +35,9 @@ function getTrailDashArray(style) {
 }
 
 // Create airplane icon that rotates based on heading
-// UPDATED: Now accepts size parameter
 function createAirplaneIcon(heading, size = 24) {
-  const rotation = heading || 0;
-  
+  const rotation = (heading) || 0;
+
   return L.divIcon({
     html: `
       <div style="
@@ -74,18 +73,18 @@ export default function LiveAircraftLayer({
   refreshInterval = 30000, 
   radiusKm = 50, 
   onAircraftUpdate = null,
-  positionDelay = 0, // NEW: delay in minutes (0 = real-time)
+  positionDelay = 0, // delay in minutes (0 = real-time)
   showTrails = true,
-  trailLength = 50,  // NEW: number of trail points to keep
-  iconSize = 24,     // NEW: size of aircraft icons in pixels
-  trailStyle = 'dashed', // NEW: style of flight trails (solid, dashed, dotted, long-dash)
-  trailColor = '#2563eb' // NEW: color of flight trails
+  trailLength = 50,  // number of trail points to keep
+  iconSize = 24,     // size of aircraft icons in pixels
+  trailStyle = 'dashed', // style of flight trails (solid, dashed, dotted, long-dash)
+  trailColor = '#2563eb' // color of flight trails
 }) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [flightTrails, setFlightTrails] = useState({}); // Store flight trails
-  const [positionBuffer, setPositionBuffer] = useState({}); // NEW: Store historical positions
+  const [positionBuffer, setPositionBuffer] = useState({}); // Store historical positions
   const map = useMap();
 
   useEffect(() => {
@@ -96,26 +95,26 @@ export default function LiveAircraftLayer({
       try {
         const data = await fetchLiveAircraft(radiusKm);
         const currentTime = Date.now();
-        
-        // NEW: Store positions in buffer with timestamps
+
+        // Store positions in buffer with timestamps
         setPositionBuffer(prevBuffer => {
           const newBuffer = { ...prevBuffer };
-          
+
           let newAircraftCount = 0;
           let totalCleaned = 0;
-          
+
           data.aircraft.forEach(plane => {
             if (!newBuffer[plane.icao24]) {
               newBuffer[plane.icao24] = [];
               newAircraftCount++;
             }
-            
+
             // Add current position with timestamp
             newBuffer[plane.icao24].push({
               ...plane,
               timestamp: currentTime
             });
-            
+
             // Keep 15 minutes of history (900 seconds)
             const cutoffTime = currentTime - (15 * 60 * 1000);
             const beforeCleanup = newBuffer[plane.icao24].length;
@@ -125,7 +124,7 @@ export default function LiveAircraftLayer({
             const afterCleanup = newBuffer[plane.icao24].length;
             totalCleaned += (beforeCleanup - afterCleanup);
           });
-          
+
           // Clean up old aircraft not seen in 10 minutes
           const currentIcao24s = new Set(data.aircraft.map(a => a.icao24));
           const removedAircraft = [];
@@ -138,18 +137,18 @@ export default function LiveAircraftLayer({
               }
             }
           });
-          
+
           // Summary log
           const totalPositions = Object.values(newBuffer).reduce((sum, positions) => sum + positions.length, 0);
           console.log(`📥 Buffer update: ${data.aircraft.length} aircraft stored | ${newAircraftCount} new | ${totalCleaned} cleaned | ${removedAircraft.length} removed`);
           console.log(`💾 Buffer status: ${Object.keys(newBuffer).length} aircraft, ${totalPositions} total positions`);
-          
+
           return newBuffer;
         });
-        
+
         setLastUpdate(new Date(data.timestamp * 1000));
         console.log(`Loaded ${data.aircraft.length} live aircraft within ${radiusKm}km`);
-        
+
         // Log flight detections
         logFlightDetections(data.aircraft).catch(err => 
           console.error('Error logging detections:', err)
@@ -158,13 +157,13 @@ export default function LiveAircraftLayer({
         // Update flight trails
         setFlightTrails(prevTrails => {
           const newTrails = { ...prevTrails };
-          
+
           // Add current positions to trails
           data.aircraft.forEach(plane => {
             if (!newTrails[plane.icao24]) {
               newTrails[plane.icao24] = [];
             }
-            
+
             // Add current position
             newTrails[plane.icao24].push({
               lat: plane.latitude,
@@ -172,13 +171,13 @@ export default function LiveAircraftLayer({
               timestamp: currentTime,
               altitude: plane.altitude
             });
-            
+
             // Keep only last N positions based on trailLength setting
             if (newTrails[plane.icao24].length > trailLength) {
               newTrails[plane.icao24].shift();
             }
           });
-          
+
           // Clean up trails for aircraft no longer in range
           const currentIcao24s = new Set(data.aircraft.map(a => a.icao24));
           Object.keys(newTrails).forEach(icao24 => {
@@ -186,10 +185,10 @@ export default function LiveAircraftLayer({
               delete newTrails[icao24];
             }
           });
-          
+
           return newTrails;
         });
-        
+
       } catch (error) {
         console.error('Failed to update aircraft:', error);
       } finally {
@@ -206,27 +205,27 @@ export default function LiveAircraftLayer({
     return () => clearInterval(interval);
   }, [enabled, refreshInterval, radiusKm]);
 
-  // NEW: Calculate delayed positions when delay changes
+  // Calculate delayed positions when delay changes
   useEffect(() => {
     const now = Date.now();
-    
+
     if (positionDelay === 0) {
       // Real-time mode - use most recent positions from buffer
       console.log('🔴 REAL-TIME MODE - Showing current positions');
-      
+
       const realtimeAircraft = Object.keys(positionBuffer).map(icao24 => {
         const positions = positionBuffer[icao24];
         return positions[positions.length - 1]; // Most recent
       })
       .filter(Boolean)
-      .filter(plane => {  // ✅ Filter by radius
+      .filter(plane => {  // Filter by radius
         const distance = calculateDistance(plane.latitude, plane.longitude);
         return distance <= radiusKm;
       });
-      
+
       console.log(`✅ Displaying ${realtimeAircraft.length} aircraft at real-time positions`);
       setAircraft(realtimeAircraft);
-      
+
       if (onAircraftUpdate) {
         onAircraftUpdate(realtimeAircraft);
       }
@@ -234,43 +233,53 @@ export default function LiveAircraftLayer({
       // Delayed mode - find positions from X minutes ago
       const targetTime = now - (positionDelay * 60 * 1000);
       const targetDate = new Date(targetTime);
-      
-      console.log(`⏱️ DELAYED MODE - Looking for positions from ${positionDelay} minutes ago (${targetDate.toLocaleTimeString()})`);
-      
-      const delayedAircraft = Object.keys(positionBuffer)
-        .map(icao24 => {
-          const positions = positionBuffer[icao24];
-          
-          // Find the closest position to target time
-          let closestPosition = null;
-          let smallestDiff = Infinity;
-          
-          positions.forEach(pos => {
-            const diff = Math.abs(pos.timestamp - targetTime);
-            if (diff < smallestDiff) {
-              smallestDiff = diff;
-              closestPosition = pos;
-            }
-          });
-          
-          // Only use if within 2 minutes of target time
-          if (closestPosition && smallestDiff < 2 * 60 * 1000) {
-            const delaySeconds = Math.round((now - closestPosition.timestamp) / 1000);
-            console.log(`  ✈️ ${closestPosition.callsign?.trim() || closestPosition.icao24}: Found position ${delaySeconds}s ago (diff: ${Math.round(smallestDiff/1000)}s)`);
-            return closestPosition;
+
+      console.log(`🕐 DELAYED MODE - Delay: ${positionDelay} minutes`);
+      console.log(`⏰ Current time: ${new Date(now).toLocaleTimeString()}`);
+      console.log(`📍 Target time: ${targetDate.toLocaleTimeString()} (${positionDelay} min ago)`);
+      console.log(`🗂️ Buffer size: ${Object.keys(positionBuffer).length} aircraft`);
+
+      const delayedAircraft = [];
+      let totalAgeDiff = 0;
+      let minAge = Infinity;
+      let maxAge = 0;
+
+      Object.keys(positionBuffer).forEach(icao24 => {
+        const positions = positionBuffer[icao24];
+
+        // Find position closest to target time
+        let closestPosition = null;
+        let smallestDiff = Infinity;
+
+        positions.forEach(pos => {
+          const diff = Math.abs(pos.timestamp - targetTime);
+          if (diff < smallestDiff) {
+            smallestDiff = diff;
+            closestPosition = pos;
           }
-          
-          return null;
-        })
-        .filter(Boolean)
-        .filter(plane => {  // ✅ Filter by radius
-          const distance = calculateDistance(plane.latitude, plane.longitude);
-          return distance <= radiusKm;
         });
-      
-      console.log(`✅ Displaying ${delayedAircraft.length} aircraft at ${positionDelay}-minute delayed positions`);
+
+        if (closestPosition) {
+          // Add distance check here
+          const distance = calculateDistance(closestPosition.latitude, closestPosition.longitude);
+          if (distance <= radiusKm) {  // Only add if within radius
+            const posAge = (now - closestPosition.timestamp) / 1000 / 60; // minutes
+            totalAgeDiff += posAge;
+            minAge = Math.min(minAge, posAge);
+            maxAge = Math.max(maxAge, posAge);
+            delayedAircraft.push(closestPosition);
+          }
+        }
+      });
+
+      const avgAge = delayedAircraft.length > 0 ? totalAgeDiff / delayedAircraft.length : 0;
+
+      console.log(`📊 Position ages: min ${minAge.toFixed(1)}m | avg ${avgAge.toFixed(1)}m | max ${maxAge.toFixed(1)}m`);
+      console.log(`✅ Displaying ${delayedAircraft.length} aircraft at delayed positions`);
+      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
       setAircraft(delayedAircraft);
-      
+
       if (onAircraftUpdate) {
         onAircraftUpdate(delayedAircraft);
       }
@@ -281,22 +290,23 @@ export default function LiveAircraftLayer({
 
   return (
     <>
-      {aircraft.map((plane) => (
+      {aircraft.map(plane => (
         <Fragment key={plane.icao24}>
-          {/* Flight trail */}
+          {/* Draw flight trail with customizable style and color */}
           {showTrails && flightTrails[plane.icao24] && flightTrails[plane.icao24].length > 1 && (
             <Polyline
-              positions={flightTrails[plane.icao24].map(point => [point.lat, point.lng])}
+              positions={flightTrails[plane.icao24].map(pos => [pos.lat, pos.lng])}
               pathOptions={{
                 color: trailColor,
                 weight: 2,
                 opacity: 0.6,
+                lineJoin: 'round',
                 dashArray: getTrailDashArray(trailStyle)
               }}
             />
           )}
-          
-          {/* Aircraft marker - UPDATED: Now uses iconSize prop */}
+
+          {/* Aircraft marker with customizable icon size */}
           <Marker
             position={[plane.latitude, plane.longitude]}
             icon={createAirplaneIcon(plane.heading, iconSize)}
@@ -332,7 +342,7 @@ export default function LiveAircraftLayer({
                     {plane.origin_country}
                   </div>
                 </div>
-                
+
                 {/* Flight Information Grid */}
                 <div style={{
                   display: 'grid',
@@ -408,7 +418,7 @@ export default function LiveAircraftLayer({
                     <span style={{ color: '#64748b', fontWeight: '600' }}>ICAO24:</span>
                     <span style={{ fontFamily: 'monospace', color: '#1e293b' }}>{plane.icao24.toUpperCase()}</span>
                   </div>
-                  
+
                   <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between',
@@ -475,7 +485,7 @@ export default function LiveAircraftLayer({
           </Marker>
         </Fragment>
       ))}
-      
+
       {/* Status indicator in corner */}
       {lastUpdate && (
         <div style={{
