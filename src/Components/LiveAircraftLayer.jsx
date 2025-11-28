@@ -20,7 +20,7 @@ function getCardinalDirection(heading) {
 
 // Create airplane icon that rotates based on heading
 function createAirplaneIcon(heading) {
-  const rotation = heading || 0;
+  const rotation = (heading -45) || 0;
   
   return L.divIcon({
     html: `
