@@ -457,6 +457,7 @@ export default function MapView() {
           trailLength={settings.trailLength || 50}
           iconSize={settings.iconSize}
           trailStyle={settings.trailStyle}
+          trailColor={settings.trailColor}
         />
       </MapContainer>
 

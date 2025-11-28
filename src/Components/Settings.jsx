@@ -15,6 +15,7 @@ export default function Settings() {
     mapStyle: 'standard',
     trailLength: 50,  // Default 50 points
     trailStyle: 'solid',
+    trailColor: '#2563eb',
     iconSize: 24, // Add this - default 24px
     positionDelay: 3,  // NEW: Add position delay setting (default 3 minutes)
     showTrails: true
@@ -531,6 +532,34 @@ export default function Settings() {
                 <option value="dashed">Dashed Line</option>
                 <option value="dotted">Dotted Line</option>
                 <option value="long-dash">Long Dash</option>
+              </select>
+            </div>
+
+            <div className="setting-item">
+              <div className="setting-info">
+                <label htmlFor="trailColor">Flight Trail Color</label>
+                <p className="setting-description">
+                  Color of aircraft flight trails
+                </p>
+              </div>
+              <select
+                id="trailColor"
+                className="setting-select"
+                value={settings.trailColor}
+                onChange={(e) => setSettings({
+                  ...settings,
+                  trailColor: e.target.value
+                })}
+                disabled={!settings.showTrails}
+              >
+                <option value="#2563eb">Blue</option>
+                <option value="#ef4444">Red</option>
+                <option value="#10b981">Green</option>
+                <option value="#f59e0b">Yellow/Orange</option>
+                <option value="#8b5cf6">Purple</option>
+                <option value="#ec4899">Pink</option>
+                <option value="#06b6d4">Cyan</option>
+                <option value="#64748b">Gray</option>
               </select>
             </div>
           </div>

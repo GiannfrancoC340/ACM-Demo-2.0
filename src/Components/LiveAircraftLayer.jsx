@@ -37,7 +37,7 @@ function getTrailDashArray(style) {
 // Create airplane icon that rotates based on heading
 // UPDATED: Now accepts size parameter
 function createAirplaneIcon(heading, size = 24) {
-  const rotation = (heading) || 0;
+  const rotation = heading || 0;
   
   return L.divIcon({
     html: `
@@ -78,7 +78,8 @@ export default function LiveAircraftLayer({
   showTrails = true,
   trailLength = 50,  // NEW: number of trail points to keep
   iconSize = 24,     // NEW: size of aircraft icons in pixels
-  trailStyle = 'dashed' // NEW: style of flight trails (solid, dashed, dotted, long-dash)
+  trailStyle = 'dashed', // NEW: style of flight trails (solid, dashed, dotted, long-dash)
+  trailColor = '#2563eb' // NEW: color of flight trails
 }) {
   const [aircraft, setAircraft] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -287,7 +288,7 @@ export default function LiveAircraftLayer({
             <Polyline
               positions={flightTrails[plane.icao24].map(point => [point.lat, point.lng])}
               pathOptions={{
-                color: '#2563eb',
+                color: trailColor,
                 weight: 2,
                 opacity: 0.6,
                 dashArray: getTrailDashArray(trailStyle)
