@@ -268,30 +268,6 @@ export default function Settings() {
     }
   };
 
-  const handleTestWhatsApp = async () => {
-    try {
-      const functions = getFunctions();
-      const sendTest = httpsCallable(functions, 'sendTestWhatsAppNotification');
-      
-      const phoneNumber = prompt('Enter your WhatsApp number to test (e.g., +12345678900):');
-      if (!phoneNumber) return;
-      
-      console.log('Sending test to:', phoneNumber);
-      
-      // Show loading state
-      alert('Sending test message (this may take a couple minutes!)');
-      
-      const result = await sendTest({ phoneNumber });
-      
-      console.log('Test result:', result);
-      alert('✅ Test message sent! Check your WhatsApp in a few seconds.');
-      
-    } catch (error) {
-      console.error('Test failed:', error);
-      alert('❌ Test failed: ' + error.message);
-    }
-  };
-
   return (
     <div className="settings-page">
       <div className="settings-container">
@@ -368,6 +344,25 @@ export default function Settings() {
                 <option value="terrain">Terrain</option>
               </select>
             </div>
+          </div>
+
+          <div className="settings-section">
+            <h2>Display</h2>
+            
+            <div className="setting-item">
+              <div className="setting-info">
+                <label>Show Aircraft Trails</label>
+                <p className="setting-description">Display flight path history on the map</p>
+              </div>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.showTrails}
+                  onChange={(e) => handleSettingChange('showTrails', e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
 
             <div className="setting-item">
               <div className="setting-info">
@@ -404,89 +399,6 @@ export default function Settings() {
                   {settings.trailLength}
                 </span>
               </div>
-            </div>
-          </div>
-
-          {/* NEW: Audio Sync Settings Section */}
-          <div className="settings-section">
-            <h2>Audio Synchronization</h2>
-            
-            <div className="setting-item">
-              <div className="setting-info">
-                <label>Position Delay: {settings.positionDelay} minutes</label>
-                <p className="setting-description">
-                  {settings.positionDelay === 0 
-                    ? '🔴 Real-time mode - Shows current aircraft positions' 
-                    : `🕐 Delayed mode - Shows positions from ${settings.positionDelay} minute${settings.positionDelay !== 1 ? 's' : ''} ago for audio transcription sync`
-                  }
-                </p>
-              </div>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '15px',
-                minWidth: '250px'
-              }}>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  step="0.5"
-                  value={settings.positionDelay}
-                  onChange={(e) => handleSettingChange('positionDelay', parseFloat(e.target.value))}
-                  style={{ 
-                    flex: 1,
-                    minWidth: '150px'
-                  }}
-                />
-                <span style={{
-                  minWidth: '60px',
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  padding: '4px 8px',
-                  backgroundColor: settings.positionDelay > 0 ? '#fff3cd' : '#d1fae5',
-                  borderRadius: '4px',
-                  fontSize: '0.9rem'
-                }}>
-                  {settings.positionDelay} min
-                </span>
-              </div>
-            </div>
-
-            <div style={{
-              marginTop: '15px',
-              padding: '15px',
-              backgroundColor: '#f0f9ff',
-              borderRadius: '8px',
-              borderLeft: '4px solid #3b82f6'
-            }}>
-              <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#1e40af' }}>
-                ℹ️ What is Position Delay?
-              </p>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: '1.5' }}>
-                Position delay synchronizes aircraft positions with audio transcription processing time. 
-                When set to 3 minutes, the map shows where aircraft were 3 minutes ago, matching when 
-                the audio was recorded and transcribed.
-              </p>
-            </div>
-          </div>
-
-          <div className="settings-section">
-            <h2>Display</h2>
-            
-            <div className="setting-item">
-              <div className="setting-info">
-                <label>Show Aircraft Trails</label>
-                <p className="setting-description">Display flight path history on the map</p>
-              </div>
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={settings.showTrails}
-                  onChange={(e) => handleSettingChange('showTrails', e.target.checked)}
-                />
-                <span className="toggle-slider"></span>
-              </label>
             </div>
 
             <div className="setting-item">
@@ -564,6 +476,70 @@ export default function Settings() {
             </div>
           </div>
 
+          {/* NEW: Audio Sync Settings Section */}
+          <div className="settings-section">
+            <h2>Audio Synchronization</h2>
+            
+            <div className="setting-item">
+              <div className="setting-info">
+                <label>Position Delay: {settings.positionDelay} minutes</label>
+                <p className="setting-description">
+                  {settings.positionDelay === 0 
+                    ? '🔴 Real-time mode - Shows current aircraft positions' 
+                    : `🕐 Delayed mode - Shows positions from ${settings.positionDelay} minute${settings.positionDelay !== 1 ? 's' : ''} ago for audio transcription sync`
+                  }
+                </p>
+              </div>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '15px',
+                minWidth: '250px'
+              }}>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  step="0.5"
+                  value={settings.positionDelay}
+                  onChange={(e) => handleSettingChange('positionDelay', parseFloat(e.target.value))}
+                  style={{ 
+                    flex: 1,
+                    minWidth: '150px'
+                  }}
+                />
+                <span style={{
+                  minWidth: '60px',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  padding: '4px 8px',
+                  backgroundColor: settings.positionDelay > 0 ? '#fff3cd' : '#d1fae5',
+                  borderRadius: '4px',
+                  fontSize: '0.9rem'
+                }}>
+                  {settings.positionDelay} min
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              marginTop: '15px',
+              padding: '15px',
+              backgroundColor: '#f0f9ff',
+              borderRadius: '8px',
+              borderLeft: '4px solid #3b82f6'
+            }}>
+              <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#1e40af' }}>
+                ℹ️ What is Position Delay?
+              </p>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: '1.5' }}>
+                Position delay synchronizes aircraft positions with audio transcription processing time. 
+                When set to 3 minutes, the map shows where aircraft were 3 minutes ago, matching when 
+                the audio was recorded and transcribed.
+              </p>
+            </div>
+          </div>
+
           {/* Account Section - Only shows if user is logged in */}
           {username && (
             <div className="settings-section">
@@ -574,19 +550,6 @@ export default function Settings() {
                   onClick={handleConnectWhatsApp}
                 >
                   💬 Connect WhatsApp
-                </button>
-
-                {/* Test Button - temporary for testing */}
-                <button
-                  className="reset-button"
-                  onClick={handleTestWhatsApp}
-                  style={{ 
-                    marginTop: '10px',
-                    backgroundColor: '#f59e0b',
-                    color: 'white'
-                  }}
-                >
-                  🧪 Test WhatsApp Notification
                 </button>
 
                 <button className="logout-button" onClick={handleLogout}>
@@ -602,15 +565,6 @@ export default function Settings() {
               <p><strong>App Version:</strong> 1.0.0</p>
               <p><strong>Build:</strong> 2025.11.22</p>
               <p><strong>Developer:</strong> ACM Team</p>
-            </div>
-          </div>
-
-          <div className="settings-section">
-            <h2>Thanks</h2>
-            <div className="thanks-info">
-              <p>I want to thank the following people for helping out on this project:</p>
-              {/* <p>Joshua Castro-Munoz for demo testing the project</p>
-              <p>Lorem ipsum</p> */}
             </div>
           </div>
 

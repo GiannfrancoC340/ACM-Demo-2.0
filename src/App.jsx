@@ -40,12 +40,6 @@ function Home() {
   const handleLogoClick = () => {
     const newCount = clickCount + 1;
     setClickCount(newCount);
-
-    // Check if it's 41 or 67 clicks
-    if (newCount === 41 || newCount === 67) {
-      setShowPopup(true);
-      // Don't reset counter here anymore
-    }
   };
 
   const closePopup = () => {
@@ -113,28 +107,6 @@ function Home() {
           ⚙️ Settings
         </Link>
       </div>
-
-      {/* Easter Egg Popup */}
-      {showPopup && (
-        <div 
-          className="easter-egg-overlay"
-          onClick={closePopup}
-        >
-          <div 
-            className="easter-egg-popup"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2>🎉 Haha funny number 🎉</h2>
-            <p>You found the secret!</p>
-            <button 
-              className="close-easter-egg"
-              onClick={closePopup}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
