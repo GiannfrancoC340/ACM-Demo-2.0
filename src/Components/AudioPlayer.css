@@ -1,10 +1,23 @@
-/* Timeline Filter Card */
+/* Universal box-sizing - scoped to audio player only */
+.audio-player-page *, 
+.audio-player-page *::before, 
+.audio-player-page *::after {
+  box-sizing: border-box;
+}
+
+/* Timeline Filter Card - Now Combined with Playlist */
 .timeline-filter-card {
   background-color: #1f2937;
   border-radius: 0.5rem;
   padding: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0; /* No bottom margin since it's one card */
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 750px; /* Increased from 600px to maintain consistent height */
+  display: flex;
+  flex-direction: column;
 }
 
 .timeline-header {
@@ -12,12 +25,43 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.timeline-title-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .timeline-title {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
+}
+
+.timeline-days-select {
+  padding: 0.5rem 0.75rem;
+  background-color: #374151;
+  color: white;
+  border: 1px solid #4b5563;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.timeline-days-select:hover {
+  background-color: #4b5563;
+  border-color: #6b7280;
+}
+
+.timeline-days-select:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
 }
 
 .clear-filter-btn {
@@ -47,8 +91,17 @@
 .timeline-scroll {
   display: flex;
   gap: 0.5rem;
+  justify-content: space-between;
   min-width: max-content;
   padding: 0.5rem 0;
+}
+
+/* On larger screens with fewer days, center the timeline */
+@media (min-width: 768px) {
+  .timeline-scroll {
+    justify-content: center;
+    gap: 1rem;
+  }
 }
 
 .timeline-tick {
@@ -186,9 +239,41 @@
 
 .audio-player-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: white;
   padding-top: 70px; /* Add padding for fixed navbar */
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Blurred Map Background Container */
+.audio-map-background {
+  position: fixed; /* Changed from absolute to fixed */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  filter: blur(3px); /* Reduced blur for more map visibility */
+  z-index: 0;
+}
+
+/* Overlay to dim the map and improve readability */
+.audio-player-page::before {
+  content: '';
+  position: fixed; /* Changed from absolute to fixed */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  background: rgba(26, 26, 46, 0.3); /* Lighter overlay at 30% opacity */
+  z-index: 1;
+}
+
+/* Ensure content is above the background */
+.audio-navbar,
+.audio-player-container {
+  position: relative;
+  z-index: 2;
 }
 
 /* Fixed Navbar */
@@ -264,10 +349,50 @@
 
 
 .audio-player-container {
-  max-width: 64rem;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 2rem 2rem 2rem;
+  padding: 0 2rem 0.5rem 2rem; /* Reduced bottom padding from 2rem to 0.5rem */
+  overflow-x: hidden;
+}
+
+/* Split Panel Layout */
+.split-panel-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  max-width: 100%;
+  width: 100%;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Reduced from 2rem to 0.5rem */
+  min-width: 0;
+  overflow: hidden;
+}
+
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  position: sticky;
+  top: 90px; /* Stick below navbar */
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 1024px) {
+  .split-panel-container {
+    grid-template-columns: 1fr;
+  }
   
+  .right-panel {
+    position: static;
+  }
 }
 
 .audio-player-title {
@@ -468,13 +593,23 @@
   box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
 }
 
-/* Now Playing Card */
-.now-playing-card {
+/* Combined Player Card - Now Playing + Flight Details + Stress Analysis */
+.combined-player-card {
   background-color: #1f2937;
   border-radius: 0.5rem;
   padding: 2rem;
-  margin-bottom: 2rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 750px; /* Match left panel height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Now Playing Section */
+.now-playing-section {
+  padding-bottom: 1.5rem;
 }
 
 .now-playing-title {
@@ -552,15 +687,27 @@
   cursor: pointer;
   transition: all 0.3s;
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-btn svg {
+  display: block;
 }
 
 .control-btn:hover:not(:disabled) {
   background-color: #4b5563;
+  transform: scale(1.1);
 }
 
 .control-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.control-btn:disabled svg {
+  opacity: 0.5;
 }
 
 .play-pause-btn {
@@ -572,34 +719,103 @@
   color: white;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 2rem; /* scale icon size */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.play-pause-btn:hover {
-  background-color: #c63030;
+.play-pause-btn svg {
+  display: block;
 }
 
-/* Playlist */
-.playlist-card {
-  background-color: #1f2937;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+.play-pause-btn:hover {
+  background-color: #c63030;
+  transform: scale(1.1);
+}
+
+/* Playlist Section - Inside Combined Card */
+.playlist-section {
+  margin-top: 1.5rem; /* Space between timeline and playlist */
+  padding-top: 1.5rem;
+  border-top: 1px solid #374151; /* Subtle divider */
+}
+
+/* Playlist Card - Legacy styles removed, now part of combined card */
+.playlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .playlist-title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin: 0;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-label {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.sort-select {
+  padding: 0.5rem 0.75rem;
+  background-color: #374151;
+  color: white;
+  border: 1px solid #4b5563;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sort-select:hover {
+  background-color: #4b5563;
+  border-color: #6b7280;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
 }
 
 .playlist-items {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  max-height: 320px; /* Show exactly 5 items, force scroll for 6+ */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 0.5rem; /* Add space to move scrollbar right */
+}
+
+/* Playlist scrollbar styling */
+.playlist-items::-webkit-scrollbar {
+  width: 8px;
+}
+
+.playlist-items::-webkit-scrollbar-track {
+  background: #111827;
+  border-radius: 4px;
+}
+
+.playlist-items::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.playlist-items::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 .playlist-item {
@@ -668,13 +884,18 @@
   }
 }
 
-/* Transcript */
+/* Transcript - Full Width Below Split Panel */
 .transcript-card {
   background-color: #1f2937;
   border-radius: 0.5rem;
   padding: 1.5rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  margin-top: 2rem;
+  box-sizing: border-box;
+  width: calc(100% - 4rem); /* Full width minus left and right margins */
+  max-width: calc(100% - 4rem);
+  margin: 0.5rem 2rem 2rem 2rem; /* Reduced top margin from 1rem to 0.5rem */
+  position: relative;
+  z-index: 2; /* Above background */
 }
 
 .transcript-title {
@@ -689,6 +910,12 @@
   padding: 1rem;
   max-height: 24rem;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Hide scrollbar corner */
+.transcript-content::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .transcript-text {
@@ -704,13 +931,197 @@
   height: 0.5rem;
 }
 
+/* Section Divider */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #374151, transparent);
+  margin: 1.5rem 0;
+}
+
+/* Live Flight Details Section */
+.flight-details-section {
+  padding: 1.5rem 0;
+}
+
+.flight-details-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.flight-info-content {
+  background-color: #111827;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-height: 100px;
+}
+
+.flight-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.flight-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.flight-info-header {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #9ca3af;
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.flight-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.flight-info-label {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.flight-info-value {
+  color: #d1d5db;
+  font-weight: 600;
+}
+
+.flight-airport-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #e04141;
+  margin-bottom: 0.25rem;
+}
+
+.flight-location {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.flight-time {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.flight-time-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.flight-time-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #e04141;
+}
+
+.flight-info-placeholder {
+  color: #6b7280;
+  font-style: italic;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.flight-info-small {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.flight-status-badge {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #1f2937;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.flight-status-badge .status-text {
+  color: #34d399;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Stress Analysis Section */
+.stress-analysis-section {
+  padding: 1.5rem 0;
+  flex-grow: 1; /* Take remaining space */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Remove old stress-detection-card styles */
+/* Legacy - now part of combined-player-card */
+
+.stress-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.stress-content {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.stress-indicator-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.stress-label-compact {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.stress-value-compact {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.stress-low-text {
+  color: #34a853;
+}
+
+.stress-medium-text {
+  color: #fbbc04;
+}
+
+.stress-high-text {
+  color: #ea4335;
+}
+
+.stress-unavailable-text {
+  color: #6b7280;
+  font-size: 1.125rem;
+}
+
 /* Scrollbar styling */
 .transcript-content::-webkit-scrollbar {
   width: 8px;
 }
 
 .transcript-content::-webkit-scrollbar-track {
-  background: #1f2937;
+  background: transparent;
   border-radius: 4px;
 }
 
