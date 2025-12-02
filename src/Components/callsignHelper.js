@@ -192,6 +192,13 @@ export function getAirlineFromCallsign(callsign) {
     'XOJ': 'XOJet',
     'TWY': 'Jet Aviation',
     'FLX': 'FlexJet',
+    'LXJ': 'Flexjet',           // ⚠️ Add this (alternative code)
+    'CST': 'CoastAir',          // ⚠️ Add this
+    'JRE': 'JetReady',          // ⚠️ Add this
+    'TNO': 'Talon Air',         // ⚠️ Add this
+    'JSX': 'JSX Air',           // ⚠️ Add this
+    'GPD': 'Tradewind Aviation',// ⚠️ Add this
+    'ASP': 'AirSprint',
     'CKS': 'Kalitta Air',
     'ATN': 'Air Transport International',
     'WWI': 'Western Global Airlines',
@@ -200,4 +207,157 @@ export function getAirlineFromCallsign(callsign) {
   // Extract airline code (first 3 letters)
   const code = clean.substring(0, 3);
   return airlineMap[code] || null;
+}
+
+/**
+ * ========================================
+ * IATA ↔ ICAO CALLSIGN CONVERSION
+ * ========================================
+ */
+
+/**
+ * Mapping between IATA (2-letter) and ICAO (3-letter) airline codes
+ */
+const AIRLINE_CODE_MAP = {
+  // US Airlines
+  'AA': 'AAL',   // American Airlines
+  'UA': 'UAL',   // United Airlines
+  'DL': 'DAL',   // Delta Air Lines
+  'WN': 'SWA',   // Southwest Airlines
+  'B6': 'JBU',   // JetBlue Airways
+  'NK': 'NKS',   // Spirit Airlines
+  'F9': 'FFT',   // Frontier Airlines
+  'AS': 'ASA',   // Alaska Airlines
+  'HA': 'HAL',   // Hawaiian Airlines
+  'G4': 'AAY',   // Allegiant Air
+  
+  // US Regional/Cargo
+  'OO': 'SKW',   // SkyWest Airlines
+  'MQ': 'ENY',   // Envoy Air
+  'FX': 'FDX',   // FedEx
+  '5X': 'UPS',   // UPS Airlines
+  'GB': 'ABX',   // ABX Air
+  '5Y': 'GTI',   // Atlas Air
+  
+  // International
+  'BA': 'BAW',   // British Airways
+  'LH': 'DLH',   // Lufthansa
+  'AF': 'AFR',   // Air France
+  'KL': 'KLM',   // KLM
+  'AC': 'ACA',   // Air Canada
+  'Y4': 'VOI',   // Volaris
+  'VB': 'VIV',   // VivaAerobus
+  'AM': 'AMX',   // Aeromexico
+  'EK': 'UAE',   // Emirates
+  'AV': 'AVA',   // Avianca
+  'CM': 'CMP',   // Copa Airlines
+  'TK': 'THY',   // Turkish Airlines
+  'UP': 'BHS',   // Bahamasair
+  'LA': 'LAN',   // LATAM Airlines
+  'JJ': 'TAM',   // LATAM (Brazil)
+  'EY': 'ETD',   // Etihad Airways
+};
+
+/**
+ * Create reverse mapping (ICAO → IATA)
+ */
+const REVERSE_AIRLINE_CODE_MAP = Object.fromEntries(
+  Object.entries(AIRLINE_CODE_MAP).map(([iata, icao]) => [icao, iata])
+);
+
+/**
+ * Convert between IATA and ICAO callsign formats
+ * Examples:
+ *   AA1110 → AAL1110
+ *   AAL1110 → AA1110
+ *   N738WC → N738WC (no conversion for tail numbers)
+ */
+export function convertCallsign(callsign, targetFormat = 'ICAO') {
+  if (!callsign) return null;
+  
+  const clean = callsign.trim().toUpperCase();
+  
+  // If it's a tail number (starts with N), don't convert
+  if (clean.startsWith('N')) {
+    return clean;
+  }
+  
+  // Try to match airline code pattern
+  // Format: AA1110 (IATA) or AAL1110 (ICAO)
+  
+  if (targetFormat === 'ICAO') {
+    // Convert IATA → ICAO
+    for (const [iata, icao] of Object.entries(AIRLINE_CODE_MAP)) {
+      if (clean.startsWith(iata) && clean.length > iata.length) {
+        // Extract flight number (everything after airline code)
+        const flightNumber = clean.substring(iata.length);
+        return icao + flightNumber;
+      }
+    }
+  } else if (targetFormat === 'IATA') {
+    // Convert ICAO → IATA
+    for (const [icao, iata] of Object.entries(REVERSE_AIRLINE_CODE_MAP)) {
+      if (clean.startsWith(icao) && clean.length > icao.length) {
+        // Extract flight number (everything after airline code)
+        const flightNumber = clean.substring(icao.length);
+        return iata + flightNumber;
+      }
+    }
+  }
+  
+  // No conversion possible, return original
+  return clean;
+}
+
+/**
+ * Get all possible variants of a callsign (IATA and ICAO)
+ * This is useful for searching/matching when you don't know which format is used
+ * 
+ * Examples:
+ *   AA1110 → ['AA1110', 'AAL1110']
+ *   AAL1110 → ['AAL1110', 'AA1110']
+ *   N738WC → ['N738WC'] (tail numbers have no variants)
+ */
+export function getCallsignVariants(callsign) {
+  if (!callsign) return [];
+  
+  const clean = callsign.trim().toUpperCase();
+  const variants = [clean];
+  
+  // Try to convert to ICAO
+  const icao = convertCallsign(clean, 'ICAO');
+  if (icao && icao !== clean) {
+    variants.push(icao);
+  }
+  
+  // Try to convert to IATA
+  const iata = convertCallsign(clean, 'IATA');
+  if (iata && iata !== clean) {
+    variants.push(iata);
+  }
+  
+  // Remove duplicates and return
+  return [...new Set(variants)];
+}
+
+/**
+ * Check if a callsign matches another callsign (accounting for IATA/ICAO variants)
+ * 
+ * Examples:
+ *   callsignsMatch('AA1110', 'AAL1110') → true
+ *   callsignsMatch('AAL1110', 'AA1110') → true
+ *   callsignsMatch('AA1110', 'AA1110') → true
+ *   callsignsMatch('N738WC', 'N738WC') → true
+ *   callsignsMatch('AA1110', 'UA456') → false
+ */
+export function callsignsMatch(callsign1, callsign2) {
+  if (!callsign1 || !callsign2) return false;
+  
+  const variants1 = getCallsignVariants(callsign1);
+  const variants2 = getCallsignVariants(callsign2);
+  
+  // Check if any variant of callsign1 matches any variant of callsign2
+  return variants1.some(v1 => 
+    variants2.some(v2 => v1 === v2)
+  );
 }
