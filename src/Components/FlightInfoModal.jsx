@@ -1,7 +1,7 @@
 // FlightInfoModal.jsx - Modal component for displaying detailed flight information
 
 import { useState, useRef, useEffect } from 'react';
-import { flightData, convertLiveAircraftToFlight, getBCTFlights } from './maphelpers';
+import { flightData, convertLiveAircraftToFlight, getBCTFlights } from './mapHelpers';
 import { saveFlightToFirestore, saveAirportLocation } from '../services/firestoreFlightService';
 // import './FlightInfo.css';
 

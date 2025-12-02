@@ -119,6 +119,34 @@ export function isPrivateAircraftType(aircraftType) {
 }
 
 /**
+ * Check if callsign is from a charter/fractional operator
+ * These operators use commercial-style callsigns but are private/charter operations
+ */
+export function isCharterOperator(callsign) {
+  if (!callsign) return false;
+  
+  const clean = callsign.trim().toUpperCase();
+  
+  const charterPrefixes = [
+    'EJA',  // NetJets
+    'VJA',  // VistaJet
+    'XOJ',  // XOJet
+    'FLX',  // FlexJet
+    'LXJ',  // FlexJet (alternative code)
+    'WUP',  // Wheels Up
+    'HPJ',  // Hop-A-Jet
+    'JTL',  // Jet Linx
+    'CST',  // CoastAir
+    'JRE',  // JetReady
+    'TNO',  // Talon Air
+    'JSX',  // JSX Air
+    'GPD',  // Tradewind Aviation
+  ];
+  
+  return charterPrefixes.some(prefix => clean.startsWith(prefix));
+}
+
+/**
  * Format callsign for display
  */
 export function formatCallsign(callsign) {

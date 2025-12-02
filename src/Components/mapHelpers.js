@@ -6,7 +6,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { getFlightDetails } from '../services/aviationStackService';
 import { getAircraftDetails } from '../services/aeroDataBoxService';
 import { getFAARegistration } from '../services/faaRegistryService';
-import { isCommercialCallsign, getAirlineFromCallsign, isPrivateAircraftType } from './callsignHelper';
+import { isCommercialCallsign, getAirlineFromCallsign, isPrivateAircraftType, isCharterOperator } from './callsignHelper';
 
 // ============================================================================
 // ICON DEFINITIONS
@@ -275,11 +275,36 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
     // 3. If callsign looks commercial AND aircraft isn't private-only, treat as commercial
     // 4. If aircraft owner exists, show as private
     // 5. Default to "Private Flight"
-    airline: flightData?.airline 
-      || (aircraftData?.aircraftType && isPrivateAircraftType(aircraftData.aircraftType) 
-          ? null  // Skip commercial check, it's definitely private
-          : (isCommercialCallsign(plane.callsign) ? (getAirlineFromCallsign(plane.callsign) || "Commercial Flight") : null))
-      || (aircraftData?.owner ? `${aircraftData.owner} (Private)` : "Private Flight"),
+    airline: (() => {
+      // 1. Use AviationStack airline if available (scheduled commercial)
+      if (flightData?.airline) return flightData.airline;
+      
+      // 2. Check if aircraft type is definitely private
+      if (aircraftData?.aircraftType && isPrivateAircraftType(aircraftData.aircraftType)) {
+        return aircraftData.owner ? `${aircraftData.owner} (Private)` : "Private Flight";
+      }
+      
+      // 3. Check if callsign matches a known operator
+      const knownOperator = getAirlineFromCallsign(plane.callsign);
+      if (knownOperator) {
+        // Check if it's a charter/fractional operator
+        const charterOperators = ['NetJets', 'VistaJet', 'Wheels Up', 'XOJet', 'FlexJet', 
+                                  'Hop-A-Jet', 'Jet Linx', 'Flexjet', 'JSX Air', 
+                                  'Tradewind Aviation'];
+        if (charterOperators.includes(knownOperator)) {
+          return `${knownOperator} (Charter)`;  // ✅ Clearly labeled as charter
+        }
+        return knownOperator;
+      }
+      
+      // 4. Commercial-looking but unknown
+      if (isCommercialCallsign(plane.callsign)) {
+        return "Commercial Flight";
+      }
+      
+      // 5. Default to private
+      return aircraftData?.owner ? `${aircraftData.owner} (Private)` : "Private Flight";
+    })(),
     flightNumber: flightData?.flightNumber || plane.callsign?.trim() || plane.icao24.toUpperCase(),
     // ✅ Show tail number
     // flightNumber: flightData?.flightNumber || aircraftData?.registration || plane.callsign?.trim() || plane.icao24.toUpperCase(),
@@ -361,11 +386,31 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       on_ground: plane.on_ground
     },
     // Enrichment source - check aircraft type to avoid misclassifying private as commercial
-    enrichmentSource: flightData 
-      ? (aircraftData ? 'AviationStack + AeroDataBox' : 'AviationStack')
-      : (aircraftData?.aircraftType && isPrivateAircraftType(aircraftData.aircraftType)
-          ? (aircraftData ? 'AeroDataBox' : 'None')  // Private aircraft, use AeroDataBox badge
-          : (isCommercialCallsign(plane.callsign) ? 'AviationStack' : (aircraftData ? 'AeroDataBox' : 'None'))),
+    enrichmentSource: (() => {
+      // Check if it's a charter/fractional operator FIRST
+      if (isCharterOperator(plane.callsign)) {
+        // Even if we have AviationStack data, mark as private for charter operators
+        return aircraftData ? 'AeroDataBox' : 'None';
+      }
+      
+      // For true commercial flights with AviationStack data
+      if (flightData) {
+        return aircraftData ? 'AviationStack + AeroDataBox' : 'AviationStack';
+      }
+      
+      // For private aircraft based on type
+      if (aircraftData?.aircraftType && isPrivateAircraftType(aircraftData.aircraftType)) {
+        return aircraftData ? 'AeroDataBox' : 'None';
+      }
+      
+      // For aircraft with commercial-looking callsigns but no flight data
+      if (isCommercialCallsign(plane.callsign)) {
+        return 'AviationStack';  // Attempted commercial lookup
+      }
+      
+      // Default: private
+      return aircraftData ? 'AeroDataBox' : 'None';
+    })(),
     audioRecordings: []
   };
 }

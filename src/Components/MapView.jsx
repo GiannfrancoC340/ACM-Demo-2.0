@@ -8,7 +8,7 @@ import './MapView.css';
 import LiveAircraftLayer from './LiveAircraftLayer';
 import SearchRadiusCircle from './SearchRadiusCircle';
 import FlightInfoModal from './FlightInfoModal';
-import { redIcon, getBCTFlights, flightData } from './maphelpers';
+import { redIcon, getBCTFlights, flightData } from './mapHelpers';
 import { getAPICallCount } from '../services/aviationStackService';
 import MapNavbar from './MapNavbar';
 
