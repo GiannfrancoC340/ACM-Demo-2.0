@@ -326,18 +326,30 @@ export async function convertLiveAircraftToFlight(plane, direction, enrichWithAP
       ? `${Math.floor(flightData.duration / 60)}h ${flightData.duration % 60}m`
       : (estimatedDuration ? `~${Math.floor(estimatedDuration / 60)}h ${estimatedDuration % 60}m (estimated)` : "Unknown"),
     distance: `${distanceFromBCT} km`,
-    departureAirport: isDeparture ? BCT : {
-      code: flightData?.departure.iata || "UNK",
-      name: flightData?.departure.airport || "Origin Unknown",
+    // ✅ FIXED: Always use flightData airports when available
+    departureAirport: flightData?.departure ? {
+      code: flightData.departure.iata || "UNK",
+      name: flightData.departure.airport || "Origin Unknown",
+      city: flightData.departure.city || plane.origin_country,
+      state: flightData.departure.state || ""
+    } : (isDeparture ? BCT : {
+      code: "UNK",
+      name: "Origin Unknown",
       city: plane.origin_country,
       state: ""
-    },
-    arrivalAirport: !isDeparture ? BCT : {
-      code: flightData?.arrival.iata || "UNK",
-      name: flightData?.arrival.airport || "Destination Unknown", 
+    }),
+
+    arrivalAirport: flightData?.arrival ? {
+      code: flightData.arrival.iata || "UNK",
+      name: flightData.arrival.airport || "Destination Unknown",
+      city: flightData.arrival.city || plane.origin_country,
+      state: flightData.arrival.state || ""
+    } : (!isDeparture ? BCT : {
+      code: "UNK",
+      name: "Destination Unknown",
       city: plane.origin_country,
       state: ""
-    },
+    }),
     liveData: {
       icao24: plane.icao24,
       latitude: plane.latitude,
