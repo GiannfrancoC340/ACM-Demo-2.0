@@ -108,7 +108,14 @@ export default function FlightInfoModal({ flightId, flights, liveAircraft = [], 
       try {
         setLoadingAudio(true);
         console.log('🎧 Fetching audio recordings for:', flightId);
-        const response = await fetch(`http://localhost:3001/api/flight/${flightId}`);
+        
+        // For live flights, also pass the callsign so server can search by it
+        let url = `http://localhost:3001/api/flight/${flightId}`;
+        if (flightDetails?.flightNumber) {
+          url += `?callsign=${encodeURIComponent(flightDetails.flightNumber)}`;
+        }
+        
+        const response = await fetch(url);
         
         if (!response.ok) {
           throw new Error('Failed to fetch audio recordings');

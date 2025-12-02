@@ -4,6 +4,7 @@ import fsSync from 'fs';              // ← For sync (readdirSync)
 import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
+import { getCallsignVariants } from './src/Components/callsignHelper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -190,13 +191,37 @@ app.get('/api/flight/:flightId', (req, res) => {
     
     console.log(`Looking for files starting with: ${normalizedFlightId}`);
     
+    // For live flights (format: live-{icao24}), also extract callsign if provided
+    let searchTerms = [normalizedFlightId];
+    
+    // If it's a live flight with query parameter for callsign
+    const callsign = req.query.callsign;
+    if (callsign) {
+      // Get ALL variants of the callsign (IATA and ICAO)
+      const callsignVariants = getCallsignVariants(callsign);
+      
+      // Add all variants to search terms
+      callsignVariants.forEach(variant => {
+        const normalized = variant.trim().replace(/-/g, '');
+        searchTerms.push(normalized);
+      });
+      
+      console.log(`Also searching by callsign variants: ${callsignVariants.join(', ')}`);
+    }
+    
     // Find all audio files matching this flight
     const files = fsSync.readdirSync(audioDir);
     const flightAudios = files
-      .filter(file => 
-        (file.endsWith('.mp3') || file.endsWith('.wav')) && 
-        file.startsWith(normalizedFlightId)
-      )
+      .filter(file => {
+        if (!(file.endsWith('.mp3') || file.endsWith('.wav'))) {
+          return false;
+        }
+        
+        // Check if file starts with any of our search terms (case-insensitive)
+        return searchTerms.some(term => 
+          file.toUpperCase().startsWith(term.toUpperCase())
+        );
+      })
       .map((file, index) => {
         const metadata = parseAudioMetadata(file);
         const timestamp = estimateTimestamp(file, audioDir);
